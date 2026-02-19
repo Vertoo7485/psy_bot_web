@@ -24,69 +24,83 @@
           </div>
           
           <!-- Информация о тесте -->
-          <div class="row g-3 mb-4">
-            <div class="col-sm-4">
-              <div class="text-center p-3 bg-light rounded">
-                <i class="fas fa-clock text-secondary mb-2"></i>
-                <h6 class="mb-0">Время</h6>
-                <small class="text-muted">5-7 минут</small>
-              </div>
-            </div>
-            
-            <div class="col-sm-4">
-              <div class="text-center p-3 bg-light rounded">
-                <i class="fas fa-question-circle text-secondary mb-2"></i>
-                <h6 class="mb-0">Вопросов</h6>
-                <small class="text-muted">40</small>
-              </div>
-            </div>
-            
-            <div class="col-sm-4">
-              <div class="text-center p-3 bg-light rounded">
-                <i class="fas fa-chart-line text-secondary mb-2"></i>
-                <h6 class="mb-0">Категория</h6>
-                <small class="text-muted">
-                  <% case test.category %>
-                  <% when 'anxiety' %>
-                    <div class="feature-icon mb-3" style="background: #9B8B9F;">
-                      <i class="fas fa-heartbeat"></i>
-                    </div>
-                  <% when 'depression' %>
-                    <div class="feature-icon mb-3" style="background: #A7C7C1;">
-                      <i class="fas fa-cloud-rain"></i>
-                    </div>
-                  <% else %>
-                    <div class="feature-icon mb-3" style="background: #C7B9C5;">
-                      <i class="fas fa-clipboard-list"></i>
-                    </div>
-                  <% end %>
-                </small>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Что вы получите -->
-          <div class="mb-4">
-            <h5 class="mb-3">Что вы узнаете:</h5>
-            <ul class="list-unstyled">
-              <li class="mb-2">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                Уровень ситуативной тревожности (прямо сейчас)
-              </li>
-              <li class="mb-2">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                Уровень личностной тревожности (в целом)
-              </li>
-              <li class="mb-2">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                Интерпретацию результатов
-              </li>
-              <li class="mb-2">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                Персональные рекомендации
-              </li>
-            </ul>
-          </div>
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <div class="text-center p-3 bg-light rounded">
+      <i class="fas fa-clock text-secondary mb-2"></i>
+      <h6 class="mb-0">Время</h6>
+      <small class="text-muted">
+        <% if @test.category == 'anxiety' %>
+          5-7 минут
+        <% elsif @test.category == 'depression' %>
+          3-5 минут
+        <% elsif @test.category == 'eq' %>
+          4-6 минут
+        <% else %>
+          5 минут
+        <% end %>
+      </small>
+    </div>
+  </div>
+  
+  <div class="col-sm-4">
+    <div class="text-center p-3 bg-light rounded">
+      <i class="fas fa-question-circle text-secondary mb-2"></i>
+      <h6 class="mb-0">Вопросов</h6>
+      <small class="text-muted">
+        <% if @test.category == 'anxiety' %>
+          40
+        <% elsif @test.category == 'depression' %>
+          21
+        <% elsif @test.category == 'eq' %>
+          30
+        <% else %>
+          ?
+        <% end %>
+      </small>
+    </div>
+  </div>
+  
+  <div class="col-sm-4">
+    <div class="text-center p-3 bg-light rounded">
+      <i class="fas fa-chart-line text-secondary mb-2"></i>
+      <h6 class="mb-0">Категория</h6>
+      <small class="text-muted">
+        <% if @test.category == 'anxiety' %>
+          Тревожность
+        <% elsif @test.category == 'depression' %>
+          Депрессия
+        <% elsif @test.category == 'eq' %>
+          Эмоциональный интеллект
+        <% else %>
+          Психологический
+        <% end %>
+      </small>
+    </div>
+  </div>
+</div>
+
+<!-- Что вы узнаете -->
+<div class="mb-4">
+  <h5 class="mb-3">Что вы узнаете:</h5>
+  <ul class="list-unstyled">
+    <% if @test.category == 'anxiety' %>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Уровень ситуативной тревожности (прямо сейчас)</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Уровень личностной тревожности (в целом)</li>
+    <% elsif @test.category == 'depression' %>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Общий уровень депрессии</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Степень тяжести симптомов</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Рекомендации по дальнейшим действиям</li>
+    <% elsif @test.category == 'eq' %>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Общий уровень эмоционального интеллекта</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Понимание своих и чужих эмоций</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Способность управлять эмоциями</li>
+      <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Навыки общения</li>
+    <% end %>
+    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Интерпретацию результатов</li>
+    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Персональные рекомендации</li>
+  </ul>
+</div>
           
           <!-- Кнопка начала -->
           <div class="text-center mt-5">

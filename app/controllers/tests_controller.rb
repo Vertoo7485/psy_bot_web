@@ -23,19 +23,17 @@ class TestsController < ApplicationController
   if request.post? && params[:answer].present?
     current_question = params[:question].to_i
     
-    # Сохраняем ответ для ТЕКУЩЕГО вопроса (который только что видел пользователь)
     answered_question = current_question - 1
     
     session[:test_answers] ||= {}
     session[:test_answers][answered_question.to_s] = params[:answer]
     puts "Сохранен ответ на вопрос #{answered_question}: #{params[:answer]}"
     
-    # Переходим к следующему вопросу
     next_question = current_question
     
-    # Проверяем, не закончился ли тест
     if (@test.category == 'anxiety' && next_question >= 40) || 
-       (@test.category == 'depression' && next_question >= 21)
+       (@test.category == 'depression' && next_question >= 21) ||
+       (@test.category == 'eq' && next_question >= 30)
       redirect_to submit_test_path(@test)
     else
       redirect_to question_test_path(@test, question: next_question)
@@ -48,16 +46,16 @@ class TestsController < ApplicationController
   puts "========== ВОПРОС #{@question_index} =========="
   puts "Всего сохранено ответов: #{session[:test_answers]&.size}"
   
-  # Проверяем, не закончился ли тест (для GET запросов)
+  # Проверяем, не закончился ли тест
   if (@test.category == 'anxiety' && @question_index >= 40) || 
-     (@test.category == 'depression' && @question_index >= 21)
+     (@test.category == 'depression' && @question_index >= 21) ||
+     (@test.category == 'eq' && @question_index >= 30)
     redirect_to submit_test_path(@test)
     return
   end
   
   # Определяем тип вопросов в зависимости от категории теста
   if @test.category == 'anxiety'
-    # Для теста тревожности - 40 вопросов
     if @question_index < 20
       @type = "situational"
       @questions = @test.questions["situational"]
@@ -69,11 +67,17 @@ class TestsController < ApplicationController
     end
     @total_questions = 40
   else
-    # Для депрессии - 21 вопрос
+    # Для депрессии и EQ
     @questions = @test.questions
     @current_question = @questions[@question_index]
-    @type = "depression"
-    @total_questions = 21
+    
+    if @test.category == 'depression'
+      @type = "depression"
+      @total_questions = 21
+    else  # eq
+      @type = "eq"
+      @total_questions = 30
+    end
   end
 end
 
@@ -136,7 +140,33 @@ def submit
     score_data = {
       total: total_score
     }
+
+  elsif @test.category == 'eq'
+  total_score = 0
+  (0..29).each do |i|
+    score = answers[i.to_s].to_i
+    # Проверяем, обратный ли вопрос
+    if @test.questions[i]["reverse"]
+      score = 8 - score  # 7 -> 1, 6 -> 2, 5 -> 3, 4 -> 4, 3 -> 5, 2 -> 6, 1 -> 7
+    end
+    total_score += score
   end
+  
+  interpretation_text = @test.config["interpretation"].find do |i|
+    range = i["range"].split("-").map(&:to_i)
+    total_score >= range[0] && total_score <= range[1]
+  end["text"]
+  
+  interpretation = {
+    eq: interpretation_text
+  }
+  
+  score_data = {
+    total: total_score
+  }
+  end
+
+  
   
   puts "Итоговые баллы: #{score_data}"
   
