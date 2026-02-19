@@ -17,14 +17,13 @@ class TestsController < ApplicationController
   end
 
   def question
-    @test = Test.find(params[:id])
-    
-    # Если это POST (пришел ответ)
-    if request.post? && params[:answer].present?
+  @test = Test.find(params[:id])
+  
+  # Если это POST (пришел ответ)
+  if request.post? && params[:answer].present?
     current_question = params[:question].to_i
     
-    # Важно! Сохраняем ответ для ТЕКУЩЕГО вопроса (который только что видел пользователь)
-    # current_question - 1, потому что в URL приходит следующий номер
+    # Сохраняем ответ для ТЕКУЩЕГО вопроса (который только что видел пользователь)
     answered_question = current_question - 1
     
     session[:test_answers] ||= {}
@@ -34,7 +33,9 @@ class TestsController < ApplicationController
     # Переходим к следующему вопросу
     next_question = current_question
     
-    if next_question >= 40
+    # Проверяем, не закончился ли тест
+    if (@test.category == 'anxiety' && next_question >= 40) || 
+       (@test.category == 'depression' && next_question >= 21)
       redirect_to submit_test_path(@test)
     else
       redirect_to question_test_path(@test, question: next_question)
@@ -47,36 +48,52 @@ class TestsController < ApplicationController
   puts "========== ВОПРОС #{@question_index} =========="
   puts "Всего сохранено ответов: #{session[:test_answers]&.size}"
   
-  # Определяем тип вопросов
-  if @question_index < 20
-    @type = "situational"
-    @questions = @test.questions["situational"]
-  else
-    @type = "personal"
-    @questions = @test.questions["personal"]
+  # Проверяем, не закончился ли тест (для GET запросов)
+  if (@test.category == 'anxiety' && @question_index >= 40) || 
+     (@test.category == 'depression' && @question_index >= 21)
+    redirect_to submit_test_path(@test)
+    return
   end
   
-  @current_question = @questions[@question_index % 20]
+  # Определяем тип вопросов в зависимости от категории теста
+  if @test.category == 'anxiety'
+    # Для теста тревожности - 40 вопросов
+    if @question_index < 20
+      @type = "situational"
+      @questions = @test.questions["situational"]
+      @current_question = @questions[@question_index]
+    else
+      @type = "personal"
+      @questions = @test.questions["personal"]
+      @current_question = @questions[@question_index - 20]
+    end
+    @total_questions = 40
+  else
+    # Для депрессии - 21 вопрос
+    @questions = @test.questions
+    @current_question = @questions[@question_index]
+    @type = "depression"
+    @total_questions = 21
+  end
 end
 
-  def submit
+def submit
   @test = Test.find(params[:id])
   answers = session[:test_answers] || {}
   
   puts "Все ответы: #{answers.inspect}"
   
-  # Подсчет баллов для ситуативной тревожности (вопросы 0-19)
-  situational_score = 0
+  if @test.category == 'anxiety'
+    # Подсчет для теста тревожности Спилбергера-Ханина
+    situational_score = 0
     (0..19).each do |i|
       score = answers[i.to_s].to_i
-      # Проверяем, есть ли этот вопрос в обратных
       if @test.config["scoring"]["situational"]["reverse"].include?(i + 1)
         score = 5 - score
       end
       situational_score += score
     end
 
-    # Подсчет баллов для личностной тревожности (вопросы 20-39)
     personal_score = 0
     (20..39).each do |i|
       score = answers[i.to_s].to_i
@@ -85,23 +102,51 @@ end
       end
       personal_score += score
     end
+    
+    total_score = situational_score + personal_score
+    
+    interpretation = {
+      situational: interpret_score(situational_score, @test.config["interpretation"]["situational"]),
+      personal: interpret_score(personal_score, @test.config["interpretation"]["personal"])
+    }
+    
+    score_data = {
+      situational: situational_score,
+      personal: personal_score,
+      total: total_score
+    }
+    
+  elsif @test.category == 'depression'
+    # Для BDI-II все вопросы суммируются (0-3)
+    total_score = 0
+    (0..20).each do |i|  # 21 вопрос (0-20)
+      total_score += answers[i.to_s].to_i
+    end
+    
+    # Находим интерпретацию по общей сумме
+    interpretation_text = @test.config["interpretation"].find do |i|
+      range = i["range"].split("-").map(&:to_i)
+      total_score >= range[0] && total_score <= range[1]
+    end["text"]
+    
+    interpretation = {
+      depression: interpretation_text
+    }
+    
+    score_data = {
+      total: total_score
+    }
+  end
   
-  puts "Итоговые баллы: situational=#{situational_score}, personal=#{personal_score}"
+  puts "Итоговые баллы: #{score_data}"
   
   # Сохраняем результат
   result = TestResult.create!(
     user: current_user,
     test: @test,
     answers: answers,
-    score: {
-    situational: situational_score,
-    personal: personal_score,
-    total: situational_score + personal_score
-    }.to_json,
-    interpretation: {
-      situational: interpret_score(situational_score, @test.config["interpretation"]["situational"]),
-      personal: interpret_score(personal_score, @test.config["interpretation"]["personal"])
-    }.to_json,
+    score: score_data.to_json,
+    interpretation: interpretation.to_json,
     started_at: session[:test_started_at],
     completed_at: Time.current
   )

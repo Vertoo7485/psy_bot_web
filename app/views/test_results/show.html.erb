@@ -1,10 +1,17 @@
 <% 
-  score = JSON.parse(@result.score) rescue { "situational" => 0, "personal" => 0, "total" => 0 }
-  interpretation = JSON.parse(@result.interpretation) rescue { "situational" => "", "personal" => "" }
+  score = JSON.parse(@result.score) rescue {}
+  interpretation = JSON.parse(@result.interpretation) rescue {}
   
-  situational = score["situational"]
-  personal = score["personal"]
-  total = situational + personal
+  if @test.category == 'anxiety'
+    situational = score["situational"] || 0
+    personal = score["personal"] || 0
+    total = score["total"] || 0
+    situational_text = interpretation["situational"] || ""
+    personal_text = interpretation["personal"] || ""
+  else
+    total = score["total"] || 0
+    depression_text = interpretation["depression"] || ""
+  end
 %>
 
 <div class="container py-5">
@@ -27,62 +34,102 @@
         <div class="card-body">
           <h4 class="text-center mb-4"><%= @test.title %></h4>
           
-          <!-- График результатов -->
-          <div class="row g-4 mb-5">
-            <div class="col-md-6">
-              <div class="card bg-light border-0">
-                <div class="card-body text-center">
-                  <h5 class="mb-3">Ситуативная тревожность</h5>
-                  <div class="display-4 mb-2" style="color: <%= situational > 45 ? '#dc3545' : (situational > 30 ? '#ffc107' : '#28a745') %>">
-                    <%= situational %>
+          <% if @test.category == 'anxiety' %>
+            <!-- График для тревожности (2 шкалы) -->
+            <div class="row g-4 mb-5">
+              <div class="col-md-6">
+                <div class="card bg-light border-0">
+                  <div class="card-body text-center">
+                    <h5 class="mb-3">Ситуативная тревожность (сейчас)</h5>
+                    <div class="display-4 mb-2" style="color: <%= situational > 45 ? '#dc3545' : (situational > 30 ? '#ffc107' : '#28a745') %>">
+                      <%= situational %>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar <%= situational > 45 ? 'bg-danger' : (situational > 30 ? 'bg-warning' : 'bg-success') %>" 
+                           style="width: <%= (situational.to_f / 80 * 100) %>%"></div>
+                    </div>
+                    <p class="mb-0"><%= situational_text %></p>
                   </div>
-                  <div class="progress mb-3" style="height: 10px;">
-                    <div class="progress-bar <%= situational > 45 ? 'bg-danger' : (situational > 30 ? 'bg-warning' : 'bg-success') %>" 
-                         style="width: <%= (situational.to_f / 80 * 100) %>%"></div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="card bg-light border-0">
+                  <div class="card-body text-center">
+                    <h5 class="mb-3">Личностная тревожность (обычно)</h5>
+                    <div class="display-4 mb-2" style="color: <%= personal > 45 ? '#dc3545' : (personal > 30 ? '#ffc107' : '#28a745') %>">
+                      <%= personal %>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar <%= personal > 45 ? 'bg-danger' : (personal > 30 ? 'bg-warning' : 'bg-success') %>" 
+                           style="width: <%= (personal.to_f / 80 * 100) %>%"></div>
+                    </div>
+                    <p class="mb-0"><%= personal_text %></p>
                   </div>
-                  <p class="mb-0"><%= interpretation["situational"] %></p>
                 </div>
               </div>
             </div>
             
-            <div class="col-md-6">
-              <div class="card bg-light border-0">
-                <div class="card-body text-center">
-                  <h5 class="mb-3">Личностная тревожность</h5>
-                  <div class="display-4 mb-2" style="color: <%= personal > 45 ? '#dc3545' : (personal > 30 ? '#ffc107' : '#28a745') %>">
-                    <%= personal %>
+            <!-- Рекомендации для тревожности -->
+            <div class="alert alert-info">
+              <h5 class="alert-heading mb-3">
+                <i class="fas fa-lightbulb me-2"></i>
+                Рекомендации
+              </h5>
+              
+              <% if situational > 45 %>
+                <p class="mb-2">Сейчас вы испытываете высокий уровень тревоги. Рекомендуем дыхательные упражнения.</p>
+              <% else %>
+                <p class="mb-2">Ваше состояние в данный момент спокойное.</p>
+              <% end %>
+              
+              <% if personal > 45 %>
+                <p class="mb-0">У вас есть склонность к личностной тревожности. Рекомендуем практики осознанности.</p>
+              <% else %>
+                <p class="mb-0">В целом вы спокойный человек.</p>
+              <% end %>
+            </div>
+            
+          <% else %>
+            <!-- График для депрессии (1 шкала) -->
+            <div class="row g-4 mb-5">
+              <div class="col-md-8 mx-auto">
+                <div class="card bg-light border-0">
+                  <div class="card-body text-center">
+                    <h5 class="mb-3">Уровень депрессии</h5>
+                    <div class="display-4 mb-2" style="color: <%= total > 28 ? '#dc3545' : (total > 19 ? '#ffc107' : '#28a745') %>">
+                      <%= total %>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar <%= total > 28 ? 'bg-danger' : (total > 19 ? 'bg-warning' : 'bg-success') %>" 
+                           style="width: <%= (total.to_f / 63 * 100) %>%"></div>
+                    </div>
+                    <p class="mb-0"><%= depression_text %></p>
                   </div>
-                  <div class="progress mb-3" style="height: 10px;">
-                    <div class="progress-bar <%= personal > 45 ? 'bg-danger' : (personal > 30 ? 'bg-warning' : 'bg-success') %>" 
-                         style="width: <%= (personal.to_f / 80 * 100) %>%"></div>
-                  </div>
-                  <p class="mb-0"><%= interpretation["personal"] %></p>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Рекомендации -->
-          <div class="alert alert-info">
-            <h5 class="alert-heading mb-3">
-              <i class="fas fa-lightbulb me-2"></i>
-              Рекомендации
-            </h5>
             
-            <% if situational > 45 %>
-              <p class="mb-2"><%= @test.config["recommendations"]["situational_high"] %></p>
-            <% else %>
-              <p class="mb-2"><%= @test.config["recommendations"]["situational_low"] %></p>
-            <% end %>
-            
-            <% if personal > 45 %>
-              <p class="mb-0"><%= @test.config["recommendations"]["personal_high"] %></p>
-            <% else %>
-              <p class="mb-0"><%= @test.config["recommendations"]["personal_low"] %></p>
-            <% end %>
-          </div>
+            <!-- Рекомендации для депрессии -->
+            <div class="alert alert-info">
+              <h5 class="alert-heading mb-3">
+                <i class="fas fa-lightbulb me-2"></i>
+                Рекомендации
+              </h5>
+              
+              <% if total >= 20 %>
+                <p class="mb-2">Рекомендуется обратиться к специалисту (психологу или психотерапевту).</p>
+              <% end %>
+              
+              <% if total >= 14 %>
+                <p class="mb-0">Полезны регулярные физические упражнения и режим сна.</p>
+              <% else %>
+                <p class="mb-0">Поддерживайте здоровый образ жизни для профилактики.</p>
+              <% end %>
+            </div>
+          <% end %>
           
-          <!-- Кнопки действий -->
+          <!-- Кнопки действий (общие для всех тестов) -->
           <div class="d-flex justify-content-between mt-5">
             <%= link_to test_path(@test), class: "btn btn-outline-primary" do %>
               <i class="fas fa-redo me-2"></i>Пройти заново
