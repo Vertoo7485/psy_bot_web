@@ -30,6 +30,34 @@
             </div>
           </div>
         <% end %>
+
+        <% if @user.test_results.any? %>
+          <hr class="my-4">
+          
+          <h5 class="mb-3"><i class="fas fa-history me-2"></i>История тестов</h5>
+          
+          <div class="list-group mb-4">
+            <% @user.test_results.order(created_at: :desc).limit(5).each do |result| %>
+              <%= link_to test_result_path(result), class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" do %>
+                <div>
+                  <strong><%= result.test.title %></strong>
+                  <br>
+                  <small class="text-muted"><%= result.created_at.strftime('%d.%m.%Y %H:%M') %></small>
+                </div>
+                <span class="badge bg-primary rounded-pill">
+                  <% score = JSON.parse(result.score) rescue {} %>
+                  <%= score["total"] || "?" %> баллов
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+          
+          <% if @user.test_results.count > 5 %>
+            <div class="text-center">
+              <%= link_to "Все результаты (#{@user.test_results.count})", "#", class: "btn btn-outline-secondary btn-sm" %>
+            </div>
+          <% end %>
+        <% end %>
         
         <div class="row mb-3">
           <div class="col-sm-3 fw-bold">Дата регистрации:</div>

@@ -1,0 +1,116 @@
+<% test = @test %>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <!-- Кнопка назад -->
+      <%= link_to tests_path, class: "btn btn-link text-secondary mb-4 p-0" do %>
+        <i class="fas fa-arrow-left me-2"></i>К списку тестов
+      <% end %>
+      
+      <!-- Карточка теста -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">
+            <i class="fas fa-clipboard-list me-2"></i>
+            <%= test.title %>
+          </h3>
+        </div>
+        
+        <div class="card-body">
+          <!-- Описание с форматированием -->
+          <div class="mb-4">
+            <%= simple_format test.description, class: "lead" %>
+          </div>
+          
+          <!-- Информация о тесте -->
+          <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+              <div class="text-center p-3 bg-light rounded">
+                <i class="fas fa-clock text-secondary mb-2"></i>
+                <h6 class="mb-0">Время</h6>
+                <small class="text-muted">5-7 минут</small>
+              </div>
+            </div>
+            
+            <div class="col-sm-4">
+              <div class="text-center p-3 bg-light rounded">
+                <i class="fas fa-question-circle text-secondary mb-2"></i>
+                <h6 class="mb-0">Вопросов</h6>
+                <small class="text-muted">40</small>
+              </div>
+            </div>
+            
+            <div class="col-sm-4">
+              <div class="text-center p-3 bg-light rounded">
+                <i class="fas fa-chart-line text-secondary mb-2"></i>
+                <h6 class="mb-0">Категория</h6>
+                <small class="text-muted">
+                  <% case test.category %>
+                  <% when 'anxiety' %>
+                    <div class="feature-icon mb-3" style="background: #9B8B9F;">
+                      <i class="fas fa-heartbeat"></i>
+                    </div>
+                  <% when 'depression' %>
+                    <div class="feature-icon mb-3" style="background: #A7C7C1;">
+                      <i class="fas fa-cloud-rain"></i>
+                    </div>
+                  <% else %>
+                    <div class="feature-icon mb-3" style="background: #C7B9C5;">
+                      <i class="fas fa-clipboard-list"></i>
+                    </div>
+                  <% end %>
+                </small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Что вы получите -->
+          <div class="mb-4">
+            <h5 class="mb-3">Что вы узнаете:</h5>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                Уровень ситуативной тревожности (прямо сейчас)
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                Уровень личностной тревожности (в целом)
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                Интерпретацию результатов
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                Персональные рекомендации
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Кнопка начала -->
+          <div class="text-center mt-5">
+            <% if user_signed_in? %>
+              <%= link_to start_test_path(test), class: "btn btn-primary btn-lg px-5 py-3", data: { turbo: false } do %>
+                <i class="fas fa-play-circle me-2"></i>Начать тест
+              <% end %>
+            <% else %>
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Войдите или зарегистрируйтесь, чтобы пройти тест
+              </div>
+              <div class="d-flex justify-content-center gap-3">
+                <%= link_to new_user_session_path, class: "btn btn-outline-primary" do %>
+                  <i class="fas fa-sign-in-alt me-2"></i>Войти
+                <% end %>
+                <%= link_to new_user_registration_path, class: "btn btn-primary" do %>
+                  <i class="fas fa-user-plus me-2"></i>Регистрация
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

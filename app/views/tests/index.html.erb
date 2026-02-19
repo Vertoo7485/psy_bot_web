@@ -1,0 +1,41 @@
+<div class="container py-5">
+  <h1 class="section-title mb-5">Психологические тесты</h1>
+  
+  <div class="row g-4">
+    <% @tests.each do |test| %>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <div class="card-body text-center">
+            <% case test.category %>
+            <% when 'anxiety' %>
+              <div class="feature-icon mb-3" style="background: #9B8B9F;">
+                <i class="fas fa-heartbeat"></i>
+              </div>
+            <% when 'depression' %>
+              <div class="feature-icon mb-3" style="background: #A7C7C1;">
+                <i class="fas fa-cloud-rain"></i>
+              </div>
+            <% else %>
+              <div class="feature-icon mb-3" style="background: #C7B9C5;">
+                <i class="fas fa-clipboard-list"></i>
+              </div>
+            <% end %>
+            
+            <h3 class="h5 mb-3"><%= test.title %></h3>
+            <p class="text-muted small mb-4"><%= truncate(test.description, length: 100) %></p>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-secondary">
+                <i class="far fa-clock me-1"></i> 5-7 мин
+              </span>
+              
+              <%= link_to test_path(test), class: "btn btn-outline-primary btn-sm" do %>
+                Подробнее <i class="fas fa-arrow-right ms-1"></i>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

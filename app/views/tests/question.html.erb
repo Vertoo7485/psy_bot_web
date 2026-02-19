@@ -1,0 +1,117 @@
+<% 
+  progress = ((@question_index + 1) * 100 / 40).to_i
+  type_text = @type == "situational" ? "Как вы чувствуете себя СЕЙЧАС" : "Как вы чувствуете себя ОБЫЧНО"
+%>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+              <i class="fas fa-question-circle me-2"></i>
+              Вопрос <%= @question_index + 1 %> из 40
+            </h3>
+            <span class="badge bg-info"><%= type_text %></span>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <!-- Прогресс бар -->
+          <div class="progress mb-4" style="height: 10px;">
+            <div class="progress-bar bg-success" 
+                 role="progressbar" 
+                 style="width: <%= progress %>%" 
+                 aria-valuenow="<%= progress %>" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+          </div>
+          
+          <!-- Вопрос -->
+          <h4 class="mb-4 text-center"><%= @current_question %></h4>
+          
+          <!-- Варианты ответов -->
+          <%= form_tag question_test_path(@test, question: @question_index + 1), method: :post, class: "mt-4" do %>            <div class="row g-3">
+              <% [1,2,3,4].each do |value| %>
+                <div class="col-md-6">
+                  <div class="form-check card-option">
+                    <input class="form-check-input" 
+                           type="radio" 
+                           name="answer" 
+                           id="answer_<%= value %>" 
+                           value="<%= value %>"
+                           required>
+                    <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span>
+                          <% if value == 1 %>
+                            Совсем нет
+                          <% elsif value == 2 %>
+                            Слегка
+                          <% elsif value == 3 %>
+                            Умеренно
+                          <% elsif value == 4 %>
+                            Очень сильно
+                          <% end %>
+                        </span>
+                        <span class="badge bg-light text-dark"><%= value %>/4</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="text-center mt-5">
+              <button type="submit" class="btn btn-primary btn-lg px-5">
+                <% if @question_index == 39 %>
+                  <i class="fas fa-check-circle me-2"></i>Завершить тест
+                <% else %>
+                  <i class="fas fa-arrow-right me-2"></i>Следующий вопрос
+                <% end %>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card-option {
+    cursor: pointer;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    margin: 0;
+    transition: all 0.2s;
+  }
+  
+  .card-option:hover {
+    border-color: var(--primary);
+    background-color: rgba(155, 139, 159, 0.05);
+    transform: translateY(-2px);
+  }
+  
+  .card-option .form-check-input {
+    display: none;
+  }
+  
+  .card-option .form-check-input:checked + .form-check-label {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 12px;
+  }
+  
+  .card-option .form-check-input:checked + .form-check-label .badge {
+    background-color: white !important;
+    color: var(--primary) !important;
+  }
+  
+  .card-option .form-check-label {
+    cursor: pointer;
+    border-radius: 10px;
+  }
+</style>

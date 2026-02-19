@@ -4,6 +4,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  has_many :test_results, dependent: :destroy
+
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'
   attribute :is_active, :boolean, default: true

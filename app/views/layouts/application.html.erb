@@ -2,11 +2,17 @@
 <html>
   <head>
     <title>PsyBotWeb</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+    </style>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "custom", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
@@ -19,6 +25,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <%= link_to tests_path, class: "nav-link" do %>
+                <i class="fas fa-clipboard-list me-1"></i> Тесты
+              <% end %>
+            </li>
             <% if user_signed_in? %>
               <li class="nav-item">
                 <%= link_to "Профиль", profile_path, class: "nav-link" %>
