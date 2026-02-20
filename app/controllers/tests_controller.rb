@@ -143,13 +143,31 @@ def submit
 
   elsif @test.category == 'eq'
   total_score = 0
+  subscales = {
+    well_being: 0,
+    self_control: 0,
+    emotionality: 0,
+    sociability: 0
+  }
+  
   (0..29).each do |i|
     score = answers[i.to_s].to_i
-    # Проверяем, обратный ли вопрос
     if @test.questions[i]["reverse"]
-      score = 8 - score  # 7 -> 1, 6 -> 2, 5 -> 3, 4 -> 4, 3 -> 5, 2 -> 6, 1 -> 7
+      score = 8 - score
     end
     total_score += score
+    
+    # Распределяем по субшкалам
+    question_number = i + 1
+    if [3, 9, 13, 20, 30].include?(question_number)
+      subscales[:well_being] += score
+    elsif [7, 12, 14, 16, 18, 22, 25].include?(question_number)
+      subscales[:self_control] += score
+    elsif [1, 2, 4, 10, 15, 17, 21, 26, 27].include?(question_number)
+      subscales[:emotionality] += score
+    elsif [5, 11, 19, 23, 28].include?(question_number)
+      subscales[:sociability] += score
+    end
   end
   
   interpretation_text = @test.config["interpretation"].find do |i|
@@ -162,8 +180,9 @@ def submit
   }
   
   score_data = {
-    total: total_score
-  }
+    total: total_score,
+    subscales: subscales
+}.to_json
   end
 
   

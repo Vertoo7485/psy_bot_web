@@ -1,0 +1,106 @@
+<% if @test.category == 'anxiety' %>
+  <canvas id="anxietyChart" width="400" height="200"></canvas>
+  <script>
+    const ctx = document.getElementById('anxietyChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Ситуативная (сейчас)', 'Личностная (обычно)'],
+        datasets: [{
+          label: 'Уровень тревожности',
+          data: [<%= situational %>, <%= personal %>],
+          backgroundColor: [
+            'rgba(155, 139, 159, 0.8)',
+            'rgba(167, 199, 193, 0.8)'
+          ],
+          borderColor: [
+            'rgb(155, 139, 159)',
+            'rgb(167, 199, 193)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 80,
+            title: {
+              display: true,
+              text: 'Баллы'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  </script>
+
+<% elsif @test.category == 'depression' %>
+  <canvas id="depressionChart" width="400" height="200"></canvas>
+  <script>
+    const ctx = document.getElementById('depressionChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Уровень депрессии', 'Остаток'],
+        datasets: [{
+          data: [<%= total %>, 63 - <%= total %>],
+          backgroundColor: [
+            <%= total > 28 ? "'rgba(220, 53, 69, 0.8)'" : (total > 19 ? "'rgba(255, 193, 7, 0.8)'" : "'rgba(40, 167, 69, 0.8)'") %>,
+            'rgba(200, 200, 200, 0.3)'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '60%',
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  </script>
+
+<% elsif @test.category == 'eq' && local_assigns[:subscales] %>
+  <canvas id="eqChart" width="400" height="200"></canvas>
+  <script>
+    const ctx = document.getElementById('eqChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Благополучие', 'Самоконтроль', 'Эмоциональность', 'Общительность'],
+        datasets: [{
+          label: 'Ваш уровень',
+          data: [
+            <%= subscales["well_being"] || 0 %>,
+            <%= subscales["self_control"] || 0 %>,
+            <%= subscales["emotionality"] || 0 %>,
+            <%= subscales["sociability"] || 0 %>
+          ],
+          backgroundColor: 'rgba(155, 139, 159, 0.2)',
+          borderColor: 'rgba(155, 139, 159, 1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(155, 139, 159, 1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 50  // Примерный максимум для субшкал
+          }
+        }
+      }
+    });
+  </script>
+<% end %>
