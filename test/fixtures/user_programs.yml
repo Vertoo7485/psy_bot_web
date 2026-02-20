@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  program: one
+  started_at: 2026-02-20 09:40:44
+  completed_at: 2026-02-20 09:40:44
+  current_day: 1
+
+two:
+  user: two
+  program: two
+  started_at: 2026-02-20 09:40:44
+  completed_at: 2026-02-20 09:40:44
+  current_day: 1

@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_19_155026) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_20_044047) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "days", force: :cascade do |t|
+    t.bigint "program_id", null: false
+    t.string "title"
+    t.text "description"
+    t.jsonb "content"
+    t.integer "day_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["program_id"], name: "index_days_on_program_id"
+  end
+
+  create_table "programs", force: :cascade do |t|
+    t.string "title"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "test_results", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -38,6 +56,31 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_19_155026) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "user_day_progresses", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "day_id", null: false
+    t.boolean "completed"
+    t.jsonb "answers"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["day_id"], name: "index_user_day_progresses_on_day_id"
+    t.index ["user_id"], name: "index_user_day_progresses_on_user_id"
+  end
+
+  create_table "user_programs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "program_id", null: false
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.integer "current_day"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["program_id"], name: "index_user_programs_on_program_id"
+    t.index ["user_id"], name: "index_user_programs_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -55,6 +98,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_19_155026) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "days", "programs"
   add_foreign_key "test_results", "tests"
   add_foreign_key "test_results", "users"
+  add_foreign_key "user_day_progresses", "days"
+  add_foreign_key "user_day_progresses", "users"
+  add_foreign_key "user_programs", "programs"
+  add_foreign_key "user_programs", "users"
 end

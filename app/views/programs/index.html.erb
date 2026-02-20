@@ -1,0 +1,74 @@
+<div class="container py-5">
+  <h1 class="section-title mb-5">Программа самопомощи</h1>
+  
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <% @programs.each do |program| %>
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+              <i class="fas fa-seedling me-2"></i>
+              <%= program.title %>
+            </h3>
+          </div>
+          <div class="card-body">
+            <p class="lead"><%= program.description %></p>
+            
+            <% user_program = current_user.user_programs.find_by(program: program) %>
+            
+            <% if user_program %>
+              <!-- Прогресс пользователя -->
+              <div class="mb-4">
+                <h5>Ваш прогресс</h5>
+                <div class="progress mb-2" style="height: 20px;">
+                  <% completed_days = current_user.user_day_progresses
+                                                   .joins(:day)
+                                                   .where(days: { program_id: program.id }, completed: true)
+                                                   .count %>
+                  <% percent = (completed_days.to_f / program.days.count * 100).to_i %>
+                  <div class="progress-bar bg-success" 
+                       style="width: <%= percent %>%">
+                    <%= completed_days %>/<%= program.days.count %> дней
+                  </div>
+                </div>
+                
+                <% if completed_days < program.days.count %>
+                  <% next_day = completed_days + 1 %>
+                  <p class="text-success">
+                    <i class="fas fa-arrow-right me-1"></i>
+                    Продолжить с Дня <%= next_day %>
+                  </p>
+                <% else %>
+                  <p class="text-success">
+                    <i class="fas fa-trophy me-1"></i>
+                    Программа завершена! Поздравляем!
+                  </p>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="text-secondary mb-4">
+                <i class="fas fa-info-circle me-1"></i>
+                Вы еще не начинали программу
+              </p>
+            <% end %>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <span class="badge bg-info me-2"><%= program.days.count %> дней</span>
+                <span class="badge bg-secondary">КПТ-подход</span>
+              </div>
+              
+              <%= link_to program_path(program), class: "btn btn-primary" do %>
+                <% if user_program %>
+                  <i class="fas fa-play me-1"></i>Продолжить
+                <% else %>
+                  <i class="fas fa-rocket me-1"></i>Начать программу
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

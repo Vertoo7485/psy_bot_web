@@ -1,0 +1,259 @@
+<div data-controller="day-program"
+     data-day-program-program-id="<%= @program.id %>"
+     data-day-program-day-number="<%= @day.day_number %>">
+
+  <% day = @day %>
+  <% content = day.content %>
+
+  <div class="container py-4">
+    <!-- Шапка дня -->
+    <div class="row mb-4">
+      <div class="col">
+        <%= link_to program_path(@program), class: "btn btn-link text-secondary p-0 mb-3" do %>
+          <i class="fas fa-arrow-left me-2"></i>К программе
+        <% end %>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <h2>День <%= day.day_number %>: <%= day.title %></h2>
+          <span class="badge bg-primary fs-6">День <%= day.day_number %>/28</span>
+        </div>
+        <p class="text-secondary"><%= day.description %></p>
+      </div>
+    </div>
+
+    <!-- Прогресс -->
+    <div class="progress mb-4" style="height: 8px;">
+      <div class="progress-bar bg-success" style="width: <%= (day.day_number.to_f / 28 * 100) %>%"></div>
+    </div>
+
+    <!-- Вступление -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h4 class="card-title">
+          <i class="fas fa-leaf text-success me-2"></i>
+          <%= content["intro"]["title"] %>
+        </h4>
+        <p class="card-text"><%= content["intro"]["text"] %></p>
+      </div>
+    </div>
+
+    <!-- Научные факты -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h4 class="card-title">
+          <i class="fas fa-flask text-primary me-2"></i>
+          Научные факты об осознанности
+        </h4>
+        <div class="row">
+          <% content["scientific_facts"].each do |fact| %>
+            <div class="col-md-6 mb-3">
+              <div class="d-flex">
+                <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                <div>
+                  <p class="mb-1"><%= fact["fact"] %></p>
+                  <small class="text-secondary"><%= fact["source"] %></small>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+      <% content["statistics"].each do |stat| %>
+        <div class="col-md-2 col-6 mb-3">
+          <div class="card text-center h-100">
+            <div class="card-body">
+              <h3 class="text-success mb-0"><%= stat["value"] %></h3>
+              <small class="text-secondary"><%= stat["label"] %></small>
+              <p class="small text-muted mt-2 mb-0"><%= stat["description"] %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Упражнение -->
+    <div class="card mb-4 border-primary">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+          <i class="fas fa-heartbeat me-2"></i>
+          <%= content["exercise"]["title"] %>
+        </h4>
+      </div>
+      <div class="card-body">
+        <p class="lead"><%= content["exercise"]["description"] %></p>
+
+        <!-- Техники дыхания -->
+        <h5 class="mt-4">Выберите технику дыхания:</h5>
+        <div class="row">
+          <% content["exercise"]["techniques"].each_with_index do |tech, index| %>
+            <div class="col-md-6 mb-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h6 class="card-title"><%= tech["name"] %></h6>
+                  <p class="small text-secondary"><%= tech["description"] %></p>
+                  <span class="badge bg-info"><%= tech["for_situation"] %></span>
+                </div>
+                <div class="card-footer bg-transparent">
+                  <button class="btn btn-sm btn-outline-primary select-technique"
+                          data-action="click->day-program#selectTechnique"
+                          data-day-program-target="techniqueButtons"
+                          data-technique="<%= index %>">
+                    Выбрать
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Подготовка -->
+        <div class="mt-4 p-3 bg-light rounded">
+          <h6>
+            <i class="fas fa-clock me-2"></i>
+            Подготовка к практике
+          </h6>
+          <p class="mb-2"><strong>Положение тела:</strong> <%= content["exercise"]["preparation"]["posture"] %></p>
+          <p class="mb-2"><strong>Время и место:</strong> <%= content["exercise"]["preparation"]["timing"] %></p>
+          <p><strong>Настройка:</strong></p>
+          <ul>
+            <% content["exercise"]["preparation"]["mindset"].each do |item| %>
+              <li><%= item %></li>
+            <% end %>
+          </ul>
+        </div>
+
+        <!-- Таймер -->
+        <div class="mt-4">
+          <h5>Время практики:</h5>
+          <div class="btn-group" role="group">
+            <% content["exercise"]["timer_options"].each do |minutes| %>
+              <button class="btn btn-outline-primary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="<%= minutes %>">
+                <%= minutes %> мин
+              </button>
+            <% end %>
+            <button class="btn btn-outline-secondary timer-option"
+                    data-action="click->day-program#selectTimer"
+                    data-day-program-target="timerButtons"
+                    data-minutes="custom">
+              Свой вариант
+            </button>
+          </div>
+        </div>
+
+        <!-- Кнопка начала -->
+        <div class="text-center mt-4">
+          <button class="btn btn-success btn-lg px-5" 
+                  id="startPractice"
+                  data-action="click->day-program#startPractice">
+            <i class="fas fa-play me-2"></i>Начать практику
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Рефлексия (скрыта, показывается после практики) -->
+    <div id="reflectionSection" 
+         class="card mb-4 d-none" 
+         data-day-program-target="reflection">
+      <div class="card-body">
+        <h4 class="card-title">
+          <i class="fas fa-pen me-2"></i>
+          <%= content["reflection"]["title"] %>
+        </h4>
+
+        <div class="accordion" id="reflectionAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBreath">
+                О дыхании
+              </button>
+            </h2>
+            <div id="collapseBreath" class="accordion-collapse collapse show" data-bs-parent="#reflectionAccordion">
+              <div class="accordion-body">
+                <ul class="list-unstyled">
+                  <% content["reflection"]["questions"]["breath"].each do |q| %>
+                    <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMind">
+                Об уме
+              </button>
+            </h2>
+            <div id="collapseMind" class="accordion-collapse collapse" data-bs-parent="#reflectionAccordion">
+              <div class="accordion-body">
+                <ul class="list-unstyled">
+                  <% content["reflection"]["questions"]["mind"].each do |q| %>
+                    <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBody">
+                О теле и эмоциях
+              </button>
+            </h2>
+            <div id="collapseBody" class="accordion-collapse collapse" data-bs-parent="#reflectionAccordion">
+              <div class="accordion-body">
+                <ul class="list-unstyled">
+                  <% content["reflection"]["questions"]["body"].each do |q| %>
+                    <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Трудности -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h4 class="card-title">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+          Возможные трудности
+        </h4>
+        <div class="row">
+          <% content["challenges"].each do |challenge| %>
+            <div class="col-md-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="card-title"><%= challenge["title"] %></h6>
+                  <p class="small mb-0"><%= challenge["solution"] %></p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Завершение дня -->
+    <div class="text-center mt-5">
+      <button class="btn btn-success btn-lg px-5 d-none" 
+              id="completeDay"
+              data-action="click->day-program#completeDay">
+        <i class="fas fa-check-circle me-2"></i>Завершить день
+      </button>
+      <p class="text-secondary mt-2 small">
+        <i class="fas fa-clock me-1"></i>
+        Следующий день будет доступен через 12 часов
+      </p>
+    </div>
+  </div>
+</div>

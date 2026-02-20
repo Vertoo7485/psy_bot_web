@@ -1,0 +1,149 @@
+
+
+<div class="container py-4">
+  <!-- Шапка -->
+  <div class="row mb-4">
+    <div class="col">
+      <%= link_to programs_path, class: "btn btn-link text-secondary p-0 mb-3" do %>
+        <i class="fas fa-arrow-left me-2"></i>К списку программ
+      <% end %>
+      
+      <h1><%= @program.title %></h1>
+      <p class="lead"><%= @program.description %></p>
+    </div>
+  </div>
+
+  <% user_program = current_user.user_programs.find_or_initialize_by(program: @program) %>
+  <% completed_days = current_user.user_day_progresses
+                                   .joins(:day)
+                                   .where(days: { program_id: @program.id }, completed: true)
+                                   .count %>
+  <% total_days = @program.days.count %>
+  <% percent = (completed_days.to_f / total_days * 100).to_i %>
+
+  <!-- Прогресс -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">
+        <i class="fas fa-chart-line me-2"></i>
+        Ваш прогресс
+      </h4>
+      
+      <div class="progress mb-2" style="height: 25px;">
+        <div class="progress-bar bg-success progress-bar-striped" 
+             style="width: <%= percent %>%">
+          <%= completed_days %>/<%= total_days %> дней
+        </div>
+      </div>
+      
+      <% if completed_days == 0 %>
+        <p class="text-secondary mt-3">
+          <i class="fas fa-info-circle me-1"></i>
+          Вы еще не начинали программу. Начните с Дня 1!
+        </p>
+      <% elsif completed_days == total_days %>
+        <p class="text-success mt-3">
+          <i class="fas fa-trophy me-1"></i>
+          Поздравляем! Вы завершили всю программу!
+        </p>
+      <% else %>
+        <p class="text-success mt-3">
+          <i class="fas fa-arrow-right me-1"></i>
+          Продолжить с Дня <%= completed_days + 1 %>
+        </p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Список дней -->
+  <h3 class="mb-3">Дни программы</h3>
+  
+  <div class="row">
+    <div class="col-lg-8">
+      <% @program.days.order(:day_number).each do |day| %>
+        <% day_progress = current_user.user_day_progresses.find_by(day: day) %>
+        <% is_completed = day_progress&.completed? %>
+        <% is_current = !is_completed && (day.day_number == completed_days + 1) %>
+        
+        <div class="card mb-3 <%= 'border-success' if is_completed %> <%= 'border-primary border-2' if is_current %>">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">
+                  День <%= day.day_number %>: <%= day.title %>
+                  <% if is_completed %>
+                    <span class="badge bg-success ms-2">
+                      <i class="fas fa-check-circle me-1"></i>Пройдено
+                    </span>
+                  <% elsif is_current %>
+                    <span class="badge bg-primary ms-2">
+                      <i class="fas fa-play me-1"></i>Текущий
+                    </span>
+                  <% end %>
+                </h5>
+                <p class="text-secondary mb-0"><%= day.description %></p>
+              </div>
+              
+              <% if is_completed %>
+                <button class="btn btn-outline-secondary" disabled>
+                  <i class="fas fa-lock me-1"></i>Пройдено
+                </button>
+              <% elsif is_current || completed_days == 0 %>
+                <%= link_to day_program_path(@program, day_number: day.day_number), 
+                            class: "btn btn-success" do %>
+                  <i class="fas fa-play me-1"></i>Начать день
+                <% end %>
+              <% else %>
+                <button class="btn btn-outline-secondary" disabled>
+                  <i class="fas fa-lock me-1"></i>Доступно позже
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Боковая панель с информацией -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            О программе
+          </h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <i class="fas fa-calendar-alt text-primary me-2"></i>
+              <strong>Длительность:</strong> 28 дней
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-clock text-primary me-2"></i>
+              <strong>Время в день:</strong> 10-20 минут
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-brain text-primary me-2"></i>
+              <strong>Основа:</strong> Когнитивно-поведенческая терапия
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-check-circle text-primary me-2"></i>
+              <strong>Пройдено:</strong> <%= completed_days %> из <%= total_days %>
+            </li>
+          </ul>
+          
+          <hr>
+          
+          <h6>Как это работает:</h6>
+          <ol class="small text-secondary">
+            <li>Каждый день открывается новый урок</li>
+            <li>После выполнения практики день отмечается пройденным</li>
+            <li>Следующий день становится доступен через 12 часов</li>
+            <li>Вы можете вернуться к любому пройденному дню</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -5,6 +5,9 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :test_results, dependent: :destroy
+  has_many :user_programs, dependent: :destroy
+  has_many :user_day_progresses, dependent: :destroy
+  has_many :programs, through: :user_programs
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'
