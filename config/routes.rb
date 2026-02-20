@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'gratitude_entries/create'
+  get 'gratitude_entries/index'
   get 'programs/index'
   get 'programs/show'
   get 'programs/start'
@@ -25,6 +27,8 @@ Rails.application.routes.draw do
       post 'day/:day_number/complete', to: 'programs#complete_day'
     end
   end
+
+  resources :gratitude_entries, only: [:create, :index]
 
   resources :test_results, only: [:show]
   

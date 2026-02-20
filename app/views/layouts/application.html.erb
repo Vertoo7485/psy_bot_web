@@ -32,6 +32,13 @@
                   <i class="fas fa-seedling me-1"></i> Программа
                 <% end %>
               </li>
+
+              <li class="nav-item">
+    <%= link_to gratitude_entries_path, class: "nav-link" do %>
+      <i class="fas fa-heart me-1"></i> Благодарности
+    <% end %>
+  </li>
+  
             <li class="nav-item">
               <%= link_to tests_path, class: "nav-link" do %>
                 <i class="fas fa-clipboard-list me-1"></i> Тесты

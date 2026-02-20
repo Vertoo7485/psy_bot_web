@@ -1,0 +1,130 @@
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      
+      <!-- Шапка -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+          <i class="fas fa-heart text-danger me-2"></i>
+          Дневник благодарности
+        </h1>
+        <%= link_to programs_path, class: "btn btn-outline-primary" do %>
+          <i class="fas fa-seedling me-2"></i>К программе
+        <% end %>
+      </div>
+      
+      <!-- Форма для новой записи -->
+      <div class="card mb-4 border-success">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-pen me-2"></i>
+            Новая запись
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <textarea class="form-control" 
+                      id="gratitudeInput" 
+                      rows="4" 
+                      placeholder="Напишите здесь, за что вы благодарны сегодня..."></textarea>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-success" id="saveGratitude">
+              <i class="fas fa-save me-2"></i>Сохранить
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Подсказки для вдохновения -->
+      <div class="card mb-4 bg-light">
+        <div class="card-body">
+          <h6 class="mb-3">
+            <i class="fas fa-lightbulb text-warning me-2"></i>
+            Идеи для благодарности
+          </h6>
+          <div class="row">
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-users text-secondary me-2"></i>Люди, которые вас поддерживают</li>
+                <li class="mb-2"><i class="fas fa-home text-secondary me-2"></i>Уют и комфорт вокруг</li>
+                <li class="mb-2"><i class="fas fa-heartbeat text-secondary me-2"></i>Здоровье и энергия</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-sun text-secondary me-2"></i>Природа и погода</li>
+                <li class="mb-2"><i class="fas fa-coffee text-secondary me-2"></i>Простые удовольствия</li>
+                <li class="mb-2"><i class="fas fa-star text-secondary me-2"></i>Личные достижения</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Заголовок для истории -->
+      <h5 class="mb-3">
+        <i class="fas fa-history me-2"></i>
+        Мои записи
+      </h5>
+      
+      <!-- Список записей -->
+      <% if @entries.any? %>
+        <% @entries.each do |entry| %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-success">
+                  <i class="fas fa-calendar me-1"></i>
+                  <%= entry.entry_date.strftime('%d.%m.%Y') %>
+                </span>
+                <small class="text-secondary">
+                  <%= time_ago_in_words(entry.created_at) %> назад
+                </small>
+              </div>
+              <p class="card-text"><%= entry.entry_text %></p>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-5 bg-light rounded">
+          <i class="fas fa-heart fa-3x text-secondary mb-3"></i>
+          <h5>У вас пока нет записей</h5>
+          <p class="text-secondary">Напишите первую благодарность выше</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('saveGratitude').addEventListener('click', function() {
+    const input = document.getElementById('gratitudeInput')
+    const text = input.value.trim()
+    
+    if (!text) {
+      alert('Напишите вашу благодарность')
+      return
+    }
+    
+    fetch('/gratitude_entries', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        entries: [{ text: text }]
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        input.value = ''
+        location.reload() // Просто перезагружаем страницу
+      } else {
+        alert('Ошибка при сохранении: ' + data.error)
+      }
+    })
+  })
+</script>

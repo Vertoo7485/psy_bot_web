@@ -141,28 +141,142 @@ export default class extends Controller {
   }
   
   completeDay() {
-    if (!this.practiceStarted) {
-      alert('Сначала выполните практику')
+  // Для дня 3 (благодарность) не проверяем практику
+  const dayNumber = this.data.get('dayNumber')
+  
+  if (dayNumber != '3' && !this.practiceStarted) {
+    alert('Сначала выполните практику')
+    return
+  }
+  
+  // Сохраняем прогресс через fetch
+  fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({
+      completed: true
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+    }
+  })
+}
+
+  // Новые переменные для дня 3
+static targets = ["reflection", "timerButtons", "techniqueButtons", "gratitudeStep", "gratitudeInput"]
+
+connect() {
+  this.selectedTechnique = null
+  this.selectedMinutes = null
+  this.practiceStarted = false
+  this.currentGratitudeStep = 0
+  this.gratitudeEntries = []
+  this.gratitudeSteps = []
+}
+
+// Метод для начала упражнения благодарности
+startGratitudeExercise() {
+  const exerciseData = JSON.parse(this.data.get('exerciseData') || '{}')
+  this.gratitudeSteps = exerciseData.steps || []
+  this.currentGratitudeStep = 0
+  this.gratitudeEntries = []
+  
+  this.showGratitudeStep()
+}
+
+// Показ текущего шага
+showGratitudeStep() {
+  if (this.currentGratitudeStep >= this.gratitudeSteps.length) {
+    this.completeGratitudeExercise()
+    return
+  }
+  
+  const step = this.gratitudeSteps[this.currentGratitudeStep]
+  
+  // Скрываем основное содержимое, показываем шаг
+  document.querySelector('.card.border-primary').classList.add('d-none')
+  
+  let stepHtml = `
+    <div class="card mb-4 border-success" id="gratitudeStep">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Шаг ${this.currentGratitudeStep + 1} из ${this.gratitudeSteps.length}</h4>
+      </div>
+      <div class="card-body">
+        <h5 class="mb-3">${step.prompt}</h5>
+        <div class="alert alert-info">
+          <ul class="mb-0">
+            ${step.questions.map(q => `<li>${q}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Ваша благодарность:</label>
+          <textarea class="form-control" 
+                    id="gratitudeInput" 
+                    rows="3" 
+                    placeholder="${step.placeholder}"></textarea>
+        </div>
+        <div class="text-end">
+          <button class="btn btn-success" onclick="this.dispatchEvent(new CustomEvent('save-gratitude'))">
+            ${this.currentGratitudeStep < this.gratitudeSteps.length - 1 ? 'Далее' : 'Завершить'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+  
+  // Вставляем шаг после упражнения
+  document.querySelector('.card.border-primary').insertAdjacentHTML('afterend', stepHtml)
+  
+  // Добавляем обработчик для кнопки
+  document.querySelector('#gratitudeStep .btn-success').addEventListener('click', () => {
+    const input = document.getElementById('gratitudeInput')
+    if (!input.value.trim()) {
+      alert('Пожалуйста, напишите вашу благодарность')
       return
     }
     
-    // Сохраняем прогресс через fetch
-    fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-      },
-      body: JSON.stringify({
-        technique: this.selectedTechnique,
-        minutes: this.selectedMinutes
-      })
+    this.gratitudeEntries.push({
+      step: this.currentGratitudeStep,
+      category: step.category,
+      text: input.value.trim()
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
-      }
+    
+    this.currentGratitudeStep++
+    document.getElementById('gratitudeStep')?.remove()
+    this.showGratitudeStep()
+  })
+}
+
+// Завершение упражнения
+completeGratitudeExercise() {
+  document.getElementById('gratitudeStep')?.remove()
+  document.querySelector('.card.border-primary').classList.remove('d-none')
+  
+  // Сохраняем в базу
+  fetch('/gratitude_entries', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({
+      entries: this.gratitudeEntries
     })
-  }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('✅ Благодарности сохранены!')
+      // Показываем рефлексию
+      this.reflectionTarget.classList.remove('d-none')
+      document.getElementById('completeDay').classList.remove('d-none')
+    }
+  })
+}
 }

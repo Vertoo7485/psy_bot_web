@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :user_programs, dependent: :destroy
   has_many :user_day_progresses, dependent: :destroy
   has_many :programs, through: :user_programs
+  has_many :gratitude_entries, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'

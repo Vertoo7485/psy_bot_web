@@ -64,23 +64,6 @@
       </div>
     <% end %>
 
-    <!-- Статистика -->
-    <% if content["statistics"].present? %>
-      <div class="row mb-4">
-        <% content["statistics"].each do |stat| %>
-          <div class="col-md-2 col-6 mb-3">
-            <div class="card text-center h-100">
-              <div class="card-body">
-                <h3 class="text-success mb-0"><%= stat["value"] %></h3>
-                <small class="text-secondary"><%= stat["label"] %></small>
-                <p class="small text-muted mt-2 mb-0"><%= stat["description"] %></p>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
     <!-- Преимущества -->
     <% if content["benefits"].present? %>
       <div class="card mb-4">
@@ -191,105 +174,166 @@
           </div>
         <% end %>
 
-        <!-- Таймер -->
-        <div class="mt-4">
-          <h5>Время практики:</h5>
-          <div class="btn-group" role="group">
-            <!-- Дефолтные значения для всех дней -->
-            <button class="btn btn-outline-primary timer-option"
-                    data-action="click->day-program#selectTimer"
-                    data-day-program-target="timerButtons"
-                    data-minutes="5">
-              5 мин
-            </button>
-            <button class="btn btn-outline-primary timer-option"
-                    data-action="click->day-program#selectTimer"
-                    data-day-program-target="timerButtons"
-                    data-minutes="10">
-              10 мин
-            </button>
-            <button class="btn btn-outline-primary timer-option"
-                    data-action="click->day-program#selectTimer"
-                    data-day-program-target="timerButtons"
-                    data-minutes="15">
-              15 мин
-            </button>
-            <button class="btn btn-outline-primary timer-option"
-                    data-action="click->day-program#selectTimer"
-                    data-day-program-target="timerButtons"
-                    data-minutes="20">
-              20 мин
-            </button>
-            <button class="btn btn-outline-secondary timer-option"
-                    data-action="click->day-program#selectTimer"
-                    data-day-program-target="timerButtons"
-                    data-minutes="custom">
-              Свой вариант
+        <!-- Пошаговое упражнение благодарности (для дня 3) -->
+        <% if content["exercise"] && content["exercise"]["steps"].present? %>
+          <div class="mt-4">
+            <h5 class="mb-3"><%= content["exercise"]["title"] %></h5>
+            <p class="text-secondary mb-4"><%= content["exercise"]["description"] %></p>
+            
+            <% content["exercise"]["steps"].each_with_index do |step, index| %>
+              <div class="card mb-3">
+                <div class="card-body">
+                  <h6 class="card-title">
+                    <span class="badge bg-success me-2">Шаг <%= index + 1 %></span>
+                    <%= step["category"] %>
+                  </h6>
+                  <div class="mb-3">
+                    <small class="text-secondary">Подсказки:</small>
+                    <ul class="mt-2">
+                      <% step["questions"].each do |q| %>
+                        <li><%= q %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Ваша благодарность:</label>
+                    <textarea class="form-control gratitude-step-input" 
+                              rows="2" 
+                              data-step="<%= index %>"
+                              placeholder="<%= step["placeholder"] %>"></textarea>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            
+            <div class="text-center mt-3">
+              <button class="btn btn-success" id="saveGratitudeSteps">
+                <i class="fas fa-save me-2"></i>Сохранить благодарности
+              </button>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Таймер (для всех дней) -->
+        <% if content["exercise"] && content["exercise"]["timer_options"].present? %>
+          <div class="mt-4">
+            <h5>Время практики:</h5>
+            <div class="btn-group" role="group">
+              <% content["exercise"]["timer_options"].each do |minutes| %>
+                <button class="btn btn-outline-primary timer-option"
+                        data-action="click->day-program#selectTimer"
+                        data-day-program-target="timerButtons"
+                        data-minutes="<%= minutes %>">
+                  <%= minutes %> мин
+                </button>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <!-- Дефолтный таймер для всех дней -->
+          <div class="mt-4">
+            <h5>Время практики:</h5>
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="5">
+                5 мин
+              </button>
+              <button class="btn btn-outline-primary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="10">
+                10 мин
+              </button>
+              <button class="btn btn-outline-primary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="15">
+                15 мин
+              </button>
+              <button class="btn btn-outline-primary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="20">
+                20 мин
+              </button>
+              <button class="btn btn-outline-secondary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="custom">
+                Свой вариант
+              </button>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Кнопка начала практики (для дней с таймером) -->
+        <% unless content["exercise"] && content["exercise"]["steps"].present? %>
+          <div class="text-center mt-4">
+            <button class="btn btn-success btn-lg px-5" 
+                    id="startPractice"
+                    data-action="click->day-program#startPractice">
+              <i class="fas fa-play me-2"></i>Начать практику
             </button>
           </div>
-        </div>
-
-        <!-- Кнопка начала -->
-        <div class="text-center mt-4">
-          <button class="btn btn-success btn-lg px-5" 
-                  id="startPractice"
-                  data-action="click->day-program#startPractice">
-            <i class="fas fa-play me-2"></i>Начать практику
-          </button>
-        </div>
+        <% end %>
       </div>
     </div>
 
     <!-- Рефлексия -->
-<% if content["reflection"].present? %>
-  <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
-    <div class="card-body">
-      <h4 class="card-title">
-        <i class="fas fa-pen me-2"></i>
-        <%= content["reflection"]["title"] || "Рефлексия после практики" %>
-      </h4>
+    <% if content["reflection"].present? %>
+      <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
+        <div class="card-body">
+          <h4 class="card-title">
+            <i class="fas fa-pen me-2"></i>
+            <%= content["reflection"]["title"] || "Рефлексия после практики" %>
+          </h4>
 
-      <div class="accordion" id="reflectionAccordion">
-        <% if content["reflection"]["questions"].present? %>
-          <% 
-            russian_names = {
-              "body" => "О теле",
-              "mind" => "Об уме",
-              "difficulties" => "О сложностях",
-              "integration" => "Для жизни",
-              "breath" => "О дыхании",
-              "questions" => "Вопросы"
-            }
-          %>
-          <% content["reflection"]["questions"].each_with_index do |(key, questions), index| %>
-            <% display_name = russian_names[key] || key.capitalize %>
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" 
-                        type="button" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#collapse<%= key.capitalize %>">
-                  <%= display_name %>
-                </button>
-              </h2>
-              <div id="collapse<%= key.capitalize %>" 
-                   class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" 
-                   data-bs-parent="#reflectionAccordion">
-                <div class="accordion-body">
-                  <ul class="list-unstyled">
-                    <% questions.each do |q| %>
-                      <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
-                    <% end %>
-                  </ul>
+          <div class="accordion" id="reflectionAccordion">
+            <% if content["reflection"]["questions"].present? %>
+              <% 
+                russian_names = {
+                  "feelings" => "О чувствах",
+                  "process" => "О процессе",
+                  "discoveries" => "Об открытиях",
+                  "integration" => "Для жизни",
+                  "mind" => "Об уме",
+                  "body" => "О теле",
+                  "difficulties" => "О сложностях",
+                  "breath" => "О дыхании",
+                  "questions" => "Вопросы"
+                }
+              %>
+              <% content["reflection"]["questions"].each_with_index do |(key, questions), index| %>
+                <% display_name = russian_names[key] || key.capitalize %>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#collapse<%= key.capitalize %>">
+                      <%= display_name %>
+                    </button>
+                  </h2>
+                  <div id="collapse<%= key.capitalize %>" 
+                       class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" 
+                       data-bs-parent="#reflectionAccordion">
+                    <div class="accordion-body">
+                      <ul class="list-unstyled">
+                        <% questions.each do |q| %>
+                          <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          <% end %>
-        <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-<% end %>
+    <% end %>
 
     <!-- Трудности -->
     <% if content["challenges"].present? %>
@@ -353,3 +397,44 @@
     </div>
   </div>
 </div>
+
+<!-- JavaScript для сохранения благодарностей -->
+<script>
+  document.getElementById('saveGratitudeSteps')?.addEventListener('click', function() {
+    const inputs = document.querySelectorAll('.gratitude-step-input')
+    const entries = []
+    
+    inputs.forEach(input => {
+      if (input.value.trim()) {
+        entries.push({ text: input.value.trim() })
+      }
+    })
+    
+    if (entries.length === 0) {
+      alert('Напишите хотя бы одну благодарность')
+      return
+    }
+    
+    fetch('/gratitude_entries', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ entries: entries })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('✅ Благодарности сохранены!')
+        // Показываем рефлексию и кнопку завершения
+        document.getElementById('reflectionSection').classList.remove('d-none')
+        document.getElementById('completeDay').classList.remove('d-none')
+        // Прокручиваем к рефлексии
+        document.getElementById('reflectionSection').scrollIntoView({ behavior: 'smooth' })
+      } else {
+        alert('Ошибка: ' + data.error)
+      }
+    })
+  })
+</script>
