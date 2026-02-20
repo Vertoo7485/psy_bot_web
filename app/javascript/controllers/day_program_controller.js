@@ -54,23 +54,28 @@ export default class extends Controller {
   }
   
   startPractice() {
-    if (!this.selectedTechnique) {
-      alert('Сначала выберите технику дыхания')
-      return
-    }
-    if (!this.selectedMinutes) {
-      alert('Выберите время практики')
-      return
-    }
-    
-    this.practiceStarted = true
-    
-    // Скрываем кнопку старта, показываем таймер
-    document.getElementById('startPractice').classList.add('d-none')
-    
-    // Создаем и показываем таймер
-    this.showTimer()
+  // Проверяем, есть ли техники дыхания на странице (для дня 1)
+  const hasTechniques = this.techniqueButtonsTargets.length > 0
+  
+  // Если техники есть, но не выбраны
+  if (hasTechniques && !this.selectedTechnique) {
+    alert('Сначала выберите технику дыхания')
+    return
   }
+  
+  if (!this.selectedMinutes) {
+    alert('Выберите время практики')
+    return
+  }
+  
+  this.practiceStarted = true
+  
+  // Скрываем кнопку старта, показываем таймер
+  document.getElementById('startPractice').classList.add('d-none')
+  
+  // Создаем и показываем таймер
+  this.showTimer()
+}
   
   showTimer() {
   const minutes = parseInt(this.selectedMinutes)
