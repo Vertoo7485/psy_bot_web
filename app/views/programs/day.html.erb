@@ -91,9 +91,15 @@
       </div>
       <div class="card-body">
 
-        <!-- Техники дыхания (для дня 1) -->
+        <!-- Техники (дыхания для дня 1, наблюдения для дня 4) -->
         <% if content["exercise"] && content["exercise"]["techniques"].present? %>
-          <h5 class="mt-4">Выберите технику дыхания:</h5>
+          <h5 class="mt-4">
+            <% if day.day_number == 4 %>
+              Выберите технику наблюдения:
+            <% else %>
+              Выберите технику дыхания:
+            <% end %>
+          </h5>
           <div class="row">
             <% content["exercise"]["techniques"].each_with_index do |tech, index| %>
               <div class="col-md-6 mb-3">
@@ -117,6 +123,37 @@
           </div>
         <% end %>
 
+        <!-- Типы активности (для дня 5) -->
+        <% if day.day_number == 5 && content["exercise"]["activity_types"].present? %>
+          <div class="mt-4">
+            <h5>Выберите тип активности:</h5>
+            <div class="row">
+              <% content["exercise"]["activity_types"].each_with_index do |activity, index| %>
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100 activity-card" data-activity="<%= index %>">
+                    <div class="card-body">
+                      <h6 class="card-title"><%= activity["name"] %></h6>
+                      <p class="small text-secondary"><%= activity["description"] %></p>
+                      <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="badge bg-info">Интенсивность: <%= activity["intensity"] %></span>
+                        <span class="badge bg-success">Польза: <%= activity["benefits"] %></span>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                      <button class="btn btn-sm btn-outline-primary select-activity"
+                              data-action="click->day-program#selectActivity"
+                              data-day-program-target="activityButtons"
+                              data-activity="<%= index %>">
+                        Выбрать
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
         <!-- Текстовая медитация (для дня 2) -->
         <% if content["text_meditation"].present? %>
           <div class="mt-4">
@@ -131,17 +168,41 @@
         <% end %>
 
         <!-- Подготовка (для дня 2) -->
-        <% if content["preparation"].present? %>
+        <% if content["preparation"].present? && !content["exercise"]["activity_types"].present? %>
           <div class="mt-4 p-3 bg-light rounded">
             <h6>
               <i class="fas fa-clock me-2"></i>
               Подготовка к практике
             </h6>
-            <p class="mb-2"><strong>Положение тела:</strong> <%= content["preparation"]["posture"] %></p>
-            <p class="mb-2"><strong>Время и место:</strong> <%= content["preparation"]["timing"] %></p>
-            <p><strong>Настройка:</strong></p>
+            <% if content["preparation"]["posture"].present? %>
+              <p class="mb-2"><strong>Положение тела:</strong> <%= content["preparation"]["posture"] %></p>
+            <% end %>
+            <% if content["preparation"]["timing"].present? %>
+              <p class="mb-2"><strong>Время и место:</strong> <%= content["preparation"]["timing"] %></p>
+            <% end %>
+            <% if content["preparation"]["breathing"].present? %>
+              <p><strong>Настройка:</strong></p>
+              <ul>
+                <% content["preparation"]["breathing"].each do |item| %>
+                  <li><%= item %></li>
+                <% end %>
+              </ul>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Подготовка для дня 5 -->
+        <% if day.day_number == 5 && content["exercise"]["preparation"].present? %>
+          <div class="mt-4 p-3 bg-light rounded">
+            <h6>
+              <i class="fas fa-clock me-2"></i>
+              Подготовка к практике
+            </h6>
+            <p class="mb-2"><strong>Экипировка:</strong> <%= content["exercise"]["preparation"]["equipment"] %></p>
+            <p class="mb-2"><strong>Пространство:</strong> <%= content["exercise"]["preparation"]["space"] %></p>
+            <p><strong>Установка:</strong></p>
             <ul>
-              <% content["preparation"]["breathing"].each do |item| %>
+              <% content["exercise"]["preparation"]["guidance"].each do |item| %>
                 <li><%= item %></li>
               <% end %>
             </ul>
@@ -214,50 +275,47 @@
           </div>
         <% end %>
 
-        <!-- Таймер (для всех дней) -->
-        <% if content["exercise"] && content["exercise"]["timer_options"].present? %>
+        <!-- Таймер (для всех дней, кроме дня 3) -->
+        <% if day.day_number != 3 %>
           <div class="mt-4">
             <h5>Время практики:</h5>
             <div class="btn-group" role="group">
-              <% content["exercise"]["timer_options"].each do |minutes| %>
+              <% if content["exercise"] && content["exercise"]["timer_options"].present? %>
+                <% content["exercise"]["timer_options"].each do |minutes| %>
+                  <button class="btn btn-outline-primary timer-option"
+                          data-action="click->day-program#selectTimer"
+                          data-day-program-target="timerButtons"
+                          data-minutes="<%= minutes %>">
+                    <%= minutes %> мин
+                  </button>
+                <% end %>
+              <% else %>
+                <!-- Дефолтные значения для всех дней -->
                 <button class="btn btn-outline-primary timer-option"
                         data-action="click->day-program#selectTimer"
                         data-day-program-target="timerButtons"
-                        data-minutes="<%= minutes %>">
-                  <%= minutes %> мин
+                        data-minutes="5">
+                  5 мин
+                </button>
+                <button class="btn btn-outline-primary timer-option"
+                        data-action="click->day-program#selectTimer"
+                        data-day-program-target="timerButtons"
+                        data-minutes="10">
+                  10 мин
+                </button>
+                <button class="btn btn-outline-primary timer-option"
+                        data-action="click->day-program#selectTimer"
+                        data-day-program-target="timerButtons"
+                        data-minutes="15">
+                  15 мин
+                </button>
+                <button class="btn btn-outline-primary timer-option"
+                        data-action="click->day-program#selectTimer"
+                        data-day-program-target="timerButtons"
+                        data-minutes="20">
+                  20 мин
                 </button>
               <% end %>
-            </div>
-          </div>
-        <% else %>
-          <!-- Дефолтный таймер для всех дней -->
-          <div class="mt-4">
-            <h5>Время практики:</h5>
-            <div class="btn-group" role="group">
-              <button class="btn btn-outline-primary timer-option"
-                      data-action="click->day-program#selectTimer"
-                      data-day-program-target="timerButtons"
-                      data-minutes="5">
-                5 мин
-              </button>
-              <button class="btn btn-outline-primary timer-option"
-                      data-action="click->day-program#selectTimer"
-                      data-day-program-target="timerButtons"
-                      data-minutes="10">
-                10 мин
-              </button>
-              <button class="btn btn-outline-primary timer-option"
-                      data-action="click->day-program#selectTimer"
-                      data-day-program-target="timerButtons"
-                      data-minutes="15">
-                15 мин
-              </button>
-              <button class="btn btn-outline-primary timer-option"
-                      data-action="click->day-program#selectTimer"
-                      data-day-program-target="timerButtons"
-                      data-minutes="20">
-                20 мин
-              </button>
               <button class="btn btn-outline-secondary timer-option"
                       data-action="click->day-program#selectTimer"
                       data-day-program-target="timerButtons"
@@ -266,10 +324,8 @@
               </button>
             </div>
           </div>
-        <% end %>
 
-        <!-- Кнопка начала практики (для дней с таймером) -->
-        <% unless content["exercise"] && content["exercise"]["steps"].present? %>
+          <!-- Кнопка начала практики -->
           <div class="text-center mt-4">
             <button class="btn btn-success btn-lg px-5" 
                     id="startPractice"
@@ -302,6 +358,8 @@
                   "body" => "О теле",
                   "difficulties" => "О сложностях",
                   "breath" => "О дыхании",
+                  "visual" => "О зрении",
+                  "mood" => "О настроении",
                   "questions" => "Вопросы"
                 }
               %>
@@ -334,6 +392,93 @@
         </div>
       </div>
     <% end %>
+
+    <!-- Выбор настроения для дня 5 -->
+<% if day.day_number == 5 && content["mood_options"].present? %>
+  <div class="mt-4" id="moodSelection" style="display: none;">
+    <h5 class="mb-3">Как изменилось ваше настроение?</h5>
+    <p class="text-secondary small mb-3">Ваш ответ поможет отслеживать связь между движением и эмоциональным состоянием</p>
+    
+    <div class="btn-group-vertical w-100" role="group">
+      <div class="card mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-start">
+            <button class="btn btn-outline-primary mood-option me-3"
+                    data-action="click->day-program#selectMood"
+                    data-day-program-target="moodButtons"
+                    data-mood="0"
+                    style="min-width: 50px;">
+              😊
+            </button>
+            <div>
+              <h6 class="mb-1">Значительно лучше</h6>
+              <p class="small text-secondary mb-0">Движение дало заметный прилив энергии и позитива. Отличный результат!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-start">
+            <button class="btn btn-outline-primary mood-option me-3"
+                    data-action="click->day-program#selectMood"
+                    data-day-program-target="moodButtons"
+                    data-mood="1"
+                    style="min-width: 50px;">
+              🙂
+            </button>
+            <div>
+              <h6 class="mb-1">Немного лучше</h6>
+              <p class="small text-secondary mb-0">Небольшое улучшение — хороший знак. Даже легкое движение влияет на состояние.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-start">
+            <button class="btn btn-outline-primary mood-option me-3"
+                    data-action="click->day-program#selectMood"
+                    data-day-program-target="moodButtons"
+                    data-mood="2"
+                    style="min-width: 50px;">
+              😐
+            </button>
+            <div>
+              <h6 class="mb-1">Без изменений</h6>
+              <p class="small text-secondary mb-0">Тоже нормально! Иногда движение работает как поддержание, а не как улучшение.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-start">
+            <button class="btn btn-outline-primary mood-option me-3"
+                    data-action="click->day-program#selectMood"
+                    data-day-program-target="moodButtons"
+                    data-mood="3"
+                    style="min-width: 50px;">
+              😔
+            </button>
+            <div>
+              <h6 class="mb-1">Хуже (усталость)</h6>
+              <p class="small text-secondary mb-0">Возможно, нагрузка была великовата. В следующий раз попробуйте более легкую активность.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <p class="text-secondary small mt-3 text-center">
+      <i class="fas fa-info-circle me-1"></i>
+      Ваш выбор никуда не передается — только для вашей личной статистики
+    </p>
+  </div>
+<% end %>
 
     <!-- Трудности -->
     <% if content["challenges"].present? %>
@@ -396,6 +541,47 @@
       </p>
     </div>
   </div>
+
+  <style>
+  .activity-card .card-body {
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .activity-card .badge {
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: left;
+    line-height: 1.4;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+  
+  .activity-card .d-flex {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .activity-card .badge.bg-info,
+  .activity-card .badge.bg-success {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+  }
+  
+  @media (min-width: 768px) {
+    .activity-card .d-flex {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    
+    .activity-card .badge {
+      width: auto;
+      flex: 1 1 auto;
+    }
+  }
+</style>
 </div>
 
 <!-- JavaScript для сохранения благодарностей -->
@@ -438,3 +624,42 @@
     })
   })
 </script>
+
+<style>
+  /* существующие стили... */
+  
+  /* Убедимся, что кнопки кликабельны */
+  .activity-card .card-footer {
+    position: relative;
+    z-index: 10;
+    background: transparent;
+    border-top: 1px solid rgba(0,0,0,0.125);
+    padding: 0.75rem;
+  }
+  
+  .activity-card .btn {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .activity-card {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+  }
+  
+  /* Убедимся, что ничего не перекрывает кнопку */
+  .activity-card .card-body {
+    pointer-events: none; /* Текст не мешает кликам */
+  }
+  
+  .activity-card .card-body * {
+    pointer-events: none; /* Элементы внутри body не перехватывают клики */
+  }
+  
+  .activity-card .card-footer {
+    pointer-events: auto; /* Футер с кнопкой получает клики */
+  }
+</style>
