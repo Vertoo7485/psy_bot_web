@@ -2,7 +2,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["reflection", "timerButtons", "techniqueButtons", "activityButtons", "moodButtons", "restButtons", "stateButtons", "gratitudeStep", "gratitudeInput"]  
+  static targets = ["reflection", "timerButtons", "techniqueButtons", "activityButtons", "moodButtons", "restButtons", "stateButtons", "signalButtons", "strategyButtons", "gratitudeStep", "gratitudeInput"]
   
   connect() {
     this.selectedTechnique = null
@@ -12,6 +12,8 @@ export default class extends Controller {
     this.selectedMood = null
     this.selectedRest = null
     this.selectedState = null
+    this.selectedSignal = null
+    this.selectedStrategy = null
     this.currentGratitudeStep = 0
     this.gratitudeEntries = []
     this.gratitudeSteps = []
@@ -139,7 +141,7 @@ export default class extends Controller {
       card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
     }
     
-    // Также выделяем саму кнопку (для совместимости со старым кодом)
+    // Также выделяем саму кнопку (для совместимости)
     this.moodButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -162,9 +164,41 @@ export default class extends Controller {
     ]
     
     this.selectedMoodText = moodOptions[moodIndex]
-    
-    // Отправляем на сервер или сохраняем локально
     console.log('Настроение сохранено:', this.selectedMoodText)
+  }
+
+  selectSignal(event) {
+    const button = event.currentTarget
+    this.selectedSignal = button.dataset.signal
+
+    // Визуальное выделение
+    this.signalButtonsTargets.forEach(btn => {
+      btn.classList.remove('btn-primary', 'text-white')
+      btn.classList.add('btn-outline-primary')
+      btn.closest('.signal-card')?.classList.remove('border-primary', 'border-2', 'bg-light')
+    })
+    button.classList.remove('btn-outline-primary')
+    button.classList.add('btn-primary', 'text-white')
+    button.closest('.signal-card')?.classList.add('border-primary', 'border-2', 'bg-light')
+
+    console.log('Выбран сигнал:', this.selectedSignal)
+  }
+
+  selectStrategy(event) {
+    const button = event.currentTarget
+    this.selectedStrategy = button.dataset.strategy
+
+    // Визуальное выделение
+    this.strategyButtonsTargets.forEach(btn => {
+      btn.classList.remove('btn-primary', 'text-white')
+      btn.classList.add('btn-outline-primary')
+      btn.closest('.strategy-card')?.classList.remove('border-primary', 'border-2', 'bg-light')
+    })
+    button.classList.remove('btn-outline-primary')
+    button.classList.add('btn-primary', 'text-white')
+    button.closest('.strategy-card')?.classList.add('border-primary', 'border-2', 'bg-light')
+
+    console.log('Выбрана стратегия:', this.selectedStrategy)
   }
   
   startPractice() {
@@ -172,7 +206,13 @@ export default class extends Controller {
     const hasTechniques = this.techniqueButtonsTargets.length > 0
     const hasActivities = this.activityButtonsTargets.length > 0
     const hasRest = this.restButtonsTargets.length > 0
+    const hasSignals = this.signalButtonsTargets?.length > 0
 
+    // Для дня 8 проверка не нужна - у него свой интерфейс
+    if (dayNumber == '8') {
+      return
+    }
+    
     // Для дня 6 нужен выбор типа отдыха
     if (dayNumber == '6' && hasRest && !this.selectedRest) {
       alert('Сначала выберите тип отдыха')
@@ -290,32 +330,32 @@ export default class extends Controller {
   }
   
   completeDay() {
-  // Для дня 3 (благодарность) и дня 7 (рефлексия) не проверяем практику
-  const dayNumber = this.data.get('dayNumber')
-  
-  if (dayNumber != '3' && dayNumber != '7' && !this.practiceStarted) {
-    alert('Сначала выполните практику')
-    return
-  }
-  
-  // Сохраняем прогресс через fetch
-  fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-    },
-    body: JSON.stringify({
-      completed: true
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+    // Для дня 3 (благодарность) и дня 7 (рефлексия) не проверяем практику
+    const dayNumber = this.data.get('dayNumber')
+    
+    if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && !this.practiceStarted) {
+      alert('Сначала выполните практику')
+      return
     }
-  })
-}
+    
+    // Сохраняем прогресс через fetch
+    fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        completed: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+      }
+    })
+  }
 
   // Методы для дня 3 (благодарность)
   startGratitudeExercise() {
