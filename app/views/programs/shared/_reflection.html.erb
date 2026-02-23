@@ -1,0 +1,58 @@
+<% if content["reflection"].present? %>
+  <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
+    <div class="card-body">
+      <h4 class="card-title">
+        <i class="fas fa-pen me-2"></i>
+        <%= content["reflection"]["title"] || "Рефлексия после практики" %>
+      </h4>
+
+      <div class="accordion" id="reflectionAccordion">
+        <% if content["reflection"]["questions"].present? %>
+          <% 
+            russian_names = {
+              "feelings" => "О чувствах",
+              "process" => "О процессе",
+              "discoveries" => "Об открытиях",
+              "integration" => "Для жизни",
+              "mind" => "Об уме",
+              "body" => "О теле",
+              "difficulties" => "О сложностях",
+              "breath" => "О дыхании",
+              "visual" => "О зрении",
+              "mood" => "О настроении",
+              "energy" => "Об энергии",
+              "stop" => "Об остановке",
+              "distraction" => "О переключении",
+              "effect" => "Об эффекте",
+              "questions" => "Вопросы"
+            }
+          %>
+          <% content["reflection"]["questions"].each_with_index do |(key, questions), index| %>
+            <% display_name = russian_names[key] || key.capitalize %>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapse<%= key.capitalize %>">
+                  <%= display_name %>
+                </button>
+              </h2>
+              <div id="collapse<%= key.capitalize %>" 
+                   class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" 
+                   data-bs-parent="#reflectionAccordion">
+                <div class="accordion-body">
+                  <ul class="list-unstyled">
+                    <% questions.each do |q| %>
+                      <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

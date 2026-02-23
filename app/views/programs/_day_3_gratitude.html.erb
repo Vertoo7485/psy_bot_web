@@ -1,0 +1,36 @@
+<div class="mt-4">
+  <h5 class="mb-3"><%= content["exercise"]["title"] %></h5>
+  <p class="text-secondary mb-4"><%= content["exercise"]["description"] %></p>
+  
+  <% content["exercise"]["steps"].each_with_index do |step, index| %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h6 class="card-title">
+          <span class="badge bg-success me-2">Шаг <%= index + 1 %></span>
+          <%= step["category"] %>
+        </h6>
+        <div class="mb-3">
+          <small class="text-secondary">Подсказки:</small>
+          <ul class="mt-2">
+            <% step["questions"].each do |q| %>
+              <li><%= q %></li>
+            <% end %>
+          </ul>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Ваша благодарность:</label>
+          <textarea class="form-control gratitude-step-input" 
+                    rows="2" 
+                    data-step="<%= index %>"
+                    placeholder="<%= step["placeholder"] %>"></textarea>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <div class="text-center mt-3">
+    <button class="btn btn-success" id="saveGratitudeSteps">
+      <i class="fas fa-save me-2"></i>Сохранить благодарности
+    </button>
+  </div>
+</div>

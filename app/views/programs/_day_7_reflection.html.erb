@@ -1,0 +1,57 @@
+<div class="mt-4">
+  <h5 class="mb-3">📝 Рефлексия первой недели</h5>
+  <p class="text-secondary mb-4">Ответьте на вопросы в каждой категории. Это поможет осмыслить и закрепить опыт.</p>
+  
+  <div class="progress mb-4" id="reflectionProgress" style="height: 10px;">
+    <div class="progress-bar bg-success" style="width: 0%"></div>
+  </div>
+  
+  <div id="reflectionCategories">
+    <% content["reflection_categories"].each_with_index do |category, index| %>
+      <div class="card mb-4 reflection-category" data-category="<%= index %>" style="<%= index > 0 ? 'display: none;' : '' %>">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <%= category["emoji"] %> <%= category["name"] %>
+            <span class="badge bg-light text-dark float-end">Категория <%= index + 1 %>/4</span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <p class="lead"><%= category["prompt"] %></p>
+          
+          <div class="alert alert-light mb-4">
+            <small>💡 Подсказки:</small>
+            <ul class="mt-2 mb-0">
+              <% category["questions"].each do |q| %>
+                <li><%= q %></li>
+              <% end %>
+            </ul>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Ваш ответ:</label>
+            <textarea class="form-control reflection-input" 
+                      rows="4" 
+                      data-category="<%= index %>"
+                      placeholder="Напишите ваши мысли..."></textarea>
+          </div>
+          
+          <div class="text-end">
+            <button class="btn btn-success save-reflection" data-category="<%= index %>">
+              Сохранить и продолжить
+            </button>
+            <button class="btn btn-link text-secondary skip-reflection" data-category="<%= index %>">
+              Пропустить
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <div id="reflectionComplete" style="display: none;">
+    <div class="alert alert-success text-center">
+      <h5 class="mb-3">✅ Рефлексия завершена!</h5>
+      <p>Спасибо, что уделили время осмыслению первой недели.</p>
+    </div>
+  </div>
+</div>

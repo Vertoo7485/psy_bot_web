@@ -1,0 +1,30 @@
+<% if content["exercise"] && content["exercise"]["techniques"].present? %>
+  <h5 class="mt-4">
+    <% if day.day_number == 4 %>
+      Выберите технику наблюдения:
+    <% else %>
+      Выберите технику дыхания:
+    <% end %>
+  </h5>
+  <div class="row">
+    <% content["exercise"]["techniques"].each_with_index do |tech, index| %>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="card-title"><%= tech["name"] %></h6>
+            <p class="small text-secondary"><%= tech["description"] %></p>
+            <span class="badge bg-info"><%= tech["for_situation"] %></span>
+          </div>
+          <div class="card-footer bg-transparent">
+            <button class="btn btn-sm btn-outline-primary select-technique"
+                    data-action="click->day-program#selectTechnique"
+                    data-day-program-target="techniqueButtons"
+                    data-technique="<%= index %>">
+              Выбрать
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

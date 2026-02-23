@@ -1,0 +1,22 @@
+<% if content["daily_tips"].present? %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">
+        <i class="fas fa-lightbulb text-info me-2"></i>
+        Как использовать в жизни
+      </h4>
+      <div class="row">
+        <% content["daily_tips"].each do |tip| %>
+          <div class="col-md-6 mb-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                <h6 class="card-title"><%= tip["title"] %></h6>
+                <p class="small mb-0"><%= tip["description"] %></p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,39 @@
+<% 
+  items = local_assigns[:items] || []
+  item_type = local_assigns[:item_type] || "item"
+  target = local_assigns[:target] || "itemButtons"
+  action = local_assigns[:action] || "selectItem"
+%>
+
+<div class="mt-4">
+  <h5>Выберите <%= item_type %>:</h5>
+  <div class="row">
+    <% items.each_with_index do |item, index| %>
+      <div class="col-md-6 mb-3">
+        <div class="card h-100 <%= item_type %>-card" data-<%= item_type %>="<%= index %>">
+          <div class="card-body">
+            <h6 class="card-title"><%= item["name"] %></h6>
+            <p class="small text-secondary"><%= item["description"] %></p>
+            <% if item["duration"].present? %>
+              <span class="badge bg-info">⏱️ <%= item["duration"] %></span>
+            <% end %>
+            <% if item["intensity"].present? %>
+              <span class="badge bg-info mt-2">Интенсивность: <%= item["intensity"] %></span>
+            <% end %>
+            <% if item["benefits"].present? %>
+              <span class="badge bg-success mt-2">Польза: <%= item["benefits"] %></span>
+            <% end %>
+          </div>
+          <div class="card-footer bg-transparent">
+            <button class="btn btn-sm btn-outline-primary select-<%= item_type %>"
+                    data-action="click->day-program#<%= action %>"
+                    data-day-program-target="<%= target %>"
+                    data-<%= item_type %>="<%= index %>">
+              Выбрать
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

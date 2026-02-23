@@ -1,0 +1,100 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let currentCategory = 0
+    const totalCategories = <%= content["reflection_categories"].size %>
+    const reflections = {}
+    
+    function updateProgress() {
+      const progress = ((currentCategory) / totalCategories) * 100
+      document.querySelector('#reflectionProgress .progress-bar').style.width = progress + '%'
+    }
+    
+    function saveReflection(categoryIndex, text) {
+      if (text.trim()) {
+        reflections[categoryIndex] = text.trim()
+        
+        document.querySelector(`.reflection-category[data-category="${categoryIndex}"]`).style.display = 'none'
+        currentCategory++
+        
+        if (currentCategory < totalCategories) {
+          document.querySelector(`.reflection-category[data-category="${currentCategory}"]`).style.display = 'block'
+          updateProgress()
+        } else {
+          document.getElementById('reflectionCategories').style.display = 'none'
+          document.getElementById('reflectionComplete').style.display = 'block'
+          updateProgress()
+          saveAllReflections()
+        }
+      } else {
+        alert('Пожалуйста, напишите ваш ответ или нажмите "Пропустить"')
+      }
+    }
+    
+    function saveAllReflections() {
+      const entries = []
+      const categories = <%= raw content["reflection_categories"].to_json %>
+      
+      for (let i = 0; i < totalCategories; i++) {
+        if (reflections[i]) {
+          entries.push({
+            text: reflections[i],
+            category: categories[i].name
+          })
+        }
+      }
+      
+      if (entries.length > 0) {
+        fetch('/reflection_entries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ entries: entries })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Рефлексия сохранена')
+            document.getElementById('completeDay').classList.remove('d-none')
+          } else {
+            alert('Ошибка при сохранении: ' + data.error)
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error)
+          alert('Ошибка при сохранении. Попробуйте еще раз.')
+        })
+      } else {
+        document.getElementById('completeDay').classList.remove('d-none')
+      }
+    }
+    
+    document.querySelectorAll('.save-reflection').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const category = this.dataset.category
+        const input = document.querySelector(`.reflection-input[data-category="${category}"]`)
+        saveReflection(parseInt(category), input.value)
+      })
+    })
+    
+    document.querySelectorAll('.skip-reflection').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const category = parseInt(this.dataset.category)
+        
+        document.querySelector(`.reflection-category[data-category="${category}"]`).style.display = 'none'
+        currentCategory++
+        
+        if (currentCategory < totalCategories) {
+          document.querySelector(`.reflection-category[data-category="${currentCategory}"]`).style.display = 'block'
+          updateProgress()
+        } else {
+          document.getElementById('reflectionCategories').style.display = 'none'
+          document.getElementById('reflectionComplete').style.display = 'block'
+          updateProgress()
+          saveAllReflections()
+        }
+      })
+    })
+  })
+</script>

@@ -1,0 +1,106 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let selectedSignal = null
+    let selectedStrategy = null
+    let selectedSignalName = ''
+    let selectedStrategyName = ''
+    
+    // Выбор стоп-сигнала
+    document.querySelectorAll('.select-signal').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const card = this.closest('.signal-card')
+        const signalIndex = this.dataset.signal
+        selectedSignal = signalIndex
+        selectedSignalName = card.querySelector('.card-title').textContent
+        
+        // Визуальное выделение
+        document.querySelectorAll('.signal-card').forEach(c => {
+          c.classList.remove('border-primary', 'border-2', 'bg-light')
+        })
+        card.classList.add('border-primary', 'border-2', 'bg-light')
+        
+        // Показываем следующий шаг
+        document.getElementById('strategySection').style.display = 'block'
+        
+        // Прокручиваем к стратегиям
+        document.getElementById('strategySection').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    })
+    
+    // Выбор стратегии
+    document.querySelectorAll('.select-strategy').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const card = this.closest('.strategy-card')
+        const strategyIndex = this.dataset.strategy
+        selectedStrategy = strategyIndex
+        selectedStrategyName = card.querySelector('.card-title').textContent
+        
+        // Визуальное выделение
+        document.querySelectorAll('.strategy-card').forEach(c => {
+          c.classList.remove('border-primary', 'border-2', 'bg-light')
+        })
+        card.classList.add('border-primary', 'border-2', 'bg-light')
+        
+        // Показываем следующий шаг
+        document.getElementById('thoughtSection').style.display = 'block'
+        
+        // Прокручиваем к вводу мысли
+        document.getElementById('thoughtSection').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    })
+    
+    // Сохранение мысли и показ практики
+    document.getElementById('saveThought').addEventListener('click', function() {
+      const thought = document.getElementById('practiceThought').value.trim()
+      if (!thought) {
+        alert('Напишите мысль для практики')
+        return
+      }
+      
+      // Обновляем текст предпросмотра
+      document.getElementById('selectedThoughtPreview').textContent = `Мысль: "${thought}"`
+      document.getElementById('selectedSignalName').textContent = `"${selectedSignalName}"`
+      document.getElementById('selectedStrategyName').textContent = `"${selectedStrategyName}"`
+      
+      // Показываем шаг с практикой
+      document.getElementById('practiceSection').style.display = 'block'
+      
+      // Прокручиваем к практике
+      document.getElementById('practiceSection').scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    
+    // Завершение практики
+    document.getElementById('completeStopPractice').addEventListener('click', function() {
+      // Получаем элемент рефлексии и показываем его
+      const reflectionSection = document.getElementById('reflectionSection')
+      if (reflectionSection) {
+        reflectionSection.classList.remove('d-none')
+        reflectionSection.scrollIntoView({ behavior: 'smooth' })
+      }
+      
+      // Показываем кнопку завершения дня
+      const completeDayBtn = document.getElementById('completeDay')
+      if (completeDayBtn) {
+        completeDayBtn.classList.remove('d-none')
+      }
+      
+      // Сохраняем данные практики
+      const thought = document.getElementById('practiceThought').value.trim()
+      if (thought && selectedSignalName && selectedStrategyName) {
+        fetch('/reflection_entries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            entries: [{
+              text: `Стоп-сигнал: ${selectedSignalName}\nСтратегия: ${selectedStrategyName}\nМысль: ${thought}`,
+              category: 'День 8: Остановка мыслей'
+            }]
+          })
+        }).catch(error => console.error('Error saving reflection:', error))
+      }
+    })
+  })
+</script>

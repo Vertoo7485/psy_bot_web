@@ -1,0 +1,22 @@
+<% if content["challenges"].present? %>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h4 class="card-title">
+        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+        Возможные трудности
+      </h4>
+      <div class="row">
+        <% content["challenges"].each do |challenge| %>
+          <div class="col-md-6 mb-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                <h6 class="card-title"><%= challenge["title"] %></h6>
+                <p class="small mb-0"><%= challenge["solution"] %></p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

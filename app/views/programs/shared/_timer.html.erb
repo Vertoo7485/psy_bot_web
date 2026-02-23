@@ -1,0 +1,46 @@
+<% if day.day_number != 3 && day.day_number != 7 && day.day_number != 8 %>
+  <div class="mt-4">
+    <h5>Время практики:</h5>
+    <div class="btn-group" role="group">
+      <% if content["exercise"] && content["exercise"]["timer_options"].present? %>
+        <% content["exercise"]["timer_options"].each do |minutes| %>
+          <button class="btn btn-outline-primary timer-option"
+                  data-action="click->day-program#selectTimer"
+                  data-day-program-target="timerButtons"
+                  data-minutes="<%= minutes %>">
+            <%= minutes %> мин
+          </button>
+        <% end %>
+      <% else %>
+        <button class="btn btn-outline-primary timer-option"
+                data-action="click->day-program#selectTimer"
+                data-day-program-target="timerButtons"
+                data-minutes="5">5 мин</button>
+        <button class="btn btn-outline-primary timer-option"
+                data-action="click->day-program#selectTimer"
+                data-day-program-target="timerButtons"
+                data-minutes="10">10 мин</button>
+        <button class="btn btn-outline-primary timer-option"
+                data-action="click->day-program#selectTimer"
+                data-day-program-target="timerButtons"
+                data-minutes="15">15 мин</button>
+        <button class="btn btn-outline-primary timer-option"
+                data-action="click->day-program#selectTimer"
+                data-day-program-target="timerButtons"
+                data-minutes="20">20 мин</button>
+      <% end %>
+      <button class="btn btn-outline-secondary timer-option"
+              data-action="click->day-program#selectTimer"
+              data-day-program-target="timerButtons"
+              data-minutes="custom">Свой вариант</button>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" 
+            id="startPractice"
+            data-action="click->day-program#startPractice">
+      <i class="fas fa-play me-2"></i>Начать практику
+    </button>
+  </div>
+<% end %>

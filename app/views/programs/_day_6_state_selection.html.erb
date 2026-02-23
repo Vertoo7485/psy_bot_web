@@ -1,0 +1,42 @@
+<div class="mt-4" id="stateSelection" style="display: none;">
+  <h5 class="mb-3">Как изменилось ваше состояние после отдыха?</h5>
+  <p class="text-secondary small mb-3">Ваш ответ поможет понять, какой отдых лучше всего восстанавливает</p>
+  
+  <div class="btn-group-vertical w-100" role="group">
+    <% content["state_options"].each_with_index do |state, index| %>
+      <% 
+        if state.is_a?(String)
+          emoji = state.match(/[😊🙂😐😔😌😴🎨📚🎵🛀💤]/)&.[](0) || "😊"
+          text = state
+        else
+          emoji = state["emoji"] || "😊"
+          text = "#{state['title']} — #{state['description']}"
+        end
+      %>
+      <div class="card mb-2">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-start">
+            <button class="btn btn-outline-primary state-option me-3"
+                    data-action="click->day-program#selectState"
+                    data-day-program-target="stateButtons"
+                    data-state="<%= index %>"
+                    style="min-width: 50px;">
+              <%= emoji %>
+            </button>
+            <div>
+              <h6 class="mb-1"><%= state.is_a?(String) ? state : state['title'] %></h6>
+              <p class="small text-secondary mb-0">
+                <%= state.is_a?(String) ? "Выберите этот вариант" : state['description'] %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <p class="text-secondary small mt-3 text-center">
+    <i class="fas fa-info-circle me-1"></i>
+    Это поможет вам отслеживать, какой отдых лучше всего восстанавливает
+  </p>
+</div>

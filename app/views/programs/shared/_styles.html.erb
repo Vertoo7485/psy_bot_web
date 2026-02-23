@@ -1,0 +1,112 @@
+<style>
+  .activity-card .card-body,
+  .rest-card .card-body,
+  .signal-card .card-body,
+  .strategy-card .card-body {
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .activity-card .badge,
+  .rest-card .badge,
+  .signal-card .badge,
+  .strategy-card .badge {
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: left;
+    line-height: 1.4;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+  
+  .activity-card .d-flex,
+  .rest-card .d-flex,
+  .signal-card .d-flex,
+  .strategy-card .d-flex {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .activity-card .badge.bg-info,
+  .activity-card .badge.bg-success,
+  .rest-card .badge.bg-info,
+  .rest-card .badge.bg-success,
+  .signal-card .badge.bg-info,
+  .signal-card .badge.bg-success,
+  .strategy-card .badge.bg-info,
+  .strategy-card .badge.bg-success {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+  }
+  
+  @media (min-width: 768px) {
+    .activity-card .d-flex,
+    .rest-card .d-flex,
+    .signal-card .d-flex,
+    .strategy-card .d-flex {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    
+    .activity-card .badge,
+    .rest-card .badge,
+    .signal-card .badge,
+    .strategy-card .badge {
+      width: auto;
+      flex: 1 1 auto;
+    }
+  }
+
+  .activity-card .card-footer,
+  .rest-card .card-footer,
+  .signal-card .card-footer,
+  .strategy-card .card-footer {
+    position: relative;
+    z-index: 10;
+    background: transparent;
+    border-top: 1px solid rgba(0,0,0,0.125);
+    padding: 0.75rem;
+  }
+  
+  .activity-card .btn,
+  .rest-card .btn,
+  .signal-card .btn,
+  .strategy-card .btn {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .activity-card,
+  .rest-card,
+  .signal-card,
+  .strategy-card {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+  }
+  
+  .activity-card .card-body,
+  .rest-card .card-body,
+  .signal-card .card-body,
+  .strategy-card .card-body {
+    pointer-events: none;
+  }
+  
+  .activity-card .card-body *,
+  .rest-card .card-body *,
+  .signal-card .card-body *,
+  .strategy-card .card-body * {
+    pointer-events: none;
+  }
+  
+  .activity-card .card-footer,
+  .rest-card .card-footer,
+  .signal-card .card-footer,
+  .strategy-card .card-footer {
+    pointer-events: auto;
+  }
+</style>

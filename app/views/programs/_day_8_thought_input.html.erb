@@ -1,0 +1,45 @@
+<!-- Шаг 3: Ввод мысли (скрыт до выбора стратегии) -->
+<div class="card mb-4" id="thoughtSection" style="display: none;">
+  <div class="card-header bg-primary text-white">
+    <h6 class="mb-0">Шаг 3: Напишите мысль для практики</h6>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-light">
+      <small>💡 Рекомендации:</small>
+      <ul class="mt-2 mb-0 small">
+        <li>✅ Нейтральная мысль («Что приготовить на ужин?»)</li>
+        <li>✅ Повседневная забота («Не забыть купить молоко»)</li>
+        <li>✅ Легкое беспокойство («Опоздаю ли я на встречу?»)</li>
+        <li class="text-danger">⚠️ Не начинайте с самых трудных мыслей</li>
+      </ul>
+    </div>
+    <textarea class="form-control" id="practiceThought" rows="3" placeholder="Например: 'Что я буду есть на ужин?' или 'Не опоздаю ли я на встречу?'"></textarea>
+    <div class="text-end mt-3">
+      <button class="btn btn-success" id="saveThought">Готово, сохранить мысль</button>
+    </div>
+  </div>
+</div>
+
+<!-- Шаг 4: Выполнение практики (показывается после сохранения мысли) -->
+<div class="card mb-4" id="practiceSection" style="display: none;">
+  <div class="card-header bg-success text-white">
+    <h6 class="mb-0">Шаг 4: Выполните практику</h6>
+  </div>
+  <div class="card-body text-center">
+    <p id="selectedThoughtPreview" class="fw-bold mb-3"></p>
+    
+    <div class="alert alert-info">
+      <p class="mb-2"><strong>Алгоритм:</strong></p>
+      <p class="mb-1">1. Позвольте мысли появиться (5-10 сек)</p>
+      <p class="mb-1">2. Примените стоп-сигнал <span id="selectedSignalName"></span></p>
+      <p class="mb-1">3. Сразу переключитесь на <span id="selectedStrategyName"></span></p>
+      <p class="mb-0">4. Практикуйте 2-3 минуты</p>
+    </div>
+    
+    <div class="mt-4">
+      <button class="btn btn-success btn-lg px-5" id="completeStopPractice">
+        <i class="fas fa-check-circle me-2"></i>Я выполнил практику
+      </button>
+    </div>
+  </div>
+</div>
