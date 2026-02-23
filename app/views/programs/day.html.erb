@@ -154,6 +154,37 @@
           </div>
         <% end %>
 
+        <!-- Типы отдыха (для дня 6) -->
+        <% if day.day_number == 6 && content["exercise"]["rest_types"].present? %>
+          <div class="mt-4">
+            <h5>Выберите тип отдыха:</h5>
+            <div class="row">
+              <% content["exercise"]["rest_types"].each_with_index do |rest, index| %>
+                <div class="col-md-6 mb-3">
+                  <div class="card h-100 rest-card" data-rest="<%= index %>">
+                    <div class="card-body">
+                      <h6 class="card-title"><%= rest["name"] %></h6>
+                      <p class="small text-secondary"><%= rest["description"] %></p>
+                      <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="badge bg-info">Время: <%= rest["duration"] %></span>
+                        <span class="badge bg-success">Польза: <%= rest["benefits"] %></span>
+                      </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                      <button class="btn btn-sm btn-outline-primary select-rest"
+                              data-action="click->day-program#selectRest"
+                              data-day-program-target="restButtons"
+                              data-rest="<%= index %>">
+                        Выбрать
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
         <!-- Текстовая медитация (для дня 2) -->
         <% if content["text_meditation"].present? %>
           <div class="mt-4">
@@ -275,8 +306,8 @@
           </div>
         <% end %>
 
-        <!-- Таймер (для всех дней, кроме дня 3) -->
-        <% if day.day_number != 3 %>
+        <!-- Таймер (для всех дней, кроме дня 3 и дня 7) -->
+        <% if day.day_number != 3 && day.day_number != 7 %>
           <div class="mt-4">
             <h5>Время практики:</h5>
             <div class="btn-group" role="group">
@@ -337,6 +368,67 @@
       </div>
     </div>
 
+    <!-- День 7: Рефлексия недели -->
+<% if day.day_number == 7 && content["reflection_categories"].present? %>
+  <div class="mt-4">
+    <h5 class="mb-3">📝 Рефлексия первой недели</h5>
+    <p class="text-secondary mb-4">Ответьте на вопросы в каждой категории. Это поможет осмыслить и закрепить опыт.</p>
+    
+    <div class="progress mb-4" id="reflectionProgress" style="height: 10px;">
+      <div class="progress-bar bg-success" style="width: 0%"></div>
+    </div>
+    
+    <div id="reflectionCategories">
+      <% content["reflection_categories"].each_with_index do |category, index| %>
+        <div class="card mb-4 reflection-category" data-category="<%= index %>" style="<%= index > 0 ? 'display: none;' : '' %>">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <%= category["emoji"] %> <%= category["name"] %>
+              <span class="badge bg-light text-dark float-end">Категория <%= index + 1 %>/4</span>
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="lead"><%= category["prompt"] %></p>
+            
+            <div class="alert alert-light mb-4">
+              <small>💡 Подсказки:</small>
+              <ul class="mt-2 mb-0">
+                <% category["questions"].each do |q| %>
+                  <li><%= q %></li>
+                <% end %>
+              </ul>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Ваш ответ:</label>
+              <textarea class="form-control reflection-input" 
+                        rows="4" 
+                        data-category="<%= index %>"
+                        placeholder="Напишите ваши мысли..."></textarea>
+            </div>
+            
+            <div class="text-end">
+              <button class="btn btn-success save-reflection" data-category="<%= index %>">
+                Сохранить и продолжить
+              </button>
+              <button class="btn btn-link text-secondary skip-reflection" data-category="<%= index %>">
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <div id="reflectionComplete" style="display: none;">
+        <div class="alert alert-success text-center">
+          <h5 class="mb-3">✅ Рефлексия завершена!</h5>
+          <p>Спасибо, что уделили время осмыслению первой недели.</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
     <!-- Рефлексия -->
     <% if content["reflection"].present? %>
       <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
@@ -360,6 +452,7 @@
                   "breath" => "О дыхании",
                   "visual" => "О зрении",
                   "mood" => "О настроении",
+                  "energy" => "Об энергии",
                   "questions" => "Вопросы"
                 }
               %>
@@ -394,91 +487,137 @@
     <% end %>
 
     <!-- Выбор настроения для дня 5 -->
-<% if day.day_number == 5 && content["mood_options"].present? %>
-  <div class="mt-4" id="moodSelection" style="display: none;">
-    <h5 class="mb-3">Как изменилось ваше настроение?</h5>
-    <p class="text-secondary small mb-3">Ваш ответ поможет отслеживать связь между движением и эмоциональным состоянием</p>
-    
-    <div class="btn-group-vertical w-100" role="group">
-      <div class="card mb-2">
-        <div class="card-body p-3">
-          <div class="d-flex align-items-start">
-            <button class="btn btn-outline-primary mood-option me-3"
-                    data-action="click->day-program#selectMood"
-                    data-day-program-target="moodButtons"
-                    data-mood="0"
-                    style="min-width: 50px;">
-              😊
-            </button>
-            <div>
-              <h6 class="mb-1">Значительно лучше</h6>
-              <p class="small text-secondary mb-0">Движение дало заметный прилив энергии и позитива. Отличный результат!</p>
+    <% if day.day_number == 5 && content["mood_options"].present? %>
+      <div class="mt-4" id="moodSelection" style="display: none;">
+        <h5 class="mb-3">Как изменилось ваше настроение?</h5>
+        <p class="text-secondary small mb-3">Ваш ответ поможет отслеживать связь между движением и эмоциональным состоянием</p>
+        
+        <div class="btn-group-vertical w-100" role="group">
+          <div class="card mb-2">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-start">
+                <button class="btn btn-outline-primary mood-option me-3"
+                        data-action="click->day-program#selectMood"
+                        data-day-program-target="moodButtons"
+                        data-mood="0"
+                        style="min-width: 50px;">
+                  😊
+                </button>
+                <div>
+                  <h6 class="mb-1">Значительно лучше</h6>
+                  <p class="small text-secondary mb-0">Движение дало заметный прилив энергии и позитива. Отличный результат!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-2">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-start">
+                <button class="btn btn-outline-primary mood-option me-3"
+                        data-action="click->day-program#selectMood"
+                        data-day-program-target="moodButtons"
+                        data-mood="1"
+                        style="min-width: 50px;">
+                  🙂
+                </button>
+                <div>
+                  <h6 class="mb-1">Немного лучше</h6>
+                  <p class="small text-secondary mb-0">Небольшое улучшение — хороший знак. Даже легкое движение влияет на состояние.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-2">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-start">
+                <button class="btn btn-outline-primary mood-option me-3"
+                        data-action="click->day-program#selectMood"
+                        data-day-program-target="moodButtons"
+                        data-mood="2"
+                        style="min-width: 50px;">
+                  😐
+                </button>
+                <div>
+                  <h6 class="mb-1">Без изменений</h6>
+                  <p class="small text-secondary mb-0">Тоже нормально! Иногда движение работает как поддержание, а не как улучшение.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mb-2">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-start">
+                <button class="btn btn-outline-primary mood-option me-3"
+                        data-action="click->day-program#selectMood"
+                        data-day-program-target="moodButtons"
+                        data-mood="3"
+                        style="min-width: 50px;">
+                  😔
+                </button>
+                <div>
+                  <h6 class="mb-1">Хуже (усталость)</h6>
+                  <p class="small text-secondary mb-0">Возможно, нагрузка была великовата. В следующий раз попробуйте более легкую активность.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        
+        <p class="text-secondary small mt-3 text-center">
+          <i class="fas fa-info-circle me-1"></i>
+          Ваш выбор никуда не передается — только для вашей личной статистики
+        </p>
       </div>
-      
-      <div class="card mb-2">
-        <div class="card-body p-3">
-          <div class="d-flex align-items-start">
-            <button class="btn btn-outline-primary mood-option me-3"
-                    data-action="click->day-program#selectMood"
-                    data-day-program-target="moodButtons"
-                    data-mood="1"
-                    style="min-width: 50px;">
-              🙂
-            </button>
-            <div>
-              <h6 class="mb-1">Немного лучше</h6>
-              <p class="small text-secondary mb-0">Небольшое улучшение — хороший знак. Даже легкое движение влияет на состояние.</p>
+    <% end %>
+
+    <!-- Выбор состояния для дня 6 -->
+    <% if day.day_number == 6 && content["state_options"].present? %>
+      <div class="mt-4" id="stateSelection" style="display: none;">
+        <h5 class="mb-3">Как изменилось ваше состояние после отдыха?</h5>
+        <p class="text-secondary small mb-3">Ваш ответ поможет понять, какой отдых лучше всего восстанавливает</p>
+        
+        <div class="btn-group-vertical w-100" role="group">
+          <% content["state_options"].each_with_index do |state, index| %>
+            <% 
+              if state.is_a?(String)
+                emoji = state.match(/[😊🙂😐😔😌😴🎨📚🎵🛀💤]/)&.[](0) || "😊"
+                text = state
+              else
+                emoji = state["emoji"] || "😊"
+                text = "#{state['title']} — #{state['description']}"
+              end
+            %>
+            <div class="card mb-2">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-start">
+                  <button class="btn btn-outline-primary state-option me-3"
+                          data-action="click->day-program#selectState"
+                          data-day-program-target="stateButtons"
+                          data-state="<%= index %>"
+                          style="min-width: 50px;">
+                    <%= emoji %>
+                  </button>
+                  <div>
+                    <h6 class="mb-1"><%= state.is_a?(String) ? state : state['title'] %></h6>
+                    <p class="small text-secondary mb-0">
+                      <%= state.is_a?(String) ? "Выберите этот вариант" : state['description'] %>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          <% end %>
         </div>
+        
+        <p class="text-secondary small mt-3 text-center">
+          <i class="fas fa-info-circle me-1"></i>
+          Это поможет вам отслеживать, какой отдых лучше всего восстанавливает
+        </p>
       </div>
-      
-      <div class="card mb-2">
-        <div class="card-body p-3">
-          <div class="d-flex align-items-start">
-            <button class="btn btn-outline-primary mood-option me-3"
-                    data-action="click->day-program#selectMood"
-                    data-day-program-target="moodButtons"
-                    data-mood="2"
-                    style="min-width: 50px;">
-              😐
-            </button>
-            <div>
-              <h6 class="mb-1">Без изменений</h6>
-              <p class="small text-secondary mb-0">Тоже нормально! Иногда движение работает как поддержание, а не как улучшение.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="card mb-2">
-        <div class="card-body p-3">
-          <div class="d-flex align-items-start">
-            <button class="btn btn-outline-primary mood-option me-3"
-                    data-action="click->day-program#selectMood"
-                    data-day-program-target="moodButtons"
-                    data-mood="3"
-                    style="min-width: 50px;">
-              😔
-            </button>
-            <div>
-              <h6 class="mb-1">Хуже (усталость)</h6>
-              <p class="small text-secondary mb-0">Возможно, нагрузка была великовата. В следующий раз попробуйте более легкую активность.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <p class="text-secondary small mt-3 text-center">
-      <i class="fas fa-info-circle me-1"></i>
-      Ваш выбор никуда не передается — только для вашей личной статистики
-    </p>
-  </div>
-<% end %>
+    <% end %>
 
     <!-- Трудности -->
     <% if content["challenges"].present? %>
@@ -543,12 +682,14 @@
   </div>
 
   <style>
-  .activity-card .card-body {
+  .activity-card .card-body,
+  .rest-card .card-body {
     max-height: none;
     overflow: visible;
   }
   
-  .activity-card .badge {
+  .activity-card .badge,
+  .rest-card .badge {
     white-space: normal;
     word-wrap: break-word;
     text-align: left;
@@ -558,30 +699,188 @@
     width: 100%;
   }
   
-  .activity-card .d-flex {
+  .activity-card .d-flex,
+  .rest-card .d-flex {
     flex-direction: column;
     gap: 0.5rem;
   }
   
   .activity-card .badge.bg-info,
-  .activity-card .badge.bg-success {
+  .activity-card .badge.bg-success,
+  .rest-card .badge.bg-info,
+  .rest-card .badge.bg-success {
     display: block;
     width: 100%;
     font-size: 0.85rem;
   }
   
   @media (min-width: 768px) {
-    .activity-card .d-flex {
+    .activity-card .d-flex,
+    .rest-card .d-flex {
       flex-direction: row;
       flex-wrap: wrap;
     }
     
-    .activity-card .badge {
+    .activity-card .badge,
+    .rest-card .badge {
       width: auto;
       flex: 1 1 auto;
     }
   }
-</style>
+
+  /* Убедимся, что кнопки кликабельны */
+  .activity-card .card-footer,
+  .rest-card .card-footer {
+    position: relative;
+    z-index: 10;
+    background: transparent;
+    border-top: 1px solid rgba(0,0,0,0.125);
+    padding: 0.75rem;
+  }
+  
+  .activity-card .btn,
+  .rest-card .btn {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .activity-card,
+  .rest-card {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+  }
+  
+  .activity-card .card-body,
+  .rest-card .card-body {
+    pointer-events: none; /* Текст не мешает кликам */
+  }
+  
+  .activity-card .card-body *,
+  .rest-card .card-body * {
+    pointer-events: none; /* Элементы внутри body не перехватывают клики */
+  }
+  
+  .activity-card .card-footer,
+  .rest-card .card-footer {
+    pointer-events: auto; /* Футер с кнопкой получает клики */
+  }
+  </style>
+
+  <!-- JavaScript для дня 7 -->
+<% if day.day_number == 7 %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let currentCategory = 0
+    const totalCategories = <%= content["reflection_categories"].size %>
+    const reflections = {}
+    
+    // Обновление прогресса
+    function updateProgress() {
+      const progress = ((currentCategory) / totalCategories) * 100
+      document.querySelector('#reflectionProgress .progress-bar').style.width = progress + '%'
+    }
+    
+    // Сохранение ответа
+    function saveReflection(categoryIndex, text) {
+      if (text.trim()) {
+        reflections[categoryIndex] = text.trim()
+        
+        // Показываем следующую категорию
+        document.querySelector(`.reflection-category[data-category="${categoryIndex}"]`).style.display = 'none'
+        currentCategory++
+        
+        if (currentCategory < totalCategories) {
+          document.querySelector(`.reflection-category[data-category="${currentCategory}"]`).style.display = 'block'
+          updateProgress()
+        } else {
+          // Все категории пройдены
+          document.getElementById('reflectionCategories').style.display = 'none'
+          document.getElementById('reflectionComplete').style.display = 'block'
+          updateProgress()
+          
+          // Сохраняем все ответы в базу
+          saveAllReflections()
+        }
+      } else {
+        alert('Пожалуйста, напишите ваш ответ или нажмите "Пропустить"')
+      }
+    }
+    
+    // Сохранение всех ответов
+    function saveAllReflections() {
+      const entries = []
+      const categories = <%= raw content["reflection_categories"].to_json %>
+      
+      for (let i = 0; i < totalCategories; i++) {
+        if (reflections[i]) {
+          entries.push({
+            text: reflections[i],
+            category: categories[i].name
+          })
+        }
+      }
+      
+      if (entries.length > 0) {
+        fetch('/reflection_entries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ entries: entries })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Рефлексия сохранена')
+            // Показываем кнопку завершения дня
+            document.getElementById('completeDay').classList.remove('d-none')
+          } else {
+            alert('Ошибка при сохранении: ' + data.error)
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error)
+          alert('Ошибка при сохранении. Попробуйте еще раз.')
+        })
+      } else {
+        document.getElementById('completeDay').classList.remove('d-none')
+      }
+    }
+    
+    // Обработчики кнопок
+    document.querySelectorAll('.save-reflection').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const category = this.dataset.category
+        const input = document.querySelector(`.reflection-input[data-category="${category}"]`)
+        saveReflection(parseInt(category), input.value)
+      })
+    })
+    
+    document.querySelectorAll('.skip-reflection').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const category = parseInt(this.dataset.category)
+        
+        document.querySelector(`.reflection-category[data-category="${category}"]`).style.display = 'none'
+        currentCategory++
+        
+        if (currentCategory < totalCategories) {
+          document.querySelector(`.reflection-category[data-category="${currentCategory}"]`).style.display = 'block'
+          updateProgress()
+        } else {
+          document.getElementById('reflectionCategories').style.display = 'none'
+          document.getElementById('reflectionComplete').style.display = 'block'
+          updateProgress()
+          saveAllReflections()
+        }
+      })
+    })
+  })
+</script>
+<% end %>
 </div>
 
 <!-- JavaScript для сохранения благодарностей -->
@@ -624,42 +923,3 @@
     })
   })
 </script>
-
-<style>
-  /* существующие стили... */
-  
-  /* Убедимся, что кнопки кликабельны */
-  .activity-card .card-footer {
-    position: relative;
-    z-index: 10;
-    background: transparent;
-    border-top: 1px solid rgba(0,0,0,0.125);
-    padding: 0.75rem;
-  }
-  
-  .activity-card .btn {
-    position: relative;
-    z-index: 20;
-    pointer-events: auto;
-    cursor: pointer;
-  }
-  
-  .activity-card {
-    position: relative;
-    z-index: 1;
-    overflow: visible;
-  }
-  
-  /* Убедимся, что ничего не перекрывает кнопку */
-  .activity-card .card-body {
-    pointer-events: none; /* Текст не мешает кликам */
-  }
-  
-  .activity-card .card-body * {
-    pointer-events: none; /* Элементы внутри body не перехватывают клики */
-  }
-  
-  .activity-card .card-footer {
-    pointer-events: auto; /* Футер с кнопкой получает клики */
-  }
-</style>

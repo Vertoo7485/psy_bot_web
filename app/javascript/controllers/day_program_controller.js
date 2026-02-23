@@ -2,7 +2,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["reflection", "timerButtons", "techniqueButtons", "activityButtons", "moodButtons", "gratitudeStep", "gratitudeInput"]
+  static targets = ["reflection", "timerButtons", "techniqueButtons", "activityButtons", "moodButtons", "restButtons", "stateButtons", "gratitudeStep", "gratitudeInput"]  
   
   connect() {
     this.selectedTechnique = null
@@ -10,9 +10,56 @@ export default class extends Controller {
     this.practiceStarted = false
     this.selectedActivity = null
     this.selectedMood = null
+    this.selectedRest = null
+    this.selectedState = null
     this.currentGratitudeStep = 0
     this.gratitudeEntries = []
     this.gratitudeSteps = []
+  }
+
+  selectRest(event) {
+    const button = event.currentTarget
+    this.selectedRest = button.dataset.rest
+
+    // Визуальное выделение
+    this.restButtonsTargets.forEach(btn => {
+      btn.classList.remove('btn-primary', 'text-white')
+      btn.classList.add('btn-outline-primary')
+      btn.closest('.rest-card')?.classList.remove('border-primary', 'border-2')
+    })
+    button.classList.remove('btn-outline-primary')
+    button.classList.add('btn-primary', 'text-white')
+    button.closest('.rest-card')?.classList.add('border-primary', 'border-2')
+
+    console.log('Выбран отдых:', this.selectedRest)
+  }
+
+  selectState(event) {
+    const button = event.currentTarget
+    this.selectedState = button.dataset.state
+    
+    // Находим родительскую карточку
+    const card = button.closest('.card')
+    
+    // Визуальное выделение — убираем выделение со всех карточек
+    document.querySelectorAll('#stateSelection .card').forEach(c => {
+      c.classList.remove('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
+    })
+    
+    // Выделяем выбранную карточку
+    if (card) {
+      card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
+    }
+    
+    // Также выделяем саму кнопку (для совместимости)
+    this.stateButtonsTargets.forEach(btn => {
+      btn.classList.remove('btn-primary', 'text-white')
+      btn.classList.add('btn-outline-primary')
+    })
+    button.classList.remove('btn-outline-primary')
+    button.classList.add('btn-primary', 'text-white')
+    
+    console.log('Выбрано состояние:', this.selectedState)
   }
   
   selectTechnique(event) {
@@ -76,35 +123,35 @@ export default class extends Controller {
   }
   
   selectMood(event) {
-  const button = event.currentTarget
-  this.selectedMood = button.dataset.mood
-  
-  // Находим родительскую карточку
-  const card = button.closest('.card')
-  
-  // Визуальное выделение — убираем выделение со всех карточек
-  document.querySelectorAll('#moodSelection .card').forEach(c => {
-    c.classList.remove('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
-  })
-  
-  // Выделяем выбранную карточку
-  if (card) {
-    card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
+    const button = event.currentTarget
+    this.selectedMood = button.dataset.mood
+    
+    // Находим родительскую карточку
+    const card = button.closest('.card')
+    
+    // Визуальное выделение — убираем выделение со всех карточек
+    document.querySelectorAll('#moodSelection .card').forEach(c => {
+      c.classList.remove('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
+    })
+    
+    // Выделяем выбранную карточку
+    if (card) {
+      card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
+    }
+    
+    // Также выделяем саму кнопку (для совместимости со старым кодом)
+    this.moodButtonsTargets.forEach(btn => {
+      btn.classList.remove('btn-primary', 'text-white')
+      btn.classList.add('btn-outline-primary')
+    })
+    button.classList.remove('btn-outline-primary')
+    button.classList.add('btn-primary', 'text-white')
+    
+    // Сохраняем настроение
+    this.saveMood(this.selectedMood)
+    
+    console.log('Выбрано настроение:', this.selectedMood)
   }
-  
-  // Также выделяем саму кнопку (для совместимости со старым кодом)
-  this.moodButtonsTargets.forEach(btn => {
-    btn.classList.remove('btn-primary', 'text-white')
-    btn.classList.add('btn-outline-primary')
-  })
-  button.classList.remove('btn-outline-primary')
-  button.classList.add('btn-primary', 'text-white')
-  
-  // Сохраняем настроение
-  this.saveMood(this.selectedMood)
-  
-  console.log('Выбрано настроение:', this.selectedMood)
-}
   
   saveMood(moodIndex) {
     const moodOptions = [
@@ -124,6 +171,13 @@ export default class extends Controller {
     const dayNumber = this.data.get('dayNumber')
     const hasTechniques = this.techniqueButtonsTargets.length > 0
     const hasActivities = this.activityButtonsTargets.length > 0
+    const hasRest = this.restButtonsTargets.length > 0
+
+    // Для дня 6 нужен выбор типа отдыха
+    if (dayNumber == '6' && hasRest && !this.selectedRest) {
+      alert('Сначала выберите тип отдыха')
+      return
+    }
     
     // Для дня 5 нужен выбор активности
     if (dayNumber == '5' && hasActivities && !this.selectedActivity) {
@@ -210,13 +264,22 @@ export default class extends Controller {
     // Показываем рефлексию
     this.reflectionTarget.classList.remove('d-none')
     
-    // Для дня 5 показываем выбор настроения
     const dayNumber = this.data.get('dayNumber')
+    
+    // Для дня 5 показываем выбор настроения
     if (dayNumber == '5') {
       const moodSelection = document.getElementById('moodSelection')
-if (moodSelection) {
-  moodSelection.style.display = 'block'
-}
+      if (moodSelection) {
+        moodSelection.style.display = 'block'
+      }
+    }
+
+    // Для дня 6 показываем выбор состояния
+    if (dayNumber == '6') {
+      const stateSelection = document.getElementById('stateSelection')
+      if (stateSelection) {
+        stateSelection.style.display = 'block'
+      }
     }
     
     // Показываем кнопку завершения дня
@@ -227,32 +290,32 @@ if (moodSelection) {
   }
   
   completeDay() {
-    // Для дня 3 (благодарность) не проверяем практику
-    const dayNumber = this.data.get('dayNumber')
-    
-    if (dayNumber != '3' && !this.practiceStarted) {
-      alert('Сначала выполните практику')
-      return
-    }
-    
-    // Сохраняем прогресс через fetch
-    fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-      },
-      body: JSON.stringify({
-        completed: true
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
-      }
-    })
+  // Для дня 3 (благодарность) и дня 7 (рефлексия) не проверяем практику
+  const dayNumber = this.data.get('dayNumber')
+  
+  if (dayNumber != '3' && dayNumber != '7' && !this.practiceStarted) {
+    alert('Сначала выполните практику')
+    return
   }
+  
+  // Сохраняем прогресс через fetch
+  fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({
+      completed: true
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+    }
+  })
+}
 
   // Методы для дня 3 (благодарность)
   startGratitudeExercise() {
