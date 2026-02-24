@@ -1,6 +1,6 @@
 module ProgramHelper
   def day_has_timer?(day_number)
-    ![3, 7, 8].include?(day_number)
+    [1,2,4,5,6].include?(day_number)
   end
 
   def day_has_techniques?(day_number)

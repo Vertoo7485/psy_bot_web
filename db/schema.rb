@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_23_052701) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_23_160802) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "anxious_thought_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.text "thought"
+    t.integer "probability"
+    t.text "facts_pro"
+    t.text "facts_con"
+    t.text "reframe"
+    t.date "entry_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_anxious_thought_entries_on_user_id"
+  end
 
   create_table "days", force: :cascade do |t|
     t.bigint "program_id", null: false
@@ -117,6 +130,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_23_052701) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "anxious_thought_entries", "users"
   add_foreign_key "days", "programs"
   add_foreign_key "gratitude_entries", "users"
   add_foreign_key "reflection_entries", "users"

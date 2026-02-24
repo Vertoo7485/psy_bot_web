@@ -1,0 +1,194 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 9 script loaded')
+    
+    let currentStep = 1
+    let thoughtData = {
+      thought: null,
+      probability: null,
+      factsPro: null,
+      factsCon: null,
+      reframe: null
+    }
+    
+    function updateProgress() {
+      const progress = ((currentStep - 1) / 5) * 100
+      const progressBar = document.querySelector('#cognitiveProgress .progress-bar')
+      if (progressBar) {
+        progressBar.style.width = progress + '%'
+      }
+    }
+    
+    // Шаг 1: Сохранение мысли
+    const saveThoughtBtn = document.getElementById('saveThought')
+    if (saveThoughtBtn) {
+      console.log('Save thought button found')
+      saveThoughtBtn.addEventListener('click', function() {
+        console.log('Save thought clicked')
+        const thought = document.getElementById('thoughtInput').value.trim()
+        if (!thought) {
+          alert('Напишите вашу мысль')
+          return
+        }
+        thoughtData.thought = thought
+        console.log('Thought saved:', thought)
+        
+        // Переходим к шагу 2
+        document.getElementById('step1Thought').style.display = 'none'
+        document.getElementById('step2Probability').style.display = 'block'
+        currentStep = 2
+        updateProgress()
+        
+        // Прокручиваем к шагу 2
+        document.getElementById('step2Probability').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    } else {
+      console.error('Save thought button not found')
+    }
+    
+    // Шаг 2: Выбор вероятности
+    document.querySelectorAll('.probability-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const probability = this.dataset.value
+        thoughtData.probability = probability
+        console.log('Probability selected:', probability)
+        
+        // Визуальное выделение
+        document.querySelectorAll('.probability-btn').forEach(b => {
+          b.classList.remove('btn-primary', 'text-white')
+          b.classList.add('btn-outline-primary')
+        })
+        this.classList.remove('btn-outline-primary')
+        this.classList.add('btn-primary', 'text-white')
+        
+        // Показываем следующий шаг через 1 секунду
+        setTimeout(() => {
+          document.getElementById('step2Probability').style.display = 'none'
+          document.getElementById('step3FactsPro').style.display = 'block'
+          currentStep = 3
+          updateProgress()
+          
+          // Прокручиваем к шагу 3
+          document.getElementById('step3FactsPro').scrollIntoView({ behavior: 'smooth', block: 'center' })
+          
+          console.log('Переход к шагу 3 - факты "за"')
+        }, 1000)
+      })
+    })
+    
+    // Шаг 3: Факты "за"
+    const saveFactsProBtn = document.getElementById('saveFactsPro')
+    if (saveFactsProBtn) {
+      saveFactsProBtn.addEventListener('click', function() {
+        const facts = document.getElementById('factsProInput').value.trim()
+        if (!facts) {
+          alert('Напишите факты, поддерживающие мысль')
+          return
+        }
+        thoughtData.factsPro = facts
+        console.log('Facts pro saved:', facts)
+        
+        document.getElementById('step3FactsPro').style.display = 'none'
+        document.getElementById('step4FactsCon').style.display = 'block'
+        currentStep = 4
+        updateProgress()
+        document.getElementById('step4FactsCon').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+    
+    // Шаг 4: Факты "против"
+    const saveFactsConBtn = document.getElementById('saveFactsCon')
+    if (saveFactsConBtn) {
+      saveFactsConBtn.addEventListener('click', function() {
+        const facts = document.getElementById('factsConInput').value.trim()
+        if (!facts) {
+          alert('Напишите факты, опровергающие мысль')
+          return
+        }
+        thoughtData.factsCon = facts
+        console.log('Facts con saved:', facts)
+        
+        document.getElementById('step4FactsCon').style.display = 'none'
+        document.getElementById('step5Reframe').style.display = 'block'
+        currentStep = 5
+        updateProgress()
+        document.getElementById('step5Reframe').scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
+    
+    // Шаг 5: Рефрейминг и завершение
+    const saveReframeBtn = document.getElementById('saveReframe')
+    if (saveReframeBtn) {
+      saveReframeBtn.addEventListener('click', function() {
+        const reframe = document.getElementById('reframeInput').value.trim()
+        if (!reframe) {
+          alert('Напишите ваш рефрейминг')
+          return
+        }
+        thoughtData.reframe = reframe
+        console.log('Reframe saved:', reframe)
+        
+        // Сохраняем анализ в базу
+        fetch('/anxious_thought_entries', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            entry: {
+              thought: thoughtData.thought,
+              probability: thoughtData.probability,
+              facts_pro: thoughtData.factsPro,
+              facts_con: thoughtData.factsCon,
+              reframe: thoughtData.reframe
+            }
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Analysis saved to database')
+            document.getElementById('step5Reframe').style.display = 'none'
+            document.getElementById('completionSection').style.display = 'block'
+            document.getElementById('completionSummary').innerHTML = `
+              ✅ Анализ сохранен<br>
+              <small class="text-secondary">Вероятность: ${thoughtData.probability}/10</small>
+            `
+            document.getElementById('completionSection').scrollIntoView({ behavior: 'smooth' })
+          } else {
+            alert('Ошибка при сохранении: ' + data.error)
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error)
+          alert('Ошибка при сохранении. Попробуйте еще раз.')
+        })
+      })
+    }
+    
+    // Завершение дня
+    const completeDay9Btn = document.getElementById('completeDay9')
+    if (completeDay9Btn) {
+      completeDay9Btn.addEventListener('click', function() {
+        console.log('Complete day 9 clicked')
+        
+        // Показываем рефлексию
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        // Показываем кнопку завершения дня (основную)
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+        
+        // Скрываем кнопку завершения дня 9
+        this.style.display = 'none'
+      })
+    }
+  })
+</script>

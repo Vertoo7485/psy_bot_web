@@ -130,7 +130,9 @@
         <% end %>
 
         <!-- Таймер -->
-        <%= render 'programs/shared/timer', day: day, content: content %>
+        <% if day_has_timer?(day.day_number) %>
+          <%= render 'programs/shared/timer', day: day, content: content %>
+        <% end %>
 
       </div>
     </div>
@@ -146,6 +148,12 @@
     <!-- День 6: Выбор состояния -->
     <% if day.day_number == 6 && content["state_options"].present? %>
       <%= render 'day_6_state_selection', content: content %>
+    <% end %>
+
+    <!-- День 9: Когнитивный анализ -->
+    <% if day.day_number == 9 %>
+      <%= render 'day_9_cognitive_analysis', content: content %>
+      <%= render 'day_9_script' %>
     <% end %>
 
     <!-- Трудности и советы -->

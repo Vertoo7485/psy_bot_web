@@ -333,7 +333,7 @@ export default class extends Controller {
     // Для дня 3 (благодарность) и дня 7 (рефлексия) не проверяем практику
     const dayNumber = this.data.get('dayNumber')
     
-    if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && !this.practiceStarted) {
+    if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && !this.practiceStarted) {
       alert('Сначала выполните практику')
       return
     }

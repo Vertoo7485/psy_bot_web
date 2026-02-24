@@ -33,6 +33,8 @@ Rails.application.routes.draw do
   resources :test_results, only: [:show]
 
   resources :reflection_entries, only: [:create, :index]
+
+  resources :anxious_thought_entries, only: [:create, :index]
   
   # Главная страница
   root to: 'home#index'

@@ -1,0 +1,307 @@
+<div class="mt-4">
+  <h5 class="mb-3">🧠 <%= content["exercise"]["title"] %></h5>
+  <p class="text-secondary mb-4"><%= content["exercise"]["description"] %></p>
+  
+  <!-- Прогресс-бар -->
+  <div class="progress mb-4" id="cognitiveProgress" style="height: 10px;">
+    <div class="progress-bar bg-info" style="width: 0%"></div>
+  </div>
+  
+  <!-- Шаг 1: Ввод мысли -->
+  <div class="card mb-4" id="step1Thought">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Шаг 1: Сформулируйте тревожную мысль</h6>
+    </div>
+    <div class="card-body">
+      <p class="small text-secondary mb-3">Не обязательно самую пугающую. Выберите умеренно тревожную мысль, которая беспокоит вас сейчас.</p>
+      
+      <!-- Аккордеон с подсказками -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep1">
+              ❓ Нужна помощь в выборе мысли?
+            </button>
+          </h2>
+          <div id="helpStep1" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p><strong>📝 Примеры тревожных мыслей:</strong></p>
+              <ul>
+                <li>"Я не справлюсь с задачей на работе"</li>
+                <li>"Они смеются надо мной за спиной"</li>
+                <li>"Если я ошибусь, меня уволят"</li>
+                <li>"Никто меня не понимает"</li>
+                <li>"Я всегда всё порчу"</li>
+              </ul>
+              <p><strong>🎯 Как выбрать подходящую мысль:</strong></p>
+              <ul>
+                <li>Выберите мысль, которая вызывает умеренный дискомфорт (не самую страшную)</li>
+                <li>Мысль должна быть конкретной, а не общей ("всё плохо")</li>
+                <li>То, что беспокоит вас именно сейчас, сегодня</li>
+              </ul>
+              <p class="text-info small"><i class="fas fa-lightbulb"></i> Если мысль слишком пугает, начните с более легкой. Навык нарабатывается постепенно.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea class="form-control" id="thoughtInput" rows="3" placeholder="Например: 'Я не справлюсь с задачей на работе'..."></textarea>
+      <div class="text-end mt-3">
+        <button class="btn btn-primary" id="saveThought">Сохранить мысль</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Шаг 2: Оценка вероятности (скрыт) -->
+  <div class="card mb-4" id="step2Probability" style="display: none;">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Шаг 2: Оцените вероятность события (1-10)</h6>
+    </div>
+    <div class="card-body">
+      <p class="small text-secondary mb-3">Насколько вероятно, что эта мысль сбудется?</p>
+      
+      <!-- Аккордеон с подсказками -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep2">
+              ❓ Как оценивать вероятность?
+            </button>
+          </h2>
+          <div id="helpStep2" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p><strong>📊 Шкала вероятности с пояснениями:</strong></p>
+              <ul class="list-unstyled">
+                <li><span class="badge bg-light text-dark me-2">1-2</span> Практически невозможно (0-20%)</li>
+                <li class="mt-1"><span class="badge bg-light text-dark me-2">3-4</span> Маловероятно (20-40%)</li>
+                <li class="mt-1"><span class="badge bg-light text-dark me-2">5-6</span> 50/50 (40-60%)</li>
+                <li class="mt-1"><span class="badge bg-light text-dark me-2">7-8</span> Вероятно (60-80%)</li>
+                <li class="mt-1"><span class="badge bg-light text-dark me-2">9-10</span> Очень вероятно (80-100%)</li>
+              </ul>
+              
+              <p><strong>🧠 Советы для объективной оценки:</strong></p>
+              <ul>
+                <li>Спросите себя: "Сколько раз это происходило раньше?"</li>
+                <li>Отделяйте страх от реальной вероятности</li>
+                <li>Представьте, что оцениваете не свою мысль, а мысль друга</li>
+                <li>Ищите статистику и объективные данные</li>
+              </ul>
+              
+              <p class="text-info small"><i class="fas fa-lightbulb"></i> Часто мы переоцениваем вероятность плохих событий из-за тревоги. Попробуйте снизить оценку на 1-2 балла и посмотреть на свои ощущения.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <% (1..10).each do |num| %>
+          <div class="col-3 col-md-2 mb-2">
+            <button class="btn btn-outline-primary w-100 probability-btn" data-value="<%= num %>">
+              <%= num %>
+            </button>
+          </div>
+        <% end %>
+      </div>
+      <div class="small text-muted mt-2">
+        <span>1 = практически невозможно, 10 = почти гарантировано</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Шаг 3: Факты "за" (скрыт) -->
+  <div class="card mb-4" id="step3FactsPro" style="display: none;">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Шаг 3: Факты, которые ПОДДЕРЖИВАЮТ мысль</h6>
+    </div>
+    <div class="card-body">
+      <p class="small text-secondary mb-3">Что говорит в пользу этой мысли? Какие есть доказательства?</p>
+      
+      <!-- Аккордеон с подсказками -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep3">
+              ❓ Не могу найти факты "за"
+            </button>
+          </h2>
+          <div id="helpStep3" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p><strong>🔍 Вопросы для поиска фактов "за":</strong></p>
+              <ul>
+                <li>Что именно подтверждает эту мысль?</li>
+                <li>Какие конкретные события говорят в её пользу?</li>
+                <li>Что я видел(а) своими глазами?</li>
+                <li>Что говорили другие люди?</li>
+                <li>Что происходило в похожих ситуациях раньше?</li>
+              </ul>
+              
+              <p><strong>📝 Пример для мысли "Я не справлюсь с задачей":</strong></p>
+              <ul>
+                <li>"В прошлый раз похожая задача заняла больше времени, чем я планировал"</li>
+                <li>"У меня мало опыта в этой конкретной области"</li>
+                <li>"Коллега сказал, что задача сложная"</li>
+              </ul>
+              
+              <p class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Важно: записывайте только реальные факты, а не свои опасения или предположения.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea class="form-control" id="factsProInput" rows="4" placeholder="Например: 'В прошлый раз я действительно ошибся'..."></textarea>
+      <div class="text-end mt-3">
+        <button class="btn btn-primary" id="saveFactsPro">Сохранить факты «за»</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Шаг 4: Факты "против" (скрыт) -->
+  <div class="card mb-4" id="step4FactsCon" style="display: none;">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">Шаг 4: Факты, которые ОПРОВЕРГАЮТ мысль</h6>
+    </div>
+    <div class="card-body">
+      <p class="small text-secondary mb-3">Что говорит против этой мысли? Какие доказательства противоречат?</p>
+      
+      <!-- Аккордеон с подсказками -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep4">
+              ❓ Не вижу опровержений
+            </button>
+          </h2>
+          <div id="helpStep4" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p><strong>🔍 Вопросы для поиска фактов "против":</strong></p>
+              <ul>
+                <li>Что противоречит этой мысли?</li>
+                <li>Какие есть доказательства обратного?</li>
+                <li>Когда эта мысль НЕ сбывалась?</li>
+                <li>Что хорошего произошло в похожих ситуациях?</li>
+                <li>Как бы другой человек оценил эту ситуацию?</li>
+                <li>Какие есть альтернативные объяснения?</li>
+              </ul>
+              
+              <p><strong>📝 Пример для мысли "Я не справлюсь с задачей":</strong></p>
+              <ul>
+                <li>"Я успешно справлялся с подобными задачами много раз"</li>
+                <li>"У меня есть нужные навыки и опыт"</li>
+                <li>"Я всегда находил решение, даже когда было трудно"</li>
+                <li>"Мой руководитель доверил мне эту задачу — значит, верит в меня"</li>
+              </ul>
+              
+              <p class="text-info small"><i class="fas fa-lightbulb"></i> Часто мы не замечаем фактов "против", потому что тревога фокусирует внимание только на угрозах. Целенаправленный поиск помогает восстановить баланс.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea class="form-control" id="factsConInput" rows="4" placeholder="Например: 'Я успешно справлялся с подобными задачами много раз'..."></textarea>
+      <div class="text-end mt-3">
+        <button class="btn btn-primary" id="saveFactsCon">Сохранить факты «против»</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Шаг 5: Рефрейминг (скрыт) -->
+  <div class="card mb-4" id="step5Reframe" style="display: none;">
+    <div class="card-header bg-success text-white">
+      <h6 class="mb-0">Шаг 5: Создайте рефрейминг</h6>
+    </div>
+    <div class="card-body">
+      <p class="small text-secondary mb-3">Основываясь на собранных фактах, создайте более реалистичную формулировку.</p>
+      
+      <!-- Аккордеон с подсказками -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep5">
+              ❓ Как написать хороший рефрейминг?
+            </button>
+          </h2>
+          <div id="helpStep5" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p><strong>🎯 Три правила хорошего рефрейминга:</strong></p>
+              <ol>
+                <li><strong>Основан на фактах</strong> — используйте собранные доказательства</li>
+                <li><strong>Реалистичен</strong> — не позитивное мышление, а сбалансированное</li>
+                <li><strong>Полезен для действий</strong> — помогает двигаться дальше, а не застывать в страхе</li>
+              </ol>
+              
+              <p><strong>📝 Примеры рефрейминга:</strong></p>
+              <table class="table table-sm small">
+                <tr>
+                  <th>Исходная мысль</th>
+                  <th>Рефрейминг</th>
+                </tr>
+                <tr>
+                  <td>"Я провалю собеседование"</td>
+                  <td>"У меня есть опыт и подготовка. Я сделаю всё возможное. Даже если не получится, это будет ценный опыт"</td>
+                </tr>
+                <tr>
+                  <td>"Они смеются надо мной"</td>
+                  <td>"Я не знаю, о чём они смеются. Скорее всего, это не связано со мной. Люди редко думают о нас так много"</td>
+                </tr>
+                <tr>
+                  <td>"Ничего не получится"</td>
+                  <td>"Были ситуации, когда получалось. Сейчас я могу сделать несколько конкретных шагов. Посмотрим, что выйдет"</td>
+                </tr>
+              </table>
+              
+              <p class="text-success small"><i class="fas fa-check-circle"></i> Хороший рефрейминг снижает тревогу и помогает видеть больше возможностей.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Когнитивные искажения для справки -->
+      <div class="accordion mb-3">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDistortions">
+              🧠 Какие когнитивные искажения могут быть?
+            </button>
+          </h2>
+          <div id="collapseDistortions" class="accordion-collapse collapse" data-bs-parent="#distortionsAccordion">
+            <div class="accordion-body">
+              <ul class="list-unstyled">
+                <% content["exercise"]["cognitive_distortions"].each do |distortion| %>
+                  <li class="mb-2">
+                    <strong><%= distortion["name"] %></strong><br>
+                    <small><%= distortion["description"] %></small>
+                    <p class="small text-muted mt-1"><%= distortion["example"] %></p>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <textarea class="form-control" id="reframeInput" rows="4" placeholder="Например: 'У меня есть опыт и навыки. Я сделаю всё возможное, и этого достаточно'..."></textarea>
+      <div class="text-end mt-3">
+        <button class="btn btn-success" id="saveReframe">Завершить анализ</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Завершение анализа (скрыт) -->
+  <div class="card mb-4" id="completionSection" style="display: none;">
+    <div class="card-header bg-success text-white">
+      <h6 class="mb-0">✅ Анализ завершен</h6>
+    </div>
+    <div class="card-body text-center">
+      <p id="completionSummary" class="mb-3"></p>
+      <p class="text-secondary small mb-3">
+        <i class="fas fa-info-circle me-1"></i>
+        Этот анализ сохранен. Вы можете вернуться к нему позже.
+      </p>
+      <div class="mt-3">
+        <button class="btn btn-success" id="completeDay9">
+          <i class="fas fa-check-circle me-2"></i>Завершить день
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
