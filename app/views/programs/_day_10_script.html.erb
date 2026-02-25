@@ -1,0 +1,245 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 10 script loaded')
+    
+    const startBtn = document.getElementById('startEmotionDiary')
+    const container = document.getElementById('diaryStepsContainer')
+    
+    let currentStep = 0
+    const steps = [
+      {
+        title: 'Шаг 1: Ситуация',
+        question: 'Опишите, что именно произошло?',
+        placeholder: 'Например: "Начальник сказал, что мой отчет нужно переделать"',
+        help: 'Будьте конкретны: кто, что, где, когда. Это поможет позже найти закономерности.'
+      },
+      {
+        title: 'Шаг 2: Мысли',
+        question: 'Какие мысли пришли вам в голову в тот момент?',
+        placeholder: 'Например: "Я всё делаю плохо", "Меня скоро уволят"',
+        help: 'Записывайте всё, даже если мысли кажутся глупыми или преувеличенными. Это важно.'
+      },
+      {
+        title: 'Шаг 3: Эмоции',
+        question: 'Что вы почувствовали?',
+        placeholder: 'Например: тревога, грусть, обида, раздражение, стыд',
+        help: 'Старайтесь называть эмоции точно. Не просто "плохо", а "разочарование" или "беспокойство".'
+      },
+      {
+        title: 'Шаг 4: Поведение',
+        question: 'Как вы поступили в той ситуации?',
+        placeholder: 'Например: промолчал, ушел, начал спорить, заплакал, заел стресс',
+        help: 'Что вы сделали сразу после того, как это произошло?'
+      },
+      {
+        title: 'Шаг 5: Проверка мыслей',
+        question: 'А теперь давайте проверим ваши мысли из шага 2.',
+        placeholder: 'Например: "Раньше мой отчет хвалили", "Начальник всегда придирается ко всем"',
+        help: 'Спросите себя: "Что говорит против этой мысли? Какие есть альтернативные объяснения?"'
+      },
+      {
+        title: 'Шаг 6: Новые мысли',
+        question: 'Как можно подумать иначе, чтобы стало легче и появились силы действовать?',
+        placeholder: 'Например: "Это просто обратная связь, я могу доработать отчет и стать лучше"',
+        help: 'Новая мысль должна быть более реалистичной и помогать, а не просто "позитивной".'
+      }
+    ]
+    
+    let answers = []
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start diary clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+  if (currentStep >= steps.length) {
+    showCompletion()
+    return
+  }
+  
+  const step = steps[currentStep]
+  
+  // Для шага 5 показываем напоминание о мыслях из шага 2
+  let reminderHtml = ''
+  if (currentStep === 4) { // Шаг 5 (индекс 4)
+    reminderHtml = `
+      <div class="alert alert-info mb-3">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Напоминание:</strong> В шаге 2 вы написали:<br>
+        "${answers[1] || 'еще не заполнено'}"
+      </div>
+    `
+  }
+  
+  // Пример текста для каждого шага
+  const examples = [
+    'Например: "Начальник сказал, что мой отчет нужно переделать"',
+    'Например: "Я всё делаю плохо", "Меня скоро уволят"',
+    'Например: тревога, грусть, обида, раздражение',
+    'Например: промолчал, ушел, начал спорить',
+    'Например: "Раньше мой отчет хвалили", "Начальник всегда придирается"',
+    'Например: "Это просто обратная связь, я могу доработать отчет"'
+  ]
+  
+  let stepHtml = `
+    <div class="card mb-4" id="step${currentStep}">
+      <div class="card-header bg-primary text-white">
+        <h6 class="mb-0">${step.title}</h6>
+      </div>
+      <div class="card-body">
+        <p class="fw-bold mb-3">${step.question}</p>
+        
+        ${reminderHtml}
+        
+        <div class="accordion mb-3">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep${currentStep}">
+                ❓ Нужна подсказка?
+              </button>
+            </h2>
+            <div id="helpStep${currentStep}" class="accordion-collapse collapse">
+              <div class="accordion-body bg-light">
+                ${step.help}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-secondary small mb-1">${examples[currentStep]}</p>
+        <textarea class="form-control" id="step${currentStep}Input" rows="4" placeholder="Напишите ваш ответ здесь..."></textarea>
+        
+        <div class="text-end mt-3">
+          <button class="btn btn-success" onclick="saveStep(${currentStep})">
+            ${currentStep < steps.length - 1 ? 'Далее' : 'Завершить'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+  
+  container.innerHTML = stepHtml
+  container.scrollIntoView({ behavior: 'smooth' })
+}
+    
+    window.saveStep = function(stepNumber) {
+      const input = document.getElementById(`step${stepNumber}Input`)
+      const value = input.value.trim()
+      
+      if (!value) {
+        alert('Пожалуйста, напишите ответ')
+        return
+      }
+      
+      answers[stepNumber] = value
+      currentStep++
+      
+      document.getElementById(`step${stepNumber}`).remove()
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    function showCompletion() {
+      let summary = '<div class="alert alert-success mb-3"><strong>Ваши ответы:</strong></div>'
+      
+      steps.forEach((step, index) => {
+        if (answers[index]) {
+          summary += `
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <small class="text-primary fw-bold">${step.title}</small>
+                <p class="small mb-0">${answers[index]}</p>
+              </div>
+            </div>
+          `
+        }
+      })
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Анализ завершен!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы только что прошли все 6 шагов дневника эмоций!</p>
+            
+            ${summary}
+            
+            <p class="text-secondary small mt-3">
+              <i class="fas fa-info-circle me-1"></i>
+              Ваши ответы сохранены. Вы можете вернуться к ним позже.
+            </p>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-success" id="completeDay10">
+                <i class="fas fa-check-circle me-2"></i>Завершить день
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      saveToDatabase()
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving to database:', answers)
+      
+      fetch('/emotion_diary_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entry: {
+            situation: answers[0] || '',
+            thoughts: answers[1] || '',
+            emotions: answers[2] || '',
+            behavior: answers[3] || '',
+            evidence_against: answers[4] || '',
+            new_thoughts: answers[5] || ''
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+    
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'completeDay10') {
+        console.log('Complete day 10 clicked')
+        
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+      }
+    })
+  })
+</script>

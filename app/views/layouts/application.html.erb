@@ -34,10 +34,16 @@
               </li>
 
               <li class="nav-item">
-    <%= link_to gratitude_entries_path, class: "nav-link" do %>
-      <i class="fas fa-heart me-1"></i> Благодарности
-    <% end %>
-  </li>
+                <%= link_to gratitude_entries_path, class: "nav-link" do %>
+                  <i class="fas fa-heart me-1"></i> Благодарности
+                <% end %>
+              </li>
+
+              <li class="nav-item">
+                <%= link_to new_emotion_diary_path, class: "nav-link" do %>
+                  <i class="fas fa-book-open me-1"></i> Дневник эмоций
+                <% end %>
+              </li>
   
             <li class="nav-item">
               <%= link_to tests_path, class: "nav-link" do %>

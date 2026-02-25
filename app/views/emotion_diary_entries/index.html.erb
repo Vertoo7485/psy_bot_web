@@ -1,0 +1,93 @@
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      
+      <!-- Шапка -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+          <i class="fas fa-book-open text-primary me-2"></i>
+          Дневник эмоций
+        </h1>
+        <%= link_to programs_path, class: "btn btn-outline-primary" do %>
+          <i class="fas fa-seedling me-2"></i>К программе
+        <% end %>
+      </div>
+      
+      <!-- Краткое объяснение -->
+      <div class="alert alert-info mb-4">
+        <i class="fas fa-lightbulb me-2"></i>
+        Записывайте ситуации, мысли, эмоции и поведение, чтобы лучше понимать себя и свои реакции.
+      </div>
+      
+      <!-- Кнопка для новой записи (ведет на день 10) -->
+      <div class="card mb-4 border-success">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-plus-circle me-2"></i>
+            Новая запись
+          </h5>
+        </div>
+        <div class="card-body text-center">
+          <p class="mb-3">Используйте тот же 6-шаговый метод, что и в программе самопомощи</p>
+          <a href="/programs/2/day/10" class="btn btn-success btn-lg px-5">
+            <i class="fas fa-pen me-2"></i>Создать запись
+          </a>
+        </div>
+      </div>
+      
+      <!-- Заголовок для истории -->
+      <h5 class="mb-3">
+        <i class="fas fa-history me-2"></i>
+        Мои записи
+      </h5>
+      
+      <!-- Список записей -->
+      <% if @entries.any? %>
+        <% @entries.each do |entry| %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-primary">
+                  <i class="fas fa-calendar me-1"></i>
+                  <%= entry.date.strftime('%d.%m.%Y') %>
+                </span>
+                <small class="text-secondary">
+                  <%= time_ago_in_words(entry.created_at) %> назад
+                </small>
+              </div>
+              
+              <div class="accordion mt-2" id="entry<%= entry.id %>">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= entry.id %>">
+                      Посмотреть подробности
+                    </button>
+                  </h2>
+                  <div id="collapse<%= entry.id %>" class="accordion-collapse collapse" data-bs-parent="#entry<%= entry.id %>">
+                    <div class="accordion-body">
+                      <p><strong>🎯 Ситуация:</strong> <%= entry.situation %></p>
+                      <p><strong>💭 Мысли:</strong> <%= entry.thoughts %></p>
+                      <p><strong>😊 Эмоции:</strong> <%= entry.emotions %></p>
+                      <p><strong>🚶 Поведение:</strong> <%= entry.behavior %></p>
+                      <p><strong>🔍 Анализ:</strong> <%= entry.evidence_against %></p>
+                      <p><strong>🌟 Новые мысли:</strong> <%= entry.new_thoughts %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center py-5 bg-light rounded">
+          <i class="fas fa-book-open fa-3x text-secondary mb-3"></i>
+          <h5>У вас пока нет записей</h5>
+          <p class="text-secondary">Начните с Дня 10 программы самопомощи</p>
+          <%= link_to program_path(Program.first), class: "btn btn-primary" do %>
+            <i class="fas fa-seedling me-2"></i>К программе
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

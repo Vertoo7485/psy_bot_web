@@ -35,6 +35,11 @@ Rails.application.routes.draw do
   resources :reflection_entries, only: [:create, :index]
 
   resources :anxious_thought_entries, only: [:create, :index]
+
+  resources :emotion_diary_entries, only: [:create, :index]
+
+  get 'emotion_diary/new', to: 'emotion_diary#new', as: 'new_emotion_diary'
+  post 'emotion_diary', to: 'emotion_diary#create'
   
   # Главная страница
   root to: 'home#index'

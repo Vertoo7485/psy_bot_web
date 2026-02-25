@@ -156,6 +156,12 @@
       <%= render 'day_9_script' %>
     <% end %>
 
+    <!-- День 10: Дневник эмоций -->
+    <% if day.day_number == 10 %>
+      <%= render 'day_10_emotion_diary', content: content %>
+      <%= render 'day_10_script' %>
+    <% end %>
+
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
     <%= render 'programs/shared/daily_tips', content: content %>

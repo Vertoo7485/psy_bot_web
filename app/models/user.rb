@@ -11,6 +11,7 @@ class User < ApplicationRecord
   has_many :gratitude_entries, dependent: :destroy
   has_many :reflection_entries, dependent: :destroy
   has_many :anxious_thought_entries, dependent: :destroy
+  has_many :emotion_diary_entries, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'
