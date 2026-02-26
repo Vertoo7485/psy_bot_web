@@ -1,0 +1,80 @@
+<!-- Интерактивная часть дня 13 -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-rocket me-2"></i>
+    <strong>Прокрастинация — это не лень, а эмоциональная реакция.</strong> Сегодня мы освоим метод "первого шага", чтобы преодолеть сопротивление и начать действовать.
+  </div>
+  
+  <!-- Статистика для мотивации -->
+  <div class="row mb-4">
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">95%</h4>
+          <small>людей откладывают дела</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">80%</h4>
+          <small>эффективность первого шага</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">15</h4>
+          <small>минут для старта</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">218</h4>
+          <small>минут теряется в день</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6 шагов (свернуто по умолчанию) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#procrastinationSteps">
+          📝 6 шагов преодоления прокрастинации (нажмите для справки)
+        </button>
+      </h2>
+      <div id="procrastinationSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+                <p class="text-secondary small mt-1 ms-4"><i>Например:</i> <%= step["placeholder"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startProcrastinationExercise">
+      <i class="fas fa-rocket me-2"></i>Начать борьбу с прокрастинацией
+    </button>
+    <p class="text-secondary small mt-2">Это займет 15-20 минут. Пройдите все 6 шагов последовательно.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="procrastinationStepsContainer" style="display: none;"></div>
+</div>

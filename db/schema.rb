@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_26_145343) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_26_152405) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -74,6 +74,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_145343) do
     t.index ["user_id"], name: "index_grounding_exercise_entries_on_user_id"
   end
 
+  create_table "procrastination_tasks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "entry_date"
+    t.text "task"
+    t.text "reason"
+    t.text "steps"
+    t.text "first_step"
+    t.text "feelings_after"
+    t.boolean "completed"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_procrastination_tasks_on_user_id"
+  end
+
   create_table "programs", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -88,6 +102,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_145343) do
     t.string "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reflection_type"
     t.index ["user_id"], name: "index_reflection_entries_on_user_id"
   end
 
@@ -174,6 +189,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_145343) do
   add_foreign_key "emotion_diary_entries", "users"
   add_foreign_key "gratitude_entries", "users"
   add_foreign_key "grounding_exercise_entries", "users"
+  add_foreign_key "procrastination_tasks", "users"
   add_foreign_key "reflection_entries", "users"
   add_foreign_key "self_compassion_practices", "users"
   add_foreign_key "test_results", "tests"

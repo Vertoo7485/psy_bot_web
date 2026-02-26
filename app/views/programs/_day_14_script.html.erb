@@ -1,0 +1,214 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 14 script loaded')
+    
+    const startBtn = document.getElementById('startTwoWeeksReflection')
+    const container = document.getElementById('reflectionStepsContainer')
+    
+    // Категории рефлексии из seeds
+    const categories = <%= raw content["reflection_categories"].to_json %>
+    
+    let currentCategory = 0
+    let reflections = []
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start reflection clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentCategory = 0
+        showCategory()
+      })
+    }
+    
+    function showCategory() {
+      if (currentCategory >= categories.length) {
+        showCompletion()
+        return
+      }
+      
+      const cat = categories[currentCategory]
+      
+      // Прогресс-бар
+      const progress = ((currentCategory) / categories.length) * 100
+      
+      let questionsHtml = ''
+      if (cat.questions && cat.questions.length > 0) {
+        questionsHtml = `
+          <div class="mb-3">
+            <small class="text-secondary">Вопросы для размышления:</small>
+            <ul class="small mt-2">
+              ${cat.questions.map(q => `<li>${q}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="category${currentCategory}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+              ${cat.emoji} Категория ${currentCategory + 1}/${categories.length}: ${cat.name}
+            </h6>
+          </div>
+          <div class="card-body">
+            <!-- Прогресс -->
+            <div class="progress mb-3" style="height: 5px;">
+              <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+            </div>
+            
+            <p class="fw-bold mb-3">${cat.prompt}</p>
+            
+            ${questionsHtml}
+            
+            <textarea class="form-control" id="category${currentCategory}Input" rows="4" placeholder="Напишите ваши мысли..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveCategory(${currentCategory})">
+                ${currentCategory < categories.length - 1 ? 'Сохранить и далее' : 'Завершить рефлексию'}
+              </button>
+              <button class="btn btn-link text-secondary" onclick="skipCategory(${currentCategory})">
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveCategory = function(categoryIndex) {
+      const input = document.getElementById(`category${categoryIndex}Input`)
+      const value = input.value.trim()
+      
+      if (!value) {
+        if (!confirm('Вы не написали ответ. Пропустить эту категорию?')) {
+          return
+        }
+        reflections[categoryIndex] = null
+      } else {
+        reflections[categoryIndex] = value
+      }
+      
+      currentCategory++
+      document.getElementById(`category${categoryIndex}`).remove()
+      
+      if (currentCategory < categories.length) {
+        showCategory()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    window.skipCategory = function(categoryIndex) {
+      reflections[categoryIndex] = null
+      currentCategory++
+      document.getElementById(`category${categoryIndex}`).remove()
+      
+      if (currentCategory < categories.length) {
+        showCategory()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    function showCompletion() {
+      // Собираем все ответы для отображения
+      let summary = '<div class="alert alert-success mb-3"><strong>Ваши итоги 2 недель:</strong></div>'
+      
+      categories.forEach((cat, index) => {
+        if (reflections[index]) {
+          summary += `
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <small class="text-primary fw-bold">${cat.emoji} ${cat.name}</small>
+                <p class="small mb-0">${reflections[index]}</p>
+              </div>
+            </div>
+          `
+        }
+      })
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Рефлексия 2 недель завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы прошли половину программы! 🎉</p>
+            
+            ${summary}
+            
+            <p class="text-secondary small mt-3">
+              <i class="fas fa-info-circle me-1"></i>
+              Ваши ответы сохранены. Вы можете вернуться к ним позже.
+            </p>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-success" id="completeDay14">
+                <i class="fas fa-check-circle me-2"></i>Завершить день
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      saveToDatabase()
+    }
+    
+    function saveToDatabase() {
+      // Формируем текст для сохранения
+      let fullText = ''
+      categories.forEach((cat, index) => {
+        if (reflections[index]) {
+          fullText += `${cat.emoji} ${cat.name}:\n${reflections[index]}\n\n`
+        }
+      })
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: fullText,
+            category: 'День 14: Промежуточная рефлексия'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+    
+    // Завершение дня
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'completeDay14') {
+        console.log('Complete day 14 clicked')
+        
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+      }
+    })
+  })
+</script>

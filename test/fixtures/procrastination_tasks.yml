@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  entry_date: 2026-02-26
+  task: MyText
+  reason: MyText
+  steps: MyText
+  first_step: MyText
+  feelings_after: MyText
+  completed: false
+
+two:
+  user: two
+  entry_date: 2026-02-26
+  task: MyText
+  reason: MyText
+  steps: MyText
+  first_step: MyText
+  feelings_after: MyText
+  completed: false

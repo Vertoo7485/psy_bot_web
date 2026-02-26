@@ -1,0 +1,286 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 13 script loaded')
+    
+    const startBtn = document.getElementById('startProcrastinationExercise')
+    const container = document.getElementById('procrastinationStepsContainer')
+    
+    // Шаги из seeds
+    const steps = <%= raw content["steps"].to_json %>
+    
+    let currentStep = 0
+    let answers = []
+    let timerActive = false
+    let timerInterval = null
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start procrastination clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showCompletion()
+        return
+      }
+      
+      const step = steps[currentStep]
+      
+      // Подсказки для каждого шага
+      const examples = step.examples || []
+      
+      let examplesHtml = ''
+      if (examples.length > 0) {
+        examplesHtml = `
+          <div class="mb-2">
+            <small class="text-secondary">Подсказки:</small>
+            <ul class="small">
+              ${examples.map(ex => `<li>${ex}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      // Для шага 5 (выполнение) показываем кнопку таймера
+      if (step.step === 5) {
+        let stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${step.step}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3">${step.description}</p>
+              
+              <div class="alert alert-light small mb-3">
+                <i class="fas fa-info-circle me-1"></i> ${step.fact}
+              </div>
+              
+              <p class="fw-bold mb-2">Ваш первый шаг:</p>
+              <p class="bg-light p-2 rounded">${answers[3] || 'не определен'}</p>
+              
+              <div class="text-center mt-4">
+                <button class="btn btn-success btn-lg" onclick="startTimer()">
+                  <i class="fas fa-clock me-2"></i>Запустить таймер на 15 минут
+                </button>
+              </div>
+              
+              <div id="timerDisplay" class="text-center mt-3" style="display: none;">
+                <h3 class="display-4">15:00</h3>
+                <button class="btn btn-danger" onclick="completeTimer()">
+                  <i class="fas fa-check me-2"></i>Завершить выполнение
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+      
+      // Для остальных шагов
+      let stepHtml = `
+        <div class="card mb-4" id="step${currentStep}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">${step.emoji} Шаг ${step.step}: ${step.title}</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">${step.description}</p>
+            
+            ${examplesHtml}
+            
+            <div class="alert alert-light small mb-3">
+              <i class="fas fa-info-circle me-1"></i> ${step.fact}
+            </div>
+            
+            <p class="text-secondary small mb-1"><i>Например:</i> ${step.placeholder}</p>
+            <textarea class="form-control" id="step${currentStep}Input" rows="3" placeholder="Напишите ваш ответ..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveStep(${currentStep})">
+                ${currentStep < steps.length - 2 ? 'Далее' : 'Продолжить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveStep = function(stepNumber) {
+      const input = document.getElementById(`step${stepNumber}Input`)
+      if (!input) return
+      
+      const value = input.value.trim()
+      
+      if (!value && stepNumber !== 5) { // Шаг 5 обрабатывается отдельно
+        alert('Пожалуйста, напишите ответ')
+        return
+      }
+      
+      answers[stepNumber] = value
+      currentStep++
+      
+      document.getElementById(`step${stepNumber}`)?.remove()
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    window.startTimer = function() {
+      timerActive = true
+      let minutes = 15
+      let seconds = 0
+      
+      document.querySelector('.btn-success[onclick="startTimer()"]').style.display = 'none'
+      document.getElementById('timerDisplay').style.display = 'block'
+      
+      const timerElement = document.querySelector('#timerDisplay h3')
+      
+      timerInterval = setInterval(() => {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            clearInterval(timerInterval)
+            timerActive = false
+            completeTimer()
+            return
+          }
+          minutes--
+          seconds = 59
+        } else {
+          seconds--
+        }
+        
+        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      }, 1000)
+    }
+    
+    window.completeTimer = function() {
+      if (timerInterval) {
+        clearInterval(timerInterval)
+      }
+      
+      answers[4] = 'выполнено' // Шаг 5
+      currentStep = 5
+      
+      document.getElementById('step4')?.remove()
+      
+      // Переходим к шагу 6 (рефлексия)
+      currentStep = 5
+      showStep()
+    }
+    
+    function showCompletion() {
+      let summary = '<div class="alert alert-success mb-3"><strong>Ваш план действий:</strong></div>'
+      
+      if (answers[0]) {
+        summary += `
+          <div class="card mb-2">
+            <div class="card-body py-2">
+              <small class="text-primary fw-bold">📋 Задача:</small>
+              <p class="small mb-0">${answers[0]}</p>
+            </div>
+          </div>
+        `
+      }
+      
+      if (answers[3]) {
+        summary += `
+          <div class="card mb-2">
+            <div class="card-body py-2">
+              <small class="text-primary fw-bold">🎯 Первый шаг:</small>
+              <p class="small mb-0">${answers[3]}</p>
+            </div>
+          </div>
+        `
+      }
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Практика преодоления прокрастинации завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы только что сделали первый шаг к решению откладываемой задачи!</p>
+            
+            ${summary}
+            
+            <p class="text-secondary small mt-3">
+              <i class="fas fa-info-circle me-1"></i>
+              Помните: даже 15 минут работы создают эффект прогресса.
+            </p>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-success" id="completeDay13">
+                <i class="fas fa-check-circle me-2"></i>Завершить день
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      saveToDatabase()
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving to database:', answers)
+      
+      fetch('/procrastination_tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          task: {
+            task: answers[0] || '',
+            reason: answers[1] || '',
+            steps: answers[2] || '',
+            first_step: answers[3] || '',
+            feelings_after: answers[5] || '',
+            completed: false
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+    
+    // Завершение дня
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'completeDay13') {
+        console.log('Complete day 13 clicked')
+        
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+      }
+    })
+  })
+</script>
