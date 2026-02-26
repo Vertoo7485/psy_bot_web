@@ -40,6 +40,9 @@ Rails.application.routes.draw do
 
   get 'emotion_diary/new', to: 'emotion_diary#new', as: 'new_emotion_diary'
   post 'emotion_diary', to: 'emotion_diary#create'
+
+  resources :grounding_exercise_entries, only: [:create, :index]
+  resources :self_compassion_practices, only: [:create, :index]
   
   # Главная страница
   root to: 'home#index'

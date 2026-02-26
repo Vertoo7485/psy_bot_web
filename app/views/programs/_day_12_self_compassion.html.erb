@@ -1,0 +1,72 @@
+<!-- Интерактивная часть дня 12 -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Самосострадание — это умение относиться к себе с добротой, как к лучшему другу.</strong> Сегодня мы пройдем 5 шагов, чтобы развить этот навык.
+  </div>
+  
+  <!-- Три компонента самосострадания -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h6 class="mb-0">🌟 Три компонента самосострадания</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <% if content["components"].present? %>
+          <% content["components"].each do |component| %>
+            <div class="col-12 mb-2">
+              <i class="fas fa-check-circle text-success me-2"></i> <%= component %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="col-12 mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i> Доброта к себе — вместо самокритики
+          </div>
+          <div class="col-12 mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i> Общечеловечность — страдание часть опыта
+          </div>
+          <div class="col-12 mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i> Осознанность — баланс в эмоциях
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 5 шагов (свернуто по умолчанию) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#compassionSteps">
+          📝 5 шагов практики (нажмите для справки)
+        </button>
+      </h2>
+      <div id="compassionSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+                <p class="text-secondary small mt-1 ms-4"><i>Например:</i> <%= step["placeholder"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startCompassionExercise">
+      <i class="fas fa-heart me-2"></i>Начать практику самосострадания
+    </button>
+    <p class="text-secondary small mt-2">Это займет 5-7 минут. Отвечайте на вопросы по мере поступления.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="compassionStepsContainer" style="display: none;"></div>
+</div>

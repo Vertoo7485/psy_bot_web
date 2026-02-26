@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_24_170554) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_26_145343) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,6 +61,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_170554) do
     t.index ["user_id"], name: "index_gratitude_entries_on_user_id"
   end
 
+  create_table "grounding_exercise_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "entry_date"
+    t.text "seen"
+    t.text "touched"
+    t.text "heard"
+    t.text "smelled"
+    t.text "tasted"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_grounding_exercise_entries_on_user_id"
+  end
+
   create_table "programs", force: :cascade do |t|
     t.string "title"
     t.text "description"
@@ -76,6 +89,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_170554) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_reflection_entries_on_user_id"
+  end
+
+  create_table "self_compassion_practices", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "entry_date"
+    t.text "current_difficulty"
+    t.text "common_humanity"
+    t.text "kind_words"
+    t.text "mantra"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_self_compassion_practices_on_user_id"
   end
 
   create_table "test_results", force: :cascade do |t|
@@ -148,7 +173,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_170554) do
   add_foreign_key "days", "programs"
   add_foreign_key "emotion_diary_entries", "users"
   add_foreign_key "gratitude_entries", "users"
+  add_foreign_key "grounding_exercise_entries", "users"
   add_foreign_key "reflection_entries", "users"
+  add_foreign_key "self_compassion_practices", "users"
   add_foreign_key "test_results", "tests"
   add_foreign_key "test_results", "users"
   add_foreign_key "user_day_progresses", "days"

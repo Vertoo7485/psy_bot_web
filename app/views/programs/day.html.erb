@@ -162,6 +162,18 @@
       <%= render 'day_10_script' %>
     <% end %>
 
+    <!-- День 11: Техника заземления -->
+    <% if day.day_number == 11 %>
+      <%= render 'day_11_grounding', content: content %>
+      <%= render 'day_11_script', content: content %>
+    <% end %>
+
+    <!-- День 12: Практика самосострадания -->
+    <% if day.day_number == 12 %>
+      <%= render 'day_12_self_compassion', content: content %>
+      <%= render 'day_12_script', content: content %>
+    <% end %>
+
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
     <%= render 'programs/shared/daily_tips', content: content %>

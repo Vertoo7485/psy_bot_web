@@ -329,33 +329,35 @@ export default class extends Controller {
     this.reflectionTarget.scrollIntoView({ behavior: 'smooth' })
   }
   
-  completeDay() {
-    // Для дня 3 (благодарность) и дня 7 (рефлексия) не проверяем практику
-    const dayNumber = this.data.get('dayNumber')
-    
-  if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '10' && !this.practiceStarted) {
-      alert('Сначала выполните практику')
-      return
-    }
-    
-    // Сохраняем прогресс через fetch
-    fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-      },
-      body: JSON.stringify({
-        completed: true
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
-      }
-    })
+ completeDay() {
+  const dayNumber = this.data.get('dayNumber')
+  
+  // Для дней без таймера не проверяем практику
+  if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && dayNumber != '10' && dayNumber != '11' && dayNumber != '12' && !this.practiceStarted) {
+    alert('Сначала выполните практику')
+    return
   }
+  
+  // Сохраняем прогресс через fetch
+  fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({
+      completed: true
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+    }
+  })
+}
+
+
 
   // Методы для дня 3 (благодарность)
   startGratitudeExercise() {

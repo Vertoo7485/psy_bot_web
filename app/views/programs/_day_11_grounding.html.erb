@@ -1,0 +1,44 @@
+<!-- Интерактивная часть дня 11 (без дублирования заголовка) -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-lightbulb me-2"></i>
+    <strong>Это ваш якорь в моменты тревоги.</strong> Техника помогает быстро вернуться в «здесь и сейчас», активируя все органы чувств.
+  </div>
+  
+  <!-- 5 шагов с понятными пояснениями (свернуто по умолчанию) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#groundingSteps">
+          📝 5 шагов заземления (нажмите для справки)
+        </button>
+      </h2>
+      <div id="groundingSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["grounding_steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+                <p class="text-secondary small mt-1 ms-4"><i>Пример:</i> <%= step["placeholder"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startGroundingExercise">
+      <i class="fas fa-pen me-2"></i>Начать практику заземления
+    </button>
+    <p class="text-secondary small mt-2">Это займет 3-5 минут. Пройдите все 5 шагов последовательно.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="groundingStepsContainer" style="display: none;"></div>
+</div>
