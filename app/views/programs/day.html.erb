@@ -186,6 +186,18 @@
       <%= render 'day_14_script', content: content %>
     <% end %>
 
+    <!-- День 15: Акты доброты -->
+    <% if day.day_number == 15 %>
+      <%= render 'day_15_kindness', content: content %>
+      <%= render 'day_15_script', content: content %>
+    <% end %>
+
+    <!-- День 16: Восстановление связей -->
+    <% if day.day_number == 16 %>
+      <%= render 'day_16_reconnection', content: content %>
+      <%= render 'day_16_script', content: content %>
+    <% end %>
+
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
     <%= render 'programs/shared/daily_tips', content: content %>

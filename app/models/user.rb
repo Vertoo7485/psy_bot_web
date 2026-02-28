@@ -15,6 +15,8 @@ class User < ApplicationRecord
   has_many :grounding_exercise_entries, dependent: :destroy
   has_many :self_compassion_practices, dependent: :destroy
   has_many :procrastination_tasks, dependent: :destroy
+  has_many :kindness_entries, dependent: :destroy
+  has_many :reconnection_practices, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'

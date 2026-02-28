@@ -44,6 +44,8 @@ Rails.application.routes.draw do
   resources :grounding_exercise_entries, only: [:create, :index]
   resources :self_compassion_practices, only: [:create, :index]
   resources :procrastination_tasks, only: [:create, :index]
+  resources :kindness_entries, only: [:create, :index]
+  resources :reconnection_practices, only: [:create, :index]
   
   # Главная страница
   root to: 'home#index'

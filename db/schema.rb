@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_26_152405) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_26_154542) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -74,6 +74,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_152405) do
     t.index ["user_id"], name: "index_grounding_exercise_entries_on_user_id"
   end
 
+  create_table "kindness_entries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "entry_date"
+    t.text "act"
+    t.text "reaction"
+    t.text "feelings"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_kindness_entries_on_user_id"
+  end
+
   create_table "procrastination_tasks", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.date "entry_date"
@@ -93,6 +104,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_152405) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "reconnection_practices", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "entry_date"
+    t.string "reconnected_person"
+    t.string "communication_format"
+    t.text "conversation_start"
+    t.text "reflection_text"
+    t.text "integration_plan"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_reconnection_practices_on_user_id"
   end
 
   create_table "reflection_entries", force: :cascade do |t|
@@ -189,7 +213,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_152405) do
   add_foreign_key "emotion_diary_entries", "users"
   add_foreign_key "gratitude_entries", "users"
   add_foreign_key "grounding_exercise_entries", "users"
+  add_foreign_key "kindness_entries", "users"
   add_foreign_key "procrastination_tasks", "users"
+  add_foreign_key "reconnection_practices", "users"
   add_foreign_key "reflection_entries", "users"
   add_foreign_key "self_compassion_practices", "users"
   add_foreign_key "test_results", "tests"

@@ -1,0 +1,250 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 15 script loaded')
+    
+    const startBtn = document.getElementById('startKindnessExercise')
+    const container = document.getElementById('kindnessStepsContainer')
+    
+    // Шаги из seeds
+    const steps = <%= raw content["steps"].to_json %>
+    
+    let currentStep = 0
+    let answers = []
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start kindness clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showCompletion()
+        return
+      }
+      
+      const step = steps[currentStep]
+      
+      // Примеры для каждого шага
+      const examples = step.examples || []
+      
+      let examplesHtml = ''
+      if (examples.length > 0) {
+        examplesHtml = `
+          <div class="mb-2">
+            <small class="text-secondary">Подсказки:</small>
+            <ul class="small">
+              ${examples.map(ex => `<li>${ex}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      // Для шага 2 (выполнение) показываем кнопку подтверждения
+      if (step.step === 2) {
+        let stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${step.step}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3">${step.description}</p>
+              
+              <div class="alert alert-light small mb-3">
+                <i class="fas fa-info-circle me-1"></i> ${step.fact}
+              </div>
+              
+              <p class="fw-bold mb-2">Ваш план:</p>
+              <p class="bg-light p-2 rounded">${answers[0] || 'не определен'}</p>
+              
+              <div class="text-center mt-4">
+                <button class="btn btn-success" onclick="saveStep(${currentStep})">
+                  Я совершил(а) доброе дело
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+      
+      // Для остальных шагов
+      let stepHtml = `
+        <div class="card mb-4" id="step${currentStep}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">${step.emoji} Шаг ${step.step}: ${step.title}</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">${step.description}</p>
+            
+            ${examplesHtml}
+            
+            <div class="alert alert-light small mb-3">
+              <i class="fas fa-info-circle me-1"></i> ${step.fact}
+            </div>
+            
+            <p class="text-secondary small mb-1"><i>Например:</i> ${step.placeholder}</p>
+            <textarea class="form-control" id="step${currentStep}Input" rows="3" placeholder="Напишите ваш ответ..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveStep(${currentStep})">
+                ${currentStep < steps.length - 1 ? 'Далее' : 'Завершить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveStep = function(stepNumber) {
+      if (stepNumber === 1) { // Шаг 2 (индекс 1) - выполнение
+        answers[stepNumber] = 'выполнено'
+        currentStep = 2
+        document.getElementById('step1')?.remove()
+        showStep()
+        return
+      }
+      
+      const input = document.getElementById(`step${stepNumber}Input`)
+      if (!input) return
+      
+      const value = input.value.trim()
+      
+      if (!value) {
+        alert('Пожалуйста, напишите ответ')
+        return
+      }
+      
+      answers[stepNumber] = value
+      currentStep++
+      
+      document.getElementById(`step${stepNumber}`).remove()
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    function showCompletion() {
+      let summary = '<div class="alert alert-success mb-3"><strong>Ваш акт доброты:</strong></div>'
+      
+      if (answers[0]) {
+        summary += `
+          <div class="card mb-2">
+            <div class="card-body py-2">
+              <small class="text-primary fw-bold">🎯 Что сделали:</small>
+              <p class="small mb-0">${answers[0]}</p>
+            </div>
+          </div>
+        `
+      }
+      
+      if (answers[2]) {
+        summary += `
+          <div class="card mb-2">
+            <div class="card-body py-2">
+              <small class="text-primary fw-bold">💭 Ваши чувства:</small>
+              <p class="small mb-0">${answers[2]}</p>
+            </div>
+          </div>
+        `
+      }
+      
+      if (answers[3]) {
+        summary += `
+          <div class="card mb-2">
+            <div class="card-body py-2">
+              <small class="text-primary fw-bold">🔄 Реакция:</small>
+              <p class="small mb-0">${answers[3]}</p>
+            </div>
+          </div>
+        `
+      }
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Практика доброты завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы сделали мир чуточку добрее! ✨</p>
+            
+            ${summary}
+            
+            <p class="text-secondary small mt-3">
+              <i class="fas fa-info-circle me-1"></i>
+              Даже маленький акт доброты запускает каскад положительных изменений в мозге и организме.
+            </p>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-success" id="completeDay15">
+                <i class="fas fa-check-circle me-2"></i>Завершить день
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      saveToDatabase()
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving to database:', answers)
+      
+      fetch('/kindness_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entry: {
+            act: answers[0] || '',
+            reaction: answers[3] || '',
+            feelings: answers[2] || ''
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+    
+    // Завершение дня
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'completeDay15') {
+        console.log('Complete day 15 clicked')
+        
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+      }
+    })
+  })
+</script>

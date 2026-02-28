@@ -1,0 +1,102 @@
+<!-- Интерактивная часть дня 15 -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Доброта — это не просто приятно, это научно доказанный способ стать счастливее.</strong> Сегодня мы осознанно совершим акт доброты и проанализируем его влияние.
+  </div>
+  
+  <!-- Статистика для мотивации -->
+  <div class="row mb-4">
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">30-50%</h4>
+          <small>рост окситоцина</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">40%</h4>
+          <small>больше счастья</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">35-45%</h4>
+          <small>меньше тревоги</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">3</h4>
+          <small>акта в неделю</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Примеры добрых дел (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#kindnessExamples">
+          💡 Идеи для добрых дел (нажмите для вдохновения)
+        </button>
+      </h2>
+      <div id="kindnessExamples" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <% content["kindness_examples"].each do |category| %>
+            <h6 class="mt-2"><%= category["category"] %>:</h6>
+            <ul>
+              <% category["examples"].each do |example| %>
+                <li><%= example %></li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 4 шага (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#kindnessSteps">
+          📝 4 шага практики (нажмите для справки)
+        </button>
+      </h2>
+      <div id="kindnessSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startKindnessExercise">
+      <i class="fas fa-heart me-2"></i>Начать практику доброты
+    </button>
+    <p class="text-secondary small mt-2">Выберите доброе дело, совершите его и проанализируйте результат.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="kindnessStepsContainer" style="display: none;"></div>
+</div>

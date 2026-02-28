@@ -1,0 +1,101 @@
+<!-- Интерактивная часть дня 16 -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-handshake me-2"></i>
+    <strong>Социальные связи — это научно-обоснованная практика для психического здоровья.</strong> Сегодня вы научитесь восстанавливать отношения с людьми, которые были важны в вашей жизни.
+  </div>
+  
+  <!-- Статистика для мотивации -->
+  <div class="row mb-4">
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">25-35%</h4>
+          <small>больше счастья</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">20-30%</h4>
+          <small>меньше стресса</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">15-20%</h4>
+          <small>дольше жизнь</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">95%</h4>
+          <small>рады общению</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Почему мы теряем контакты (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#whyLost">
+          🤔 Почему мы теряем контакты? (нажмите)
+        </button>
+      </h2>
+      <div id="whyLost" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-clock text-secondary me-2"></i> <strong>Временной парадокс:</strong> «Сейчас некогда» → «Уже прошло полгода» → «Слишком поздно»</li>
+            <li class="mb-2"><i class="fas fa-map-marker-alt text-secondary me-2"></i> <strong>Эффект дистанции:</strong> Переезд, смена работы, разные графики</li>
+            <li class="mb-2"><i class="fas fa-star text-secondary me-2"></i> <strong>Синдром перфекциониста:</strong> «Нужен идеальный повод» → «Повода нет»</li>
+            <li class="mb-2"><i class="fas fa-heart-broken text-secondary me-2"></i> <strong>Страх неловкости:</strong> «А вдруг им не интересно?»</li>
+          </ul>
+          <p class="text-success mt-2"><i class="fas fa-smile me-1"></i> Хорошая новость: 95% людей рады, когда с ними связываются!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6 шагов (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reconnectionSteps">
+          📝 6 шагов восстановления связей (нажмите для справки)
+        </button>
+      </h2>
+      <div id="reconnectionSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startReconnectionExercise">
+      <i class="fas fa-handshake me-2"></i>Начать восстановление связей
+    </button>
+    <p class="text-secondary small mt-2">Вспомните людей, выберите формат, подготовьтесь и сделайте первый шаг.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="reconnectionStepsContainer" style="display: none;"></div>
+</div>
