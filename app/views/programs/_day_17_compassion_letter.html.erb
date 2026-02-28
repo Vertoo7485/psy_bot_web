@@ -1,0 +1,113 @@
+<!-- Интерактивная часть дня 17 -->
+<div class="mt-4">
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Письмо себе от лучшего друга.</strong> Сегодня вы научитесь дарить себе ту же поддержку, которую дарите другим.
+  </div>
+  
+  <!-- Статистика для мотивации -->
+  <div class="row mb-4">
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">40%</h4>
+          <small>меньше тревоги</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">45%</h4>
+          <small>выше самооценка</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">35%</h4>
+          <small>устойчивее к стрессу</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">30%</h4>
+          <small>выше мотивация</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Мифы о самосострадании (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#myths">
+          🤔 Мифы о самосострадании (нажмите)
+        </button>
+      </h2>
+      <div id="myths" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% if content["myths"].present? %>
+              <% content["myths"].each do |myth| %>
+                <div class="col-12 mb-2">
+                  <span class="badge bg-danger me-2">❌</span> <strong><%= myth["myth"] %></strong><br>
+                  <span class="badge bg-success me-2 mt-1">✅</span> <em><%= myth["truth"] %></em>
+                </div>
+              <% end %>
+            <% else %>
+              <div class="col-12 mb-2">
+                <span class="badge bg-danger me-2">❌</span> <strong>Это слабость</strong><br>
+                <span class="badge bg-success me-2 mt-1">✅</span> <em>Признак эмоциональной зрелости</em>
+              </div>
+              <div class="col-12 mb-2">
+                <span class="badge bg-danger me-2">❌</span> <strong>Я буду лениться</strong><br>
+                <span class="badge bg-success me-2 mt-1">✅</span> <em>Самосострадание повышает мотивацию</em>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 5 шагов (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#compassionSteps">
+          📝 5 шагов письма самосострадания (нажмите для справки)
+        </button>
+      </h2>
+      <div id="compassionSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startCompassionLetter">
+      <i class="fas fa-heart me-2"></i>Написать письмо себе
+    </button>
+    <p class="text-secondary small mt-2">5 шагов к поддержке себя как лучшего друга.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="compassionLetterContainer" style="display: none;"></div>
+</div>

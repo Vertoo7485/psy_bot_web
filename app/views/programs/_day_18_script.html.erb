@@ -1,0 +1,673 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 18 script loaded')
+    
+    const startBtn = document.getElementById('startPleasureActivity')
+    const container = document.getElementById('pleasureActivityContainer')
+    
+    // Шкала чувств
+    const feelingsScale = {
+      1: { emoji: '😔', text: 'Очень плохо', desc: 'тяжело, грустно, нет сил' },
+      2: { emoji: '🙁', text: 'Плохо', desc: 'некомфортно, тревожно' },
+      3: { emoji: '😐', text: 'Нейтрально', desc: 'ровно, спокойно' },
+      4: { emoji: '🙂', text: 'Хорошо', desc: 'легко, приятно' },
+      5: { emoji: '😊', text: 'Отлично', desc: 'радостно, энергично' }
+    }
+    
+    // Категории активностей из seeds
+    const categories = <%= raw content["activity_categories"].to_json %>
+    
+    let currentStep = 0
+    let activityData = {
+      feelingsBefore: null,
+      category: null,
+      activityPlan: null,
+      plannedTime: null,
+      feelingsAfter: null,
+      reflection: null,
+      challenges: []
+    }
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start pleasure activity clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showFeelingsBefore()
+      })
+    }
+    
+    // ===== ШАГ 1: ОЦЕНКА НАСТРОЕНИЯ =====
+    function showFeelingsBefore() {
+      let buttons = ''
+      for (let i = 1; i <= 5; i++) {
+        buttons += `
+          <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-3">
+            <button class="btn btn-outline-primary feeling-btn w-100" data-value="${i}" style="height: 100%">
+              <div style="font-size: 2rem;">${feelingsScale[i].emoji}</div>
+              <div><strong>${i}</strong> — ${feelingsScale[i].text}</div>
+              <small class="text-secondary">${feelingsScale[i].desc}</small>
+            </button>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step0">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🧠 Шаг 1: Оцените ваше настроение</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Как вы себя чувствуете <strong>прямо сейчас</strong>? Честно, без оценок.</p>
+            
+            <div class="row">
+              ${buttons}
+            </div>
+            
+            <!-- Кнопка помощи -->
+            <div class="accordion mt-4">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep1">
+                    ❓ Почему важно оценивать настроение?
+                  </button>
+                </h2>
+                <div id="helpStep1" class="accordion-collapse collapse">
+                  <div class="accordion-body bg-light">
+                    <p class="mb-2">Когда мы фиксируем состояние ДО, мы можем увидеть РЕАЛЬНЫЕ изменения после. Часто мы не замечаем, как маленькие радости улучшают наше самочувствие.</p>
+                    <p class="mb-0">Исследования показывают: осознанное отслеживание настроения усиливает положительный эффект на <strong>30-40%</strong>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      document.querySelectorAll('.feeling-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const value = parseInt(this.dataset.value)
+          activityData.feelingsBefore = value
+          
+          // Визуальное выделение
+          document.querySelectorAll('.feeling-btn').forEach(b => {
+            b.classList.remove('btn-primary', 'text-white')
+            b.classList.add('btn-outline-primary')
+          })
+          this.classList.remove('btn-outline-primary')
+          this.classList.add('btn-primary', 'text-white')
+          
+          // Подтверждение
+          const feeling = feelingsScale[value]
+          showTemporaryMessage(`✅ Запомнила: сейчас вы чувствуете себя "${feeling.text}"`)
+          
+          // Автоматический переход
+          setTimeout(() => {
+            document.getElementById('step0').remove()
+            currentStep = 1
+            showCategorySelection()
+          }, 1500)
+        })
+      })
+    }
+    
+    // ===== ШАГ 2: ВЫБОР КАТЕГОРИИ =====
+    function showCategorySelection() {
+      let categoryButtons = ''
+      categories.forEach(cat => {
+        categoryButtons += `
+          <div class="col-12 col-sm-6 col-md-4 mb-3">
+            <button class="btn btn-outline-primary w-100 category-btn h-100" data-category="${cat.id}" style="padding: 1rem;">
+              <div style="font-size: 2rem;">${cat.title.split(' ')[0]}</div>
+              <div><strong>${cat.title}</strong></div>
+              <small class="text-secondary">${cat.description}</small>
+            </button>
+          </div>
+        `
+      })
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step1">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🎯 Шаг 2: Выберите категорию удовольствия</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Прислушайтесь к себе:</strong> что сейчас хочется? Не что "полезно" или "нужно", а что действительно откликается.</p>
+            
+            <div class="row">
+              ${categoryButtons}
+            </div>
+            
+            <!-- Кнопка помощи -->
+            <div class="accordion mt-4">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep2">
+                    ❓ Не могу выбрать — слишком много вариантов
+                  </button>
+                </h2>
+                <div id="helpStep2" class="accordion-collapse collapse">
+                  <div class="accordion-body bg-light">
+                    <p class="mb-2">Это нормально! Попробуйте <strong>«правило 5 секунд»</strong>: закройте глаза и выберите первую категорию, которая пришла в голову. Доверьтесь интуиции.</p>
+                    <p class="mb-0">Или спросите себя: «Что я любил(а) делать в детстве?» Часто наши истинные удовольствия родом оттуда.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const category = this.dataset.category
+          activityData.category = category
+          const selectedCategory = categories.find(c => c.id === category)
+          
+          // Визуальное выделение
+          document.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('btn-primary', 'text-white')
+            b.classList.add('btn-outline-primary')
+          })
+          this.classList.remove('btn-outline-primary')
+          this.classList.add('btn-primary', 'text-white')
+          
+          showTemporaryMessage(`✅ Отличный выбор! ${selectedCategory.title}`)
+          
+          setTimeout(() => {
+            document.getElementById('step1').remove()
+            currentStep = 2
+            showActivityPlanning(category)
+          }, 1500)
+        })
+      })
+    }
+    
+    // ===== ШАГ 3: ПЛАНИРОВАНИЕ АКТИВНОСТИ =====
+    function showActivityPlanning(category) {
+      const selectedCategory = categories.find(c => c.id === category)
+      
+      let examplesHtml = ''
+      if (selectedCategory && selectedCategory.examples) {
+        examplesHtml = `
+          <div class="mb-3">
+            <p class="small text-secondary mb-1"><i class="fas fa-lightbulb me-1"></i> Идеи для вдохновения:</p>
+            <ul class="small">
+              ${selectedCategory.examples.map(ex => `<li>💡 ${ex}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step2">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">📝 Шаг 3: Спланируйте конкретную активность</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Что именно вы хотите сделать? Чем конкретнее план, тем легче его выполнить.</p>
+            
+            ${examplesHtml}
+            
+            <textarea class="form-control" id="activityPlan" rows="3" placeholder="Например: почитать 15 минут перед сном, сварить какао и посмотреть закат..."></textarea>
+            
+            <!-- Кнопка помощи -->
+            <div class="accordion mt-4">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep3">
+                    ❓ Что писать? Не знаю, что выбрать
+                  </button>
+                </h2>
+                <div id="helpStep3" class="accordion-collapse collapse">
+                  <div class="accordion-body bg-light">
+                    <p>Начните с малого: <strong>5-15 минут</strong>. Не нужно планировать сложное. Даже чашка любимого чая в тишине — уже акт заботы о себе.</p>
+                    <p class="mb-0">Помните: цель — не результат, а сам процесс и удовольствие от него.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveActivityPlan()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveActivityPlan = function() {
+      const plan = document.getElementById('activityPlan').value.trim()
+      
+      if (!plan) {
+        alert('Пожалуйста, напишите план активности')
+        return
+      }
+      
+      activityData.activityPlan = plan
+      document.getElementById('step2').remove()
+      currentStep = 3
+      showTimePlanning()
+    }
+    
+    // ===== ШАГ 4: НАЗНАЧЕНИЕ ВРЕМЕНИ =====
+    function showTimePlanning() {
+      let stepHtml = `
+        <div class="card mb-4" id="step3">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">⏰ Шаг 4: Назначьте время</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Когда вы это сделаете? Конкретное время <strong>повышает вероятность выполнения на 70%</strong>.</p>
+            
+            <textarea class="form-control" id="timePlan" rows="2" placeholder="Например: сегодня в 20:00, завтра утром после завтрака..."></textarea>
+            
+            <!-- Кнопка помощи -->
+            <div class="accordion mt-4">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep4">
+                    ❓ Боюсь, что не успею
+                  </button>
+                </h2>
+                <div id="helpStep4" class="accordion-collapse collapse">
+                  <div class="accordion-body bg-light">
+                    <p>Это частая тревога. Попробуйте:</p>
+                    <ul>
+                      <li>Запланируйте <strong>10-15 минут</strong> — это всегда можно найти</li>
+                      <li>Установите напоминание в телефоне</li>
+                      <li>Скажите себе: «Я попробую, а если не получится — перенесу»</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveTimePlan()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveTimePlan = function() {
+      const time = document.getElementById('timePlan').value.trim()
+      
+      if (!time) {
+        alert('Пожалуйста, напишите время')
+        return
+      }
+      
+      activityData.plannedTime = time
+      document.getElementById('step3').remove()
+      currentStep = 4
+      showSummary()
+    }
+    
+    // ===== ШАГ 5: СОХРАНЕНИЕ ПЛАНА =====
+    function showSummary() {
+      const category = categories.find(c => c.id === activityData.category)
+      const feeling = feelingsScale[activityData.feelingsBefore]
+      
+      let stepHtml = `
+        <div class="card mb-4 border-success" id="step4">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">📋 Ваш план удовольствия</h6>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-light">
+              <p><strong>Что вы сейчас чувствуете:</strong> ${feeling.emoji} ${activityData.feelingsBefore}/5 — ${feeling.text}</p>
+              <p><strong>Категория:</strong> ${category ? category.title : activityData.category}</p>
+              <p><strong>Активность:</strong> ${activityData.activityPlan}</p>
+              <p><strong>Время:</strong> ${activityData.plannedTime}</p>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-heart me-2"></i>
+              <strong>Маленькое напоминание:</strong> Это время принадлежит только вам. Никакой вины, никаких «надо». Только радость.
+            </div>
+            
+            <div class="row mt-4">
+              <div class="col-6">
+                <button class="btn btn-success w-100" onclick="saveActivity()">
+                  ✅ Да, сохранить
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-outline-secondary w-100" onclick="restartPlanning()">
+                  🔄 Хочу изменить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveActivity = function() {
+      fetch('/pleasure_activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          activity: {
+            title: activityData.activityPlan,
+            activity_type: activityData.category,
+            feelings_before: activityData.feelingsBefore,
+            planned_time: activityData.plannedTime,
+            completed: false
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          activityData.id = data.id
+          showReflection()
+        } else {
+          alert('Ошибка при сохранении: ' + data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+        alert('Ошибка при сохранении')
+      })
+    }
+    
+    // ===== ШАГ 6: РЕФЛЕКСИЯ ПОСЛЕ ВЫПОЛНЕНИЯ =====
+    function showReflection() {
+      let stepHtml = `
+        <div class="card mb-4" id="step5">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">✨ Шаг 5: После выполнения</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы уже составили план. <strong>Когда выполните активность, вернитесь сюда.</strong></p>
+            
+            <div class="alert alert-success">
+              <i class="fas fa-heart me-2"></i>
+              После того, как уделите время себе, нажмите кнопку ниже.
+            </div>
+            
+            <button class="btn btn-success w-100" id="activityCompletedBtn">
+              ✅ Я выполнил(а) активность
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчик для кнопки
+      setTimeout(() => {
+        const activityBtn = document.getElementById('activityCompletedBtn')
+        if (activityBtn) {
+          console.log('Activity button found, adding event listener')
+          activityBtn.addEventListener('click', function() {
+            console.log('Activity button clicked')
+            showAfterQuestions()
+          })
+        } else {
+          console.error('Activity button not found!')
+        }
+      }, 100)
+    }
+    
+    function showAfterQuestions() {
+      console.log('showAfterQuestions called')
+      document.getElementById('step5').remove()
+      
+      // Оценка настроения после
+      let feelingsAfterButtons = ''
+      for (let i = 1; i <= 5; i++) {
+        feelingsAfterButtons += `
+          <div class="col-4 col-md-2 mb-3">
+            <button class="btn btn-outline-primary feeling-after-btn w-100" data-value="${i}">
+              <div style="font-size: 2rem;">${feelingsScale[i].emoji}</div>
+              <div>${i}</div>
+            </button>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step6">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">✨ Как вы себя чувствуете после?</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              ${feelingsAfterButtons}
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчики для кнопок настроения
+      setTimeout(() => {
+        document.querySelectorAll('.feeling-after-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const value = parseInt(this.dataset.value)
+            console.log('Feeling after selected:', value)
+            activityData.feelingsAfter = value
+            
+            // Визуальное выделение
+            document.querySelectorAll('.feeling-after-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+            
+            setTimeout(() => {
+              document.getElementById('step6').remove()
+              showReflectionQuestions()
+            }, 500)
+          })
+        })
+      }, 100)
+    }
+    
+    function showReflectionQuestions() {
+      console.log('showReflectionQuestions called')
+      let stepHtml = `
+        <div class="card mb-4" id="step7">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">💭 Поделитесь впечатлениями</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Что вы чувствовали во время активности?</strong> Были ли мысли о делах? Удалось ли побыть в моменте?</p>
+            
+            <textarea class="form-control" id="reflectionText" rows="4" placeholder="Например: Сначала было трудно отключиться от мыслей, но через 5 минут я расслабилась и получила удовольствие..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" id="saveReflectionBtn">
+                Завершить анализ
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчик для кнопки сохранения
+      setTimeout(() => {
+        const saveBtn = document.getElementById('saveReflectionBtn')
+        if (saveBtn) {
+          console.log('Save button found')
+          saveBtn.addEventListener('click', function() {
+            console.log('Save button clicked')
+            saveReflection()
+          })
+        }
+      }, 100)
+    }
+    
+    function saveReflection() {
+      console.log('saveReflection called')
+      const reflection = document.getElementById('reflectionText').value.trim()
+      
+      if (!reflection) {
+        if (!confirm('Вы не написали впечатления. Все равно завершить?')) {
+          return
+        }
+      }
+      
+      console.log('Saving reflection for activity:', activityData.id)
+      console.log('Feelings after:', activityData.feelingsAfter)
+      
+      // Показываем сообщение о сохранении
+      showTemporaryMessage('⏳ Сохраняю...')
+      
+      fetch(`/pleasure_activities/${activityData.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          activity: {
+            feelings_after: activityData.feelingsAfter,
+            reflection: reflection,
+            completed: true,
+            completed_at: new Date().toISOString()
+          }
+        })
+      })
+      .then(response => {
+        console.log('Response status:', response.status)
+        if (!response.ok) {
+          throw new Error('Network response was not ok')
+        }
+        return response.json()
+      })
+      .then(data => {
+        console.log('Response data:', data)
+        if (data.success) {
+          console.log('✅ Activity updated successfully')
+          showTemporaryMessage('✅ Сохранено!')
+          setTimeout(() => {
+            showFinalSummary()
+          }, 500)
+        } else {
+          alert('Ошибка при сохранении: ' + (data.error || 'Неизвестная ошибка'))
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+        alert('Ошибка при сохранении. Попробуйте еще раз.')
+      })
+    }
+    
+    function showFinalSummary() {
+      console.log('showFinalSummary called')
+      const before = feelingsScale[activityData.feelingsBefore]
+      const after = feelingsScale[activityData.feelingsAfter]
+      const change = activityData.feelingsAfter - activityData.feelingsBefore
+      
+      let changeText = ''
+      if (change > 0) {
+        changeText = `📈 Настроение улучшилось на ${change} балла!`
+      } else if (change < 0) {
+        changeText = `📉 Настроение немного снизилось. Может, нужен другой вид активности?`
+      } else {
+        changeText = `📊 Настроение стабильно — это тоже хорошо!`
+      }
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Анализ завершен!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы уделили время себе — это важный шаг к гармонии с собой! 💖</p>
+            
+            <div class="alert alert-light">
+              <p><strong>Было:</strong> ${before.emoji} ${activityData.feelingsBefore}/5 — ${before.text}</p>
+              <p><strong>Стало:</strong> ${after.emoji} ${activityData.feelingsAfter}/5 — ${after.text}</p>
+              <p><strong>${changeText}</strong></p>
+            </div>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay18">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      // Добавляем обработчик для кнопки завершения дня
+      setTimeout(() => {
+        const completeBtn = document.getElementById('completeDay18')
+        if (completeBtn) {
+          completeBtn.addEventListener('click', function() {
+            console.log('Complete day button clicked')
+            
+            const reflectionSection = document.getElementById('reflectionSection')
+            if (reflectionSection) {
+              reflectionSection.classList.remove('d-none')
+              reflectionSection.scrollIntoView({ behavior: 'smooth' })
+            }
+            
+            const completeDayBtn = document.getElementById('completeDay')
+            if (completeDayBtn) {
+              completeDayBtn.classList.remove('d-none')
+            }
+          })
+        }
+      }, 100)
+    }
+    
+    // Вспомогательные функции
+    function showTemporaryMessage(text) {
+      const msgDiv = document.createElement('div')
+      msgDiv.className = 'alert alert-success text-center position-fixed top-50 start-50 translate-middle'
+      msgDiv.style.zIndex = '9999'
+      msgDiv.textContent = text
+      document.body.appendChild(msgDiv)
+      setTimeout(() => msgDiv.remove(), 1400)
+    }
+    
+    window.restartPlanning = function() {
+      document.getElementById('step4').remove()
+      activityData = {
+        feelingsBefore: activityData.feelingsBefore,
+        category: null,
+        activityPlan: null,
+        plannedTime: null,
+        feelingsAfter: null,
+        reflection: null
+      }
+      currentStep = 1
+      showCategorySelection()
+    }
+  })
+</script>

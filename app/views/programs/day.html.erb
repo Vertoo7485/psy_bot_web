@@ -198,6 +198,18 @@
       <%= render 'day_16_script', content: content %>
     <% end %>
 
+    <!-- День 17: Письмо самосострадания -->
+    <% if day.day_number == 17 %>
+      <%= render 'day_17_compassion_letter', content: content %>
+      <%= render 'day_17_script', content: content %>
+    <% end %>
+
+    <!-- День 18: Время для себя -->
+    <% if day.day_number == 18 %>
+      <%= render 'day_18_pleasure', content: content %>
+      <%= render 'day_18_script', content: content %>
+    <% end %>
+
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
     <%= render 'programs/shared/daily_tips', content: content %>

@@ -46,6 +46,8 @@ Rails.application.routes.draw do
   resources :procrastination_tasks, only: [:create, :index]
   resources :kindness_entries, only: [:create, :index]
   resources :reconnection_practices, only: [:create, :index]
+  resources :compassion_letters, only: [:create, :index]
+  resources :pleasure_activities, only: [:create, :index, :update]
   
   # Главная страница
   root to: 'home#index'
