@@ -1,0 +1,388 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 19 script loaded')
+    
+    const startBtn = document.getElementById('startMeditation')
+    const container = document.getElementById('meditationContainer')
+    
+    // Шаги медитации из seeds
+    const steps = <%= raw content["meditation_steps"].to_json %>
+    const ratingScale = <%= raw content["rating_scale"].to_json %>
+    
+    let currentStep = 0
+    let timerActive = false
+    let timerInterval = null
+    let meditationData = {
+      rating: null,
+      feedback: null
+    }
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start meditation clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    // ===== ПОКАЗ ШАГА МЕДИТАЦИИ С ТАЙМЕРОМ =====
+    function showStep() {
+      if (currentStep >= steps.length) {
+        completeMeditation()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const totalSteps = steps.length
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step${currentStep}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">${step.emoji} Шаг ${step.step} из ${totalSteps}: ${step.title}</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">${step.instruction}</p>
+            
+            <div class="alert alert-light">
+              <i class="fas fa-clock me-2"></i> <strong>Время:</strong> ${step.duration} ${step.duration == 1 ? 'минута' : 'минуты'}
+            </div>
+            
+            <!-- Кнопка запуска таймера -->
+            <div class="text-center mt-4" id="timerButtonContainer">
+              <button class="btn btn-success" onclick="startTimer(${step.duration}, ${currentStep})">
+                <i class="fas fa-play me-2"></i>Начать ${step.duration} мин
+              </button>
+            </div>
+            
+            <!-- Контейнер для таймера (изначально скрыт) -->
+            <div id="timerDisplay_${currentStep}" class="text-center mt-4" style="display: none;">
+              <h2 class="display-4" id="timerTime_${currentStep}">${step.duration}:00</h2>
+              <p class="text-secondary">Осталось времени</p>
+              <button class="btn btn-outline-secondary btn-sm" onclick="skipTimer(${currentStep})">
+                Пропустить таймер
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    // ===== ФУНКЦИЯ ВОСПРОИЗВЕДЕНИЯ ЗВУКА =====
+    function playBeepSound() {
+      try {
+        // Пробуем простой вариант с Audio
+        const audio = new Audio('data:audio/wav;base64,UklGRlwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAAA8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PDw8PA==')
+        audio.volume = 0.3
+        audio.play().catch(e => {
+          console.log('Simple audio failed, trying Web Audio')
+          tryWebAudio()
+        })
+      } catch (e) {
+        console.log('Audio not supported')
+        tryWebAudio()
+      }
+    }
+    
+    function tryWebAudio() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        oscillator.frequency.value = 880
+        gainNode.gain.value = 0.2
+        
+        oscillator.start()
+        
+        if (audioContext.state === 'suspended') {
+          audioContext.resume()
+        }
+        
+        setTimeout(() => {
+          oscillator.stop()
+          audioContext.close()
+        }, 400)
+      } catch (e) {
+        console.log('Web Audio failed')
+      }
+    }
+    
+    // ===== ТАЙМЕР =====
+    window.startTimer = function(minutes, stepIndex) {
+      if (timerActive) return
+      
+      // Скрываем кнопку запуска
+      document.getElementById('timerButtonContainer').style.display = 'none'
+      
+      // Показываем таймер
+      const timerDisplay = document.getElementById(`timerDisplay_${stepIndex}`)
+      timerDisplay.style.display = 'block'
+      
+      const timerElement = document.getElementById(`timerTime_${stepIndex}`)
+      let totalSeconds = minutes * 60
+      timerActive = true
+      
+      timerInterval = setInterval(() => {
+        totalSeconds--
+        
+        const mins = Math.floor(totalSeconds / 60)
+        const secs = totalSeconds % 60
+        timerElement.textContent = `${mins}:${secs.toString().padStart(2, '0')}`
+        
+        if (totalSeconds <= 0) {
+          clearInterval(timerInterval)
+          timerActive = false
+          
+          // Воспроизводим звуковой сигнал
+          playBeepSound()
+          
+          // Показываем сообщение о завершении
+          timerElement.innerHTML = '✨ Время вышло!'
+          
+          // Автоматически переходим к следующему шагу через 1.5 секунды
+          setTimeout(() => {
+            if (timerActive) return
+            document.getElementById(`step${stepIndex}`).remove()
+            currentStep++
+            showStep()
+          }, 1500)
+        }
+      }, 1000)
+    }
+    
+    window.skipTimer = function(stepIndex) {
+      if (timerInterval) {
+        clearInterval(timerInterval)
+        timerActive = false
+      }
+      document.getElementById(`step${stepIndex}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    // ===== ЗАВЕРШЕНИЕ МЕДИТАЦИИ =====
+    function completeMeditation() {
+      console.log('Meditation completed')
+      
+      // Создаем кнопки оценки
+      let ratingButtons = ''
+      for (let i = 1; i <= 5; i++) {
+        let emoji = ''
+        if (i == 1) emoji = '😔'
+        else if (i == 2) emoji = '🙁'
+        else if (i == 3) emoji = '😐'
+        else if (i == 4) emoji = '🙂'
+        else if (i == 5) emoji = '😊'
+        
+        ratingButtons += `
+          <div class="col-2 text-center mb-3">
+            <button class="btn btn-outline-primary rating-btn w-100" data-rating="${i}">
+              <div style="font-size: 2rem;">${emoji}</div>
+              <div>${i}</div>
+            </button>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="ratingStep">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✨ Медитация завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы сделали это! 5 минут практики — отличный результат для первого раза.</p>
+            
+            <p class="mb-2"><strong>Как вы себя чувствуете?</strong></p>
+            <div class="row">
+              ${ratingButtons}
+            </div>
+            
+            <div class="mt-4">
+              <p class="small text-secondary">
+                <i class="fas fa-info-circle me-1"></i>
+                Нет "неправильных" результатов. Даже если отвлекались много раз — это нормально для начала.
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчики для кнопок оценки
+      document.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const rating = parseInt(this.dataset.rating)
+          meditationData.rating = rating
+          
+          // Визуальное выделение
+          document.querySelectorAll('.rating-btn').forEach(b => {
+            b.classList.remove('btn-primary', 'text-white')
+            b.classList.add('btn-outline-primary')
+          })
+          this.classList.remove('btn-outline-primary')
+          this.classList.add('btn-primary', 'text-white')
+          
+          setTimeout(() => {
+            document.getElementById('ratingStep').remove()
+            showFeedback()
+          }, 500)
+        })
+      })
+    }
+    
+    // ===== ВВОД ОТЗЫВА =====
+    function showFeedback() {
+      let stepHtml = `
+        <div class="card mb-4" id="feedbackStep">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">💭 Поделитесь впечатлениями</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Что вы чувствовали во время медитации? Было ли трудно сосредоточиться?</p>
+            
+            <textarea class="form-control" id="feedbackText" rows="4" placeholder="Например: Сначала было трудно, мысли убегали, но потом стало спокойнее..."></textarea>
+            
+            <div class="row mt-4">
+              <div class="col-6">
+                <button class="btn btn-success w-100" onclick="saveFeedback()">
+                  ✅ Сохранить
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-outline-secondary w-100" onclick="skipFeedback()">
+                  ⏭️ Пропустить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveFeedback = function() {
+      const feedback = document.getElementById('feedbackText').value.trim()
+      meditationData.feedback = feedback
+      saveMeditation()
+    }
+    
+    window.skipFeedback = function() {
+      meditationData.feedback = ''
+      saveMeditation()
+    }
+    
+    // ===== СОХРАНЕНИЕ МЕДИТАЦИИ =====
+    function saveMeditation() {
+      console.log('Saving meditation session')
+      showTemporaryMessage('⏳ Сохраняю...')
+      
+      fetch('/meditation_sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          meditation_session: {
+            duration_minutes: steps.reduce((sum, step) => sum + step.duration, 0),
+            technique: 'breathing_anchor',
+            rating: meditationData.rating,
+            notes: meditationData.feedback,
+            completed_at: new Date().toISOString()
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showTemporaryMessage('✅ Сохранено!')
+          setTimeout(() => {
+            showSummary()
+          }, 500)
+        } else {
+          alert('Ошибка при сохранении: ' + data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+        alert('Ошибка при сохранении. Попробуйте еще раз.')
+      })
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      const ratingText = ratingScale[meditationData.rating.toString()] || 'Оценка сохранена'
+      
+      let stepHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Ваша первая медитация завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Поздравляю с первым шагом в медитации! 🎉</p>
+            
+            <div class="alert alert-light">
+              <p><strong>Ваша оценка:</strong> ${meditationData.rating}/5 — ${ratingText}</p>
+              ${meditationData.feedback ? `<p><strong>Ваши впечатления:</strong> "${meditationData.feedback}"</p>` : ''}
+            </div>
+            
+            <div class="mt-3">
+              <p class="small text-secondary">
+                <i class="fas fa-lightbulb me-1"></i>
+                <strong>Совет:</strong> Старайтесь медитировать регулярно, даже по 2-3 минуты в день. Это важнее длительности.
+              </p>
+            </div>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay19">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчик для кнопки завершения
+      const completeBtn = document.getElementById('completeDay19')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          console.log('Complete day button clicked')
+          
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    // Вспомогательная функция
+    function showTemporaryMessage(text) {
+      const msgDiv = document.createElement('div')
+      msgDiv.className = 'alert alert-success text-center position-fixed top-50 start-50 translate-middle'
+      msgDiv.style.zIndex = '9999'
+      msgDiv.textContent = text
+      document.body.appendChild(msgDiv)
+      setTimeout(() => msgDiv.remove(), 1400)
+    }
+  })
+</script>

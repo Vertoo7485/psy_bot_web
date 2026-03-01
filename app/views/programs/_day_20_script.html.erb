@@ -1,0 +1,474 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 20 script loaded')
+    
+    const startBtn = document.getElementById('startFearExercise')
+    const container = document.getElementById('fearContainer')
+    
+    // Категории страхов из seeds
+    const categories = <%= raw content["fear_categories"].to_json %>
+    
+    let currentStep = 0
+    let fearData = {
+      category: null,
+      action: null,
+      awareness: null,
+      analysis: null,
+      microSteps: null,
+      actionCompleted: false,
+      reflection: null
+    }
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start fear exercise clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        showCategorySelection()
+      })
+    }
+    
+    // ===== ШАГ 1: ВЫБОР КАТЕГОРИИ =====
+    function showCategorySelection() {
+      let categoryButtons = ''
+      categories.forEach(cat => {
+        categoryButtons += `
+          <div class="col-12 col-sm-6 mb-3">
+            <button class="btn btn-outline-primary w-100 category-btn h-100" data-category="${cat.id}" style="padding: 1rem;">
+              <div style="font-size: 2rem;">${cat.emoji}</div>
+              <div><strong>${cat.name}</strong></div>
+              <small class="text-secondary">${cat.examples.slice(0, 2).join(' • ')}...</small>
+            </button>
+          </div>
+        `
+      })
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step1">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🎯 Шаг 1: Выберите категорию страха</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">В какой сфере вы хотели бы поработать сегодня? Выбирайте не самый большой страх, а тот, с которым готовы справиться СЕГОДНЯ.</p>
+            
+            <div class="row">
+              ${categoryButtons}
+            </div>
+            
+            <!-- Кнопка помощи -->
+            <div class="accordion mt-4">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpCategory">
+                    ❓ Не знаю, что выбрать
+                  </button>
+                </h2>
+                <div id="helpCategory" class="accordion-collapse collapse">
+                  <div class="accordion-body bg-light">
+                    <p>Начните с категории <strong>"Малые победы"</strong> — там самые безопасные действия. Маленькая победа даст силы для больших страхов.</p>
+                    <p class="mb-0">Помните: цель — не героический подвиг, а маленький шаг.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const categoryId = this.dataset.category
+          const selectedCategory = categories.find(c => c.id === categoryId)
+          fearData.category = selectedCategory
+          
+          // Визуальное выделение
+          document.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('btn-primary', 'text-white')
+            b.classList.add('btn-outline-primary')
+          })
+          this.classList.remove('btn-outline-primary')
+          this.classList.add('btn-primary', 'text-white')
+          
+          setTimeout(() => {
+            document.getElementById('step1').remove()
+            showActionSelection(selectedCategory)
+          }, 500)
+        })
+      })
+    }
+    
+    // ===== ШАГ 2: ВЫБОР ДЕЙСТВИЯ =====
+    function showActionSelection(category) {
+      let examplesHtml = ''
+      if (category.examples) {
+        examplesHtml = `
+          <div class="mb-3">
+            <p class="small text-secondary mb-1"><i class="fas fa-lightbulb me-1"></i> Примеры действий:</p>
+            <ul class="small">
+              ${category.examples.map(ex => `<li>💡 ${ex}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step2">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">📝 Шаг 2: Выберите действие</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Что именно вы хотите сделать?</strong> Выберите из примеров или придумайте своё.</p>
+            
+            ${examplesHtml}
+            
+            <p class="text-secondary small mb-1"><i>Важно:</i> Действие должно быть:</p>
+            <ul class="small">
+              <li>✅ Достаточно маленьким — чтобы сделать сегодня</li>
+              <li>✅ Достаточно значимым — чтобы почувствовать победу</li>
+              <li>✅ Достаточно конкретным — чтобы знать, что делать</li>
+              <li>✅ Достаточно безопасным — чтобы последствия были приемлемы</li>
+            </ul>
+            
+            <textarea class="form-control" id="actionInput" rows="2" placeholder="Напишите ваше действие..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveAction()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveAction = function() {
+      const action = document.getElementById('actionInput').value.trim()
+      
+      if (!action) {
+        alert('Пожалуйста, напишите действие')
+        return
+      }
+      
+      fearData.action = action
+      document.getElementById('step2').remove()
+      showAwarenessStep()
+    }
+    
+    // ===== ШАГ 3: ОСОЗНАНИЕ СТРАХА =====
+    function showAwarenessStep() {
+      let stepHtml = `
+        <div class="card mb-4" id="step3">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🎯 Шаг 3: Осознание страха</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Опишите свой страх максимально конкретно.</strong></p>
+            
+            <p class="small text-secondary">Что именно вас пугает в этом действии? Какие мысли приходят? Как реагирует тело?</p>
+            
+            <textarea class="form-control" id="awarenessInput" rows="3" placeholder="Например: Когда я думаю о том, чтобы позвонить, у меня учащается сердцебиение и я начинаю искать причины отложить..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveAwareness()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveAwareness = function() {
+      const awareness = document.getElementById('awarenessInput').value.trim()
+      
+      if (!awareness) {
+        if (!confirm('Вы не написали описание. Пропустить этот шаг?')) {
+          return
+        }
+      }
+      
+      fearData.awareness = awareness || 'Пропущено'
+      document.getElementById('step3').remove()
+      showAnalysisStep()
+    }
+    
+    // ===== ШАГ 4: АНАЛИЗ СТРАХА =====
+    function showAnalysisStep() {
+      let stepHtml = `
+        <div class="card mb-4" id="step4">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🧠 Шаг 4: Анализ страха</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Проведите реалистичную оценку:</strong></p>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">1. Что самое худшее может случиться?</label>
+              <textarea class="form-control mb-3" id="worstCaseInput" rows="2" placeholder="Например: Мне откажут, и я почувствую себя глупо..."></textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">2. Насколько это вероятно? (от 1% до 100%)</label>
+              <input type="number" class="form-control" id="probabilityInput" min="1" max="100" value="50">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">3. Что самое лучшее может случиться?</label>
+              <textarea class="form-control mb-3" id="bestCaseInput" rows="2" placeholder="Например: Всё пройдет отлично, и я буду гордиться собой..."></textarea>
+            </div>
+            
+            <div class="alert alert-info small">
+              <i class="fas fa-info-circle me-1"></i> Исследования показывают: в 85% случаев наши страхи преувеличены.
+            </div>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveAnalysis()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveAnalysis = function() {
+      const worstCase = document.getElementById('worstCaseInput').value.trim()
+      const probability = document.getElementById('probabilityInput').value
+      const bestCase = document.getElementById('bestCaseInput').value.trim()
+      
+      fearData.analysis = {
+        worstCase: worstCase || 'Не указано',
+        probability: probability,
+        bestCase: bestCase || 'Не указано'
+      }
+      
+      document.getElementById('step4').remove()
+      showPlanningStep()
+    }
+    
+    // ===== ШАГ 5: ПЛАНИРОВАНИЕ МИКРО-ШАГОВ =====
+    function showPlanningStep() {
+      let stepHtml = `
+        <div class="card mb-4" id="step5">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">📝 Шаг 5: Планирование микро-шагов</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Разбейте действие "${fearData.action}" на самые маленькие возможные шаги.</strong></p>
+            
+            <div class="alert alert-warning">
+              <i class="fas fa-lightbulb me-2"></i>
+              <strong>Секрет:</strong> Первый шаг должен быть настолько маленьким, что отказ от него будет смешным.
+            </div>
+            
+            <p class="small text-secondary">Пример для "Позвонить незнакомцу":</p>
+            <ul class="small">
+              <li>1. Найти номер телефона</li>
+              <li>2. Написать, что скажу</li>
+              <li>3. Сделать три глубоких вдоха</li>
+              <li>4. Набрать номер</li>
+              <li>5. Сказать "Алло"</li>
+            </ul>
+            
+            <textarea class="form-control" id="microStepsInput" rows="5" placeholder="Опишите ваши микро-шаги (каждый с новой строки)..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="savePlanning()">
+                Далее <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.savePlanning = function() {
+      const microSteps = document.getElementById('microStepsInput').value.trim()
+      
+      if (!microSteps) {
+        if (!confirm('Вы не написали микро-шаги. Пропустить?')) {
+          return
+        }
+      }
+      
+      fearData.microSteps = microSteps || 'Пропущено'
+      document.getElementById('step5').remove()
+      showActionStep()
+    }
+    
+    // ===== ШАГ 6: ДЕЙСТВИЕ =====
+    function showActionStep() {
+      let stepHtml = `
+        <div class="card mb-4" id="step6">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🚀 Шаг 6: Действие</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Самый важный момент!</strong> Сделайте первый микро-шаг прямо сейчас.</p>
+            
+            <div class="alert alert-info">
+              <p class="mb-2"><i class="fas fa-heart me-2"></i> <strong>Напутствие:</strong></p>
+              <p class="mb-1">• "Я делаю это не потому, что не боюсь, а чтобы научиться действовать, несмотря на страх"</p>
+              <p class="mb-1">• "Это всего лишь эксперимент"</p>
+              <p class="mb-0">• "Дискомфорт ≠ опасность"</p>
+            </div>
+            
+            <p class="fw-bold mt-3">Ваш первый микро-шаг:</p>
+            <p class="bg-light p-2 rounded">${fearData.microSteps.split('\n')[0] || 'Не указан'}</p>
+            
+            <div class="text-center mt-4">
+              <button class="btn btn-success btn-lg" onclick="completeAction()">
+                ✅ Я сделал(а) первый шаг!
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.completeAction = function() {
+      fearData.actionCompleted = true
+      document.getElementById('step6').remove()
+      showReflectionStep()
+    }
+    
+    // ===== ШАГ 7: РЕФЛЕКСИЯ =====
+    function showReflectionStep() {
+      let stepHtml = `
+        <div class="card mb-4" id="step7">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">💭 Шаг 7: Рефлексия</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Что произошло на самом деле?</strong></p>
+            
+            <p class="small text-secondary">Вопросы для анализа:</p>
+            <ul class="small">
+              <li>Чем это отличается от ваших ожиданий?</li>
+              <li>Что вы узнали о своем страхе?</li>
+              <li>Что вы узнали о себе?</li>
+            </ul>
+            
+            <textarea class="form-control" id="reflectionInput" rows="4" placeholder="Напишите ваши впечатления..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveReflection()">
+                Завершить анализ
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveReflection = function() {
+      const reflection = document.getElementById('reflectionInput').value.trim()
+      fearData.reflection = reflection
+      
+      showSummary()
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🏆 Поздравляем! День 20 завершен!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы только что сделали шаг навстречу своему страху! 🎉</p>
+            
+            <div class="alert alert-light">
+              <p><strong>Ваше действие:</strong> ${fearData.action}</p>
+              <p><strong>Категория:</strong> ${fearData.category.emoji} ${fearData.category.name}</p>
+              ${fearData.reflection ? `<p><strong>Ваш опыт:</strong> "${fearData.reflection}"</p>` : ''}
+            </div>
+            
+            <p class="small text-secondary mt-3">
+              <i class="fas fa-lightbulb me-1"></i>
+              <strong>Что это значит:</strong> Каждый раз, когда вы действуете, несмотря на страх, вы создаете новые нейронные пути и становитесь смелее.
+            </p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay20">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      saveToDatabase()
+      
+      const completeBtn = document.getElementById('completeDay20')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving fear conquest:', fearData)
+      
+      fetch('/fear_conquests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          fear_conquest: {
+            category: fearData.category.id,
+            action: fearData.action,
+            micro_steps: fearData.microSteps,
+            reflection: fearData.reflection,
+            conquered_at: new Date().toISOString()
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

@@ -210,6 +210,20 @@
       <%= render 'day_18_script', content: content %>
     <% end %>
 
+    <!-- День 19: Первая медитация -->
+    <% if day.day_number == 19 %>
+      <%= render 'day_19_meditation', content: content %>
+      <%= render 'day_19_script', content: content %>
+    <% end %>
+
+    
+    <!-- День 20: Преодоление страха -->
+    <% if day.day_number == 20 %>
+      <%= render 'day_20_fear', content: content %>
+      <%= render 'day_20_script', content: content %>
+    <% end %>
+
+
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
     <%= render 'programs/shared/daily_tips', content: content %>

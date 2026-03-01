@@ -48,6 +48,8 @@ Rails.application.routes.draw do
   resources :reconnection_practices, only: [:create, :index]
   resources :compassion_letters, only: [:create, :index]
   resources :pleasure_activities, only: [:create, :index, :update]
+  resources :meditation_sessions, only: [:create, :index]
+  resources :fear_conquests, only: [:create, :index]
   
   # Главная страница
   root to: 'home#index'

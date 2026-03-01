@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  conquered_at: 2026-02-28 19:04:48
+  category: MyString
+  action: MyString
+  micro_steps: MyText
+  reflection: MyText
+
+two:
+  user: two
+  conquered_at: 2026-02-28 19:04:48
+  category: MyString
+  action: MyString
+  micro_steps: MyText
+  reflection: MyText

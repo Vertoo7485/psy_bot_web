@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_28_091145) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_28_140448) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,6 +66,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_28_091145) do
     t.index ["user_id"], name: "index_emotion_diary_entries_on_user_id"
   end
 
+  create_table "fear_conquests", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "conquered_at"
+    t.string "category"
+    t.string "action"
+    t.text "micro_steps"
+    t.text "reflection"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_fear_conquests_on_user_id"
+  end
+
   create_table "gratitude_entries", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.date "entry_date"
@@ -97,6 +109,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_28_091145) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_kindness_entries_on_user_id"
+  end
+
+  create_table "meditation_sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "duration_minutes"
+    t.string "technique"
+    t.integer "rating"
+    t.text "notes"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_meditation_sessions_on_user_id"
   end
 
   create_table "pleasure_activities", force: :cascade do |t|
@@ -243,9 +267,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_28_091145) do
   add_foreign_key "compassion_letters", "users"
   add_foreign_key "days", "programs"
   add_foreign_key "emotion_diary_entries", "users"
+  add_foreign_key "fear_conquests", "users"
   add_foreign_key "gratitude_entries", "users"
   add_foreign_key "grounding_exercise_entries", "users"
   add_foreign_key "kindness_entries", "users"
+  add_foreign_key "meditation_sessions", "users"
   add_foreign_key "pleasure_activities", "users"
   add_foreign_key "procrastination_tasks", "users"
   add_foreign_key "reconnection_practices", "users"

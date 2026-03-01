@@ -1,0 +1,94 @@
+<!-- Интерактивная часть дня 19 -->
+<div class="mt-4">
+  <!-- Теплое приветствие -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3">🧘‍♀️ День 19: Ваша первая медитация</h5>
+    <p class="lead">Сегодня вы сделаете <strong>первый шаг в мир медитации</strong> — научитесь простой, но эффективной технике фокусировки на дыхании.</p>
+  </div>
+  
+  <!-- Простое объяснение с теплотой -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Важно знать:</strong> Медитация — это не попытка "отключить мысли", а <strong>умение наблюдать за ними без осуждения</strong>. Каждое возвращение внимания к дыханию — это успех.
+  </div>
+  
+  <!-- Научные факты вдохновляюще -->
+  <div class="card mb-4 bg-light">
+    <div class="card-body">
+      <h6 class="card-title">📊 Что говорит наука</h6>
+      <div class="row">
+        <div class="col-6 mb-2">
+          <span class="badge bg-success me-1">30-40%</span> меньше стресса
+        </div>
+        <div class="col-6 mb-2">
+          <span class="badge bg-primary me-1">20-30%</span> лучше концентрация
+        </div>
+        <div class="col-6 mb-2">
+          <span class="badge bg-warning me-1">25-35%</span> ниже тревога
+        </div>
+        <div class="col-6 mb-2">
+          <span class="badge bg-danger me-1">15-25%</span> лучше сон
+        </div>
+      </div>
+      <p class="small text-secondary mt-2 mb-0">* Данные исследований JAMA Internal Medicine</p>
+    </div>
+  </div>
+  
+  <!-- 5 шагов медитации (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#meditationSteps">
+          📝 5 шагов медитации (нажмите для справки)
+        </button>
+      </h2>
+      <div id="meditationSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["meditation_steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["instruction"] %></p>
+                <p class="text-secondary small ms-4"><i class="fas fa-clock"></i> <%= step["duration"] %> мин</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Что может мешать (аккордеон с эмпатией) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#blocks">
+          🤔 Что может мешать?
+        </button>
+      </h2>
+      <div id="blocks" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="fas fa-heart-broken text-danger me-2"></i> <strong>Мысли отвлекают:</strong> «Не могу сосредоточиться»</li>
+            <li class="mb-2"><i class="fas fa-heart-broken text-danger me-2"></i> <strong>Ожидания:</strong> «Должно быть по-другому»</li>
+            <li class="mb-2"><i class="fas fa-heart-broken text-danger me-2"></i> <strong>Нетерпение:</strong> «Хочу результат сразу»</li>
+            <li class="mb-2"><i class="fas fa-heart-broken text-danger me-2"></i> <strong>Сравнение:</strong> «У других получается лучше»</li>
+          </ul>
+          <p class="text-success mt-2"><i class="fas fa-smile me-1"></i> Всё это нормально! Сегодня мы будем учиться мягко замечать и отпускать.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startMeditation">
+      <i class="fas fa-heart me-2"></i>Начать первую медитацию
+    </button>
+    <p class="text-secondary small mt-2">5 минут осознанности. Просто следуйте инструкциям.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="meditationContainer" style="display: none;"></div>
+</div>

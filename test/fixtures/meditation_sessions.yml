@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  duration_minutes: 1
+  technique: MyString
+  rating: 1
+  notes: MyText
+  completed_at: 2026-02-28 18:39:52
+
+two:
+  user: two
+  duration_minutes: 1
+  technique: MyString
+  rating: 1
+  notes: MyText
+  completed_at: 2026-02-28 18:39:52
