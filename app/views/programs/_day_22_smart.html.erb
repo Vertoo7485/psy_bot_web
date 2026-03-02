@@ -1,0 +1,99 @@
+<!-- Интерактивная часть дня 22 -->
+<div class="mt-4">
+  <!-- Теплое приветствие -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3">🎯 День 22: Планирование с SMART целями</h5>
+    <p class="lead"><strong>Научно обоснованный метод</strong> постановки целей, который используют успешные люди по всему миру.</p>
+  </div>
+  
+  <!-- Что такое SMART -->
+  <div class="card mb-4 bg-light">
+    <div class="card-body">
+      <h6 class="card-title">🔤 SMART-акроним</h6>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <p><span class="badge bg-primary">S</span> <strong>Specific</strong> — Конкретная</p>
+          <p><span class="badge bg-primary">M</span> <strong>Measurable</strong> — Измеримая</p>
+          <p><span class="badge bg-primary">A</span> <strong>Achievable</strong> — Достижимая</p>
+        </div>
+        <div class="col-12 col-md-6">
+          <p><span class="badge bg-primary">R</span> <strong>Relevant</strong> — Актуальная</p>
+          <p><span class="badge bg-primary">T</span> <strong>Time-bound</strong> — Ограниченная по времени</p>
+        </div>
+      </div>
+      <p class="small text-secondary mt-2 mb-0">* Цели по SMART достигаются на 75-90% чаще</p>
+    </div>
+  </div>
+  
+  <!-- Научные факты -->
+  <div class="row mb-4">
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">75-90%</h4>
+          <small>чаще достигаются</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">30-40%</h4>
+          <small>выше продуктивность</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">60%</h4>
+          <small>больше успеха при пересмотре</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">40%</h4>
+          <small>меньше стресса</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6 шагов (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#smartSteps">
+          📝 6 шагов к идеальной цели (нажмите для справки)
+        </button>
+      </h2>
+      <div id="smartSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["smart_steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+                <p class="text-secondary small ms-4"><i class="fas fa-question-circle me-1"></i> <%= step["question"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startSmartGoal">
+      <i class="fas fa-bullseye me-2"></i>Создать SMART-цель
+    </button>
+    <p class="text-secondary small mt-2">6 шагов к идеальной цели, которая действительно сработает.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="smartContainer" style="display: none;"></div>
+</div>

@@ -1,0 +1,531 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 24 script loaded')
+    
+    const startBtn = document.getElementById('startAnticipation')
+    const container = document.getElementById('anticipationContainer')
+    
+    // Категории ситуаций из seeds
+    const situationCategories = <%= raw content["situation_categories"].to_json %>
+    const skillsByWeek = <%= raw content["skills_by_week"].to_json %>
+    
+    let currentStep = 0
+    let planData = {
+      situation: null,
+      situationDetails: null,
+      challenges: [],
+      skills: [],
+      flexibilityPlan: null,
+      visualizationNotes: null,
+      commitment: null
+    }
+    
+    const steps = [
+      {
+        id: 'situation',
+        title: 'Выбор ситуации',
+        emoji: '🎯',
+        question: 'Какую ситуацию на завтра вы хотите проработать?',
+        description: 'Выберите одну небольшую, но значимую ситуацию, которая вызывает легкий дискомфорт.'
+      },
+      {
+        id: 'challenges',
+        title: 'Возможные трудности',
+        emoji: '🔍',
+        question: 'Что может пойти не так?',
+        description: 'Реалистично оцените возможные трудности — внешние и внутренние.'
+      },
+      {
+        id: 'skills',
+        title: 'Инвентаризация навыков',
+        emoji: '🛠️',
+        question: 'Какие навыки помогут справиться?',
+        description: 'Выберите из освоенных за 4 недели навыков те, что пригодятся.'
+      },
+      {
+        id: 'plan',
+        title: 'План гибкости',
+        emoji: '📝',
+        question: 'Как вы будете действовать?',
+        description: 'Создайте конкретный план действий для каждой трудности.'
+      },
+      {
+        id: 'visualization',
+        title: 'Мысленная репетиция',
+        emoji: '🎭',
+        question: 'Что вы почувствовали во время репетиции?',
+        description: 'Закройте глаза на 1 минуту и представьте успешное применение плана.'
+      },
+      {
+        id: 'commitment',
+        title: 'Обязательство',
+        emoji: '🤝',
+        question: 'Какое обещание вы даете себе на завтра?',
+        description: 'Сформулируйте конкретное обязательство с указанием времени и действия.'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start anticipation clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    // ===== ПОКАЗ ШАГА =====
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      let stepHtml = ''
+      
+      if (step.id === 'situation') {
+        let situationButtons = ''
+        situationCategories.forEach(cat => {
+          situationButtons += `
+            <div class="col-12 col-sm-6 mb-2">
+              <button class="btn btn-outline-primary w-100 situation-category-btn" data-category="${cat.name}" data-emoji="${cat.emoji}" data-examples='${JSON.stringify(cat.examples)}'>
+                ${cat.emoji} ${cat.name}
+              </button>
+            </div>
+          `
+        })
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${situationButtons}
+              </div>
+              
+              <div class="mt-3" id="situationExamples" style="display: none;">
+                <p class="small text-secondary">Примеры:</p>
+                <ul id="examplesList" class="small"></ul>
+              </div>
+              
+              <div class="mt-3">
+                <textarea class="form-control" id="situationDetails" rows="2" placeholder="Уточните детали (когда, где, с кем)..."></textarea>
+              </div>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="nextStep()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'challenges') {
+        let currentSituation = planData.situation ? `${planData.situation.emoji} ${planData.situation.name}` : 'выбранная ситуация'
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="alert alert-light">
+                <p class="mb-1"><strong>Ваша ситуация:</strong> ${currentSituation}</p>
+                <p class="small mb-0">${planData.situationDetails || ''}</p>
+              </div>
+              
+              <p class="small text-secondary mb-2"><i class="fas fa-lightbulb me-1"></i> Внешние факторы: задержки, чужая реакция, обстоятельства</p>
+              <p class="small text-secondary mb-3"><i class="fas fa-heart me-1"></i> Внутренние факторы: тревога, усталость, раздражение</p>
+              
+              <textarea class="form-control" id="challengesInput" rows="4" placeholder="Опишите возможные трудности (каждая с новой строки)..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveChallenges()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'skills') {
+        let skillsHtml = ''
+        skillsByWeek.forEach(week => {
+          skillsHtml += `<p class="mb-1 mt-3"><strong>${week.week} неделя: ${week.title}</strong></p>`
+          week.skills.forEach((skill, idx) => {
+            skillsHtml += `
+              <div class="form-check mb-2">
+                <input class="form-check-input skill-check" type="checkbox" data-skill="${skill.emoji} ${skill.name}" data-desc="${skill.description}" id="skill_${week.week}_${idx}">
+                <label class="form-check-label" for="skill_${week.week}_${idx}">
+                  ${skill.emoji} <strong>${skill.name}</strong> — ${skill.description}
+                </label>
+              </div>
+            `
+          })
+        })
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              ${skillsHtml}
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveSkills()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'plan') {
+        let challengesList = planData.challenges.map((c, i) => `${i+1}. ${c}`).join('<br>')
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="alert alert-light">
+                <p class="mb-1"><strong>Трудности:</strong></p>
+                <p class="small">${challengesList}</p>
+              </div>
+              
+              <p class="small text-secondary mb-2">Формат: "ЕСЛИ [трудность] → ТО [навык + действие]"</p>
+              
+              <textarea class="form-control" id="planInput" rows="5" placeholder="Например:
+ЕСЛИ собеседование начнется с опозданием → ТО сделаю 3 глубоких вдоха и напомню себе, что это нормально
+ЕСЛИ почувствую тревогу → ТО применю технику заземления 5-4-3-2-1..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="savePlan()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'visualization') {
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="alert alert-info">
+                <p class="mb-1"><strong>Инструкция:</strong></p>
+                <p class="small mb-0">1️⃣ Закройте глаза на 1 минуту</p>
+                <p class="small mb-0">2️⃣ Представьте ситуацию и применение плана</p>
+                <p class="small mb-0">3️⃣ Почувствуйте уверенность и спокойствие</p>
+              </div>
+              
+              <textarea class="form-control" id="visualizationInput" rows="4" placeholder="Опишите, что вы почувствовали во время репетиции..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveVisualization()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'commitment') {
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <p class="small text-secondary mb-2">Формат: "Завтра в [время], когда [ситуация], я [действие] с [отношение]"</p>
+              
+              <textarea class="form-control" id="commitmentInput" rows="3" placeholder="Например:
+Завтра в 10:00 на совещании я сделаю 3 глубоких вдоха перед ответом и подойду к ситуации с любопытством, а не со страхом."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveCommitment()">Завершить</button>
+              </div>
+            </div>
+          </div>
+        `
+      }
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчики для специфических шагов
+      if (step.id === 'situation') {
+        document.querySelectorAll('.situation-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const categoryName = this.dataset.category
+            const emoji = this.dataset.emoji
+            const examples = JSON.parse(this.dataset.examples)
+            
+            planData.situation = { name: categoryName, emoji: emoji }
+            
+            // Показываем примеры
+            const examplesDiv = document.getElementById('situationExamples')
+            const examplesList = document.getElementById('examplesList')
+            examplesList.innerHTML = examples.map(ex => `<li>${ex}</li>`).join('')
+            examplesDiv.style.display = 'block'
+            
+            // Визуальное выделение
+            document.querySelectorAll('.situation-category-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+          })
+        })
+      }
+    }
+    
+    window.nextStep = function() {
+      const situationDetails = document.getElementById('situationDetails')?.value.trim()
+      if (situationDetails) {
+        planData.situationDetails = situationDetails
+      }
+      
+      if (!planData.situation) {
+        alert('Пожалуйста, выберите категорию ситуации')
+        return
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveChallenges = function() {
+      const challengesText = document.getElementById('challengesInput').value.trim()
+      if (!challengesText) {
+        if (!confirm('Вы не указали трудности. Пропустить этот шаг?')) {
+          return
+        }
+      } else {
+        planData.challenges = challengesText.split('\n').filter(c => c.trim() !== '')
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveSkills = function() {
+      const selectedSkills = []
+      document.querySelectorAll('.skill-check:checked').forEach(cb => {
+        selectedSkills.push({
+          name: cb.dataset.skill,
+          description: cb.dataset.desc
+        })
+      })
+      
+      if (selectedSkills.length === 0) {
+        if (!confirm('Вы не выбрали навыки. Пропустить этот шаг?')) {
+          return
+        }
+      } else {
+        planData.skills = selectedSkills
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.savePlan = function() {
+      const planText = document.getElementById('planInput').value.trim()
+      if (!planText) {
+        alert('Пожалуйста, опишите ваш план действий')
+        return
+      }
+      
+      planData.flexibilityPlan = planText
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveVisualization = function() {
+      const visText = document.getElementById('visualizationInput').value.trim()
+      if (!visText) {
+        if (!confirm('Вы не описали ощущения. Пропустить этот шаг?')) {
+          return
+        }
+      } else {
+        planData.visualizationNotes = visText
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveCommitment = function() {
+      const commitText = document.getElementById('commitmentInput').value.trim()
+      if (!commitText) {
+        alert('Пожалуйста, сформулируйте ваше обязательство')
+        return
+      }
+      
+      planData.commitment = commitText
+      showSummary()
+      saveToDatabase()
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🛡️ Ваш План Гибкости готов!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы создали мощный инструмент проактивной подготовки. Вот что у вас получилось:</p>
+            
+            <div class="alert alert-light">
+              <p><strong>🎯 Ситуация:</strong> ${planData.situation ? planData.situation.emoji + ' ' + planData.situation.name : 'Не указана'}</p>
+              <p><strong>📝 Детали:</strong> ${planData.situationDetails || 'Не указаны'}</p>
+              
+              <p><strong>⚠️ Возможные трудности:</strong></p>
+              <ul>${planData.challenges.map(c => `<li>${c}</li>`).join('') || '<li>Не указаны</li>'}</ul>
+              
+              <p><strong>🛠️ Выбранные навыки:</strong></p>
+              <ul>${planData.skills.map(s => `<li>${s.name} — ${s.description}</li>`).join('') || '<li>Не выбраны</li>'}</ul>
+              
+              <p><strong>📋 План действий:</strong> ${planData.flexibilityPlan || 'Не указан'}</p>
+              
+              <p><strong>🎭 Мысленная репетиция:</strong> ${planData.visualizationNotes || 'Не указана'}</p>
+              
+              <p><strong>🤝 Обязательство:</strong> ${planData.commitment || 'Не указано'}</p>
+            </div>
+            
+            <p class="small text-secondary mt-3">
+              <i class="fas fa-lightbulb me-1"></i>
+              Сохраните этот план и перечитайте его завтра утром. Вечером отметьте, что сработало.
+            </p>
+            
+            <p class="fst-italic text-center mt-3">«Не события волнуют людей, а их мнения об событиях.» — Эпиктет</p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay24">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      const completeBtn = document.getElementById('completeDay24')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving flexibility plan:', planData)
+      
+      const planText = `
+План Гибкости на завтра
+
+Ситуация: ${planData.situation ? planData.situation.emoji + ' ' + planData.situation.name : 'Не указана'}
+Детали: ${planData.situationDetails || 'Не указаны'}
+
+Возможные трудности:
+${planData.challenges.map(c => '• ' + c).join('\n') || 'Не указаны'}
+
+Выбранные навыки:
+${planData.skills.map(s => '• ' + s.name).join('\n') || 'Не выбраны'}
+
+План действий:
+${planData.flexibilityPlan || 'Не указан'}
+
+Обязательство:
+${planData.commitment || 'Не указано'}
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: planText,
+            category: 'День 24: План Гибкости'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

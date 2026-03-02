@@ -223,6 +223,36 @@
       <%= render 'day_20_script', content: content %>
     <% end %>
 
+    <!-- День 21: Рефлексия 3 недель -->
+    <% if day.day_number == 21 %>
+      <%= render 'day_21_reflection', content: content %>
+      <%= render 'day_21_script', content: content %>
+    <% end %>
+
+    <!-- День 22: Планирование с SMART целями -->
+    <% if day.day_number == 22 %>
+      <%= render 'day_22_smart', content: content %>
+      <%= render 'day_22_script', content: content %>
+    <% end %>
+
+    <!-- День 23: Анализ дневника эмоций -->
+    <% if day.day_number == 23 %>
+      <%= render 'day_23_analysis', content: content %>
+      <%= render 'day_23_script', content: content %>
+    <% end %>
+
+    <!-- День 24: Проактивная гибкость -->
+    <% if day.day_number == 24 %>
+      <%= render 'day_24_anticipation', content: content %>
+      <%= render 'day_24_script', content: content %>
+    <% end %>
+
+    <!-- День 25: Стоический "Вид сверху" -->
+    <% if day.day_number == 25 %>
+      <%= render 'day_25_view_from_above', content: content %>
+      <%= render 'day_25_script', content: content %>
+    <% end %>
+
 
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>

@@ -1,0 +1,594 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 23 script loaded')
+    
+    const startBtn = document.getElementById('startAnalysis')
+    const container = document.getElementById('analysisContainer')
+    
+    // Категории ситуаций из seeds
+    const situationCategories = <%= raw content["situation_categories"].to_json %>
+    const cognitiveDistortions = <%= raw content["cognitive_distortions"].to_json %>
+    
+    let currentStep = 0
+    let analysisData = {
+      period: null,
+      situations: [],
+      thoughts: [],
+      emotions: [],
+      triggers: [],
+      strategies: []
+    }
+    
+    const steps = [
+      {
+        id: 'period',
+        title: 'Выбор периода анализа',
+        emoji: '📅',
+        question: 'За какой период вы хотите проанализировать записи?',
+        description: 'Выберите период, который даст достаточно данных для выявления паттернов.'
+      },
+      {
+        id: 'situations',
+        title: 'Анализ ситуаций-триггеров',
+        emoji: '🔍',
+        question: 'Какие ситуации чаще всего вызывают у вас трудные эмоции?',
+        description: 'Выберите категории ситуаций, которые повторяются в ваших записях.'
+      },
+      {
+        id: 'thoughts',
+        title: 'Анализ мыслительных паттернов',
+        emoji: '💭',
+        question: 'Какие мыслительные паттерны повторяются в ваших записях?',
+        description: 'Выберите когнитивные искажения, которые вы замечаете.'
+      },
+      {
+        id: 'emotions',
+        title: 'Анализ эмоциональных реакций',
+        emoji: '😔',
+        question: 'Какие эмоции преобладают в ваших записях?',
+        description: 'Опишите эмоции, которые вы чаще всего испытываете.'
+      },
+      {
+        id: 'triggers',
+        title: 'Формулировка триггеров',
+        emoji: '🎯',
+        question: 'Сформулируйте ваши ключевые триггеры',
+        description: 'Свяжите ситуации, мысли и эмоции в конкретные триггеры.'
+      },
+      {
+        id: 'strategies',
+        title: 'Стратегии совладания',
+        emoji: '🛡️',
+        question: 'Какие стратегии помогут вам работать с этими триггерами?',
+        description: 'Создайте персонализированные стратегии для каждого триггера.'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start analysis clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    // ===== ПОКАЗ ШАГА =====
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      if (step.id === 'period') {
+        // Показываем записи пользователя перед выбором периода
+        showEntriesAndPeriod(step, progress)
+        return
+      }
+      
+      let stepHtml = ''
+      
+      if (step.id === 'situations') {
+        let situationButtons = ''
+        situationCategories.forEach(cat => {
+          situationButtons += `
+            <div class="col-12 col-md-6 mb-2">
+              <button class="btn btn-outline-primary w-100 situation-btn" data-category="${cat.name}">
+                ${cat.emoji} ${cat.name}
+              </button>
+            </div>
+          `
+        })
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${situationButtons}
+              </div>
+              
+              <div class="mt-3">
+                <p class="small text-secondary">Выбранные категории: <span id="selectedSituations">нет</span></p>
+              </div>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="nextStep()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'thoughts') {
+        let thoughtButtons = ''
+        cognitiveDistortions.forEach((dist, index) => {
+          thoughtButtons += `
+            <div class="col-12 mb-2">
+              <button class="btn btn-outline-primary w-100 thought-btn" data-index="${index}" data-name="${dist.name}">
+                ${dist.name}: ${dist.description}
+              </button>
+            </div>
+          `
+        })
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${thoughtButtons}
+              </div>
+              
+              <div class="mt-3">
+                <p class="small text-secondary">Выбранные паттерны: <span id="selectedThoughts">нет</span></p>
+              </div>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="nextStep()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'emotions') {
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <textarea class="form-control" id="emotionsInput" rows="3" placeholder="Например: тревога, грусть, раздражение, стыд..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveEmotions()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'triggers') {
+        let triggersPreview = ''
+        if (analysisData.situations.length > 0 || analysisData.thoughts.length > 0 || analysisData.emotions.length > 0) {
+          triggersPreview = `
+            <div class="alert alert-light mb-3">
+              <p class="mb-1"><strong>На основе вашего анализа:</strong></p>
+              <p class="small mb-1">🔍 Ситуации: ${analysisData.situations.join(', ') || 'не выбраны'}</p>
+              <p class="small mb-1">💭 Паттерны: ${analysisData.thoughts.join(', ') || 'не выбраны'}</p>
+              <p class="small mb-0">😔 Эмоции: ${analysisData.emotions || 'не указаны'}</p>
+            </div>
+          `
+        }
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              ${triggersPreview}
+              
+              <p class="small text-secondary mb-2">Формат: "Когда [ситуация], у меня возникает мысль [мысль], что вызывает чувство [эмоция], и я реагирую [поведение]"</p>
+              
+              <textarea class="form-control" id="triggersInput" rows="4" placeholder="Опишите ваши триггеры (каждый с новой строки)..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveTriggers()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if (step.id === 'strategies') {
+        let triggersList = ''
+        if (analysisData.triggers.length > 0) {
+          triggersList = '<div class="alert alert-light mb-3"><p class="mb-1"><strong>Ваши триггеры:</strong></p>'
+          analysisData.triggers.forEach((t, i) => {
+            triggersList += `<p class="small mb-1">${i+1}. ${t}</p>`
+          })
+          triggersList += '</div>'
+        }
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              ${triggersList}
+              
+              <p class="small text-secondary mb-2">Опишите конкретные действия для каждого триггера.</p>
+              
+              <textarea class="form-control" id="strategiesInput" rows="4" placeholder="Например: для триггера 'критика на работе' я буду делать дыхательное упражнение и задавать себе вопрос 'Какие есть доказательства?'..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveStrategies()">Завершить анализ</button>
+              </div>
+            </div>
+          </div>
+        `
+      }
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      // Добавляем обработчики для специфических шагов
+      if (step.id === 'situations') {
+        document.querySelectorAll('.situation-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const category = this.dataset.category
+            const index = analysisData.situations.indexOf(category)
+            
+            if (index === -1) {
+              analysisData.situations.push(category)
+              this.classList.remove('btn-outline-primary')
+              this.classList.add('btn-primary', 'text-white')
+            } else {
+              analysisData.situations.splice(index, 1)
+              this.classList.remove('btn-primary', 'text-white')
+              this.classList.add('btn-outline-primary')
+            }
+            
+            document.getElementById('selectedSituations').textContent = 
+              analysisData.situations.length > 0 ? analysisData.situations.join(', ') : 'нет'
+          })
+        })
+      }
+      
+      if (step.id === 'thoughts') {
+        document.querySelectorAll('.thought-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const name = this.dataset.name
+            const index = analysisData.thoughts.indexOf(name)
+            
+            if (index === -1) {
+              analysisData.thoughts.push(name)
+              this.classList.remove('btn-outline-primary')
+              this.classList.add('btn-primary', 'text-white')
+            } else {
+              analysisData.thoughts.splice(index, 1)
+              this.classList.remove('btn-primary', 'text-white')
+              this.classList.add('btn-outline-primary')
+            }
+            
+            document.getElementById('selectedThoughts').textContent = 
+              analysisData.thoughts.length > 0 ? analysisData.thoughts.join(', ') : 'нет'
+          })
+        })
+      }
+    }
+    
+    // ===== ПОКАЗ ЗАПИСЕЙ И ВЫБОР ПЕРИОДА =====
+    function showEntriesAndPeriod(step, progress) {
+      // Показываем записи пользователя
+      fetch('/emotion_diary_entries.json')
+        .then(response => response.json())
+        .then(entries => {
+          let entriesHtml = ''
+          
+          if (entries && entries.length > 0) {
+            entriesHtml = '<div class="mb-4"><h6 class="mb-2">📝 Ваши последние записи:</h6>'
+            entries.slice(0, 5).forEach((entry, idx) => {
+              entriesHtml += `
+                <div class="card mb-2 bg-light">
+                  <div class="card-body py-2">
+                    <small class="text-primary">${new Date(entry.created_at).toLocaleDateString('ru-RU')}</small>
+                    <p class="small mb-0"><strong>Ситуация:</strong> ${entry.situation || '—'}</p>
+                    <p class="small mb-0"><strong>Мысли:</strong> ${entry.thoughts || '—'}</p>
+                    <p class="small mb-0"><strong>Эмоции:</strong> ${entry.emotions || '—'}</p>
+                  </div>
+                </div>
+              `
+            })
+            entriesHtml += '</div>'
+          } else {
+            entriesHtml = '<div class="alert alert-warning mb-3">📭 У вас пока нет записей в дневнике эмоций. Сделайте несколько записей перед анализом.</div>'
+          }
+          
+          let stepHtml = `
+            <div class="card mb-4" id="step${currentStep}">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+              </div>
+              <div class="card-body">
+                <!-- Прогресс -->
+                <div class="progress mb-3" style="height: 5px;">
+                  <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+                </div>
+                
+                <p class="mb-3"><strong>${step.question}</strong></p>
+                <p class="text-secondary small mb-3">${step.description}</p>
+                
+                ${entriesHtml}
+                
+                <div class="d-grid gap-2">
+                  <button class="btn btn-outline-primary period-btn" data-period="7_days">📅 Последние 7 дней</button>
+                  <button class="btn btn-outline-primary period-btn" data-period="30_days">🗓️ Последний месяц</button>
+                  <button class="btn btn-outline-primary period-btn" data-period="all">📚 Все записи</button>
+                </div>
+              </div>
+            </div>
+          `
+          
+          container.innerHTML = stepHtml
+          container.scrollIntoView({ behavior: 'smooth' })
+          
+          // Добавляем обработчики для кнопок
+          document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const period = this.dataset.period
+              analysisData.period = period
+              
+              document.querySelectorAll('.period-btn').forEach(b => {
+                b.classList.remove('btn-primary', 'text-white')
+                b.classList.add('btn-outline-primary')
+              })
+              this.classList.remove('btn-outline-primary')
+              this.classList.add('btn-primary', 'text-white')
+              
+              setTimeout(() => {
+                document.getElementById(`step${currentStep}`).remove()
+                currentStep++
+                showStep()
+              }, 500)
+            })
+          })
+        })
+        .catch(error => {
+          console.error('Error fetching entries:', error)
+          // Если не удалось загрузить, показываем простой вариант
+          let stepHtml = `
+            <div class="card mb-4" id="step${currentStep}">
+              <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+              </div>
+              <div class="card-body">
+                <!-- Прогресс -->
+                <div class="progress mb-3" style="height: 5px;">
+                  <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+                </div>
+                
+                <p class="mb-3"><strong>${step.question}</strong></p>
+                <p class="text-secondary small mb-3">${step.description}</p>
+                
+                <div class="d-grid gap-2">
+                  <button class="btn btn-outline-primary period-btn" data-period="7_days">📅 Последние 7 дней</button>
+                  <button class="btn btn-outline-primary period-btn" data-period="30_days">🗓️ Последний месяц</button>
+                  <button class="btn btn-outline-primary period-btn" data-period="all">📚 Все записи</button>
+                </div>
+              </div>
+            </div>
+          `
+          
+          container.innerHTML = stepHtml
+          container.scrollIntoView({ behavior: 'smooth' })
+          
+          document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const period = this.dataset.period
+              analysisData.period = period
+              
+              document.querySelectorAll('.period-btn').forEach(b => {
+                b.classList.remove('btn-primary', 'text-white')
+                b.classList.add('btn-outline-primary')
+              })
+              this.classList.remove('btn-outline-primary')
+              this.classList.add('btn-primary', 'text-white')
+              
+              setTimeout(() => {
+                document.getElementById(`step${currentStep}`).remove()
+                currentStep++
+                showStep()
+              }, 500)
+            })
+          })
+        })
+    }
+    
+    window.nextStep = function() {
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveEmotions = function() {
+      const emotions = document.getElementById('emotionsInput').value.trim()
+      if (!emotions) {
+        if (!confirm('Вы не указали эмоции. Пропустить этот шаг?')) {
+          return
+        }
+      }
+      analysisData.emotions = emotions || 'Не указано'
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveTriggers = function() {
+      const triggersText = document.getElementById('triggersInput').value.trim()
+      if (!triggersText) {
+        if (!confirm('Вы не ввели триггеры. Пропустить этот шаг?')) {
+          return
+        }
+      } else {
+        analysisData.triggers = triggersText.split('\n').filter(t => t.trim() !== '')
+      }
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveStrategies = function() {
+      const strategiesText = document.getElementById('strategiesInput').value.trim()
+      if (!strategiesText) {
+        if (!confirm('Вы не ввели стратегии. Всё равно завершить анализ?')) {
+          return
+        }
+      } else {
+        analysisData.strategies = strategiesText
+      }
+      
+      showSummary()
+      saveToDatabase()
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">📊 Ваш анализ дневника завершен!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы прошли все 6 шагов анализа. Вот что вы обнаружили:</p>
+            
+            <div class="alert alert-light">
+              <p><strong>📅 Период анализа:</strong> ${analysisData.period || 'Не указан'}</p>
+              <p><strong>🔍 Ключевые ситуации:</strong> ${analysisData.situations.join(', ') || 'Не указаны'}</p>
+              <p><strong>💭 Мыслительные паттерны:</strong> ${analysisData.thoughts.join(', ') || 'Не указаны'}</p>
+              <p><strong>😔 Преобладающие эмоции:</strong> ${analysisData.emotions || 'Не указаны'}</p>
+              ${analysisData.triggers.length > 0 ? `<p><strong>🎯 Сформулированные триггеры:</strong></p><ul>${analysisData.triggers.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+              ${analysisData.strategies ? `<p><strong>🛡️ Стратегии совладания:</strong> ${analysisData.strategies}</p>` : ''}
+            </div>
+            
+            <p class="small text-secondary mt-3">
+              <i class="fas fa-lightbulb me-1"></i>
+              Сохраните этот анализ и возвращайтесь к нему при появлении новых записей.
+            </p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay23">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      const completeBtn = document.getElementById('completeDay23')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving analysis:', analysisData)
+      
+      const analysisText = `
+Период анализа: ${analysisData.period || 'Не указан'}
+        
+Ключевые ситуации: ${analysisData.situations.join(', ') || 'Не указаны'}
+        
+Мыслительные паттерны: ${analysisData.thoughts.join(', ') || 'Не указаны'}
+        
+Преобладающие эмоции: ${analysisData.emotions || 'Не указаны'}
+        
+Триггеры:
+${analysisData.triggers.join('\n') || 'Не указаны'}
+        
+Стратегии совладания:
+${analysisData.strategies || 'Не указаны'}
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: analysisText,
+            category: 'День 23: Анализ дневника эмоций'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

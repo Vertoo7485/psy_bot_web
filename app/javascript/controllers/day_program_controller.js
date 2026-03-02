@@ -333,7 +333,7 @@ export default class extends Controller {
   const dayNumber = this.data.get('dayNumber')
   
   // Для дней без таймера не проверяем практику
-  if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && dayNumber != '10' && dayNumber != '11' && dayNumber != '12' && dayNumber != '13' && dayNumber != '14' && dayNumber != '15' && dayNumber != '16' && dayNumber != '17' && dayNumber != '18' && dayNumber != '19' && dayNumber != '20' && !this.practiceStarted) {
+  if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && dayNumber != '10' && dayNumber != '11' && dayNumber != '12' && dayNumber != '13' && dayNumber != '14' && dayNumber != '15' && dayNumber != '16' && dayNumber != '17' && dayNumber != '18' && dayNumber != '19' && dayNumber != '20' && dayNumber != '21' && dayNumber != '22' && dayNumber != '23' && dayNumber != '24' && dayNumber != '25' && !this.practiceStarted) {
     alert('Сначала выполните практику')
     return
   }

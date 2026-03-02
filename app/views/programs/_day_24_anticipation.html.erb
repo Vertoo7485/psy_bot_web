@@ -1,0 +1,93 @@
+<!-- Интерактивная часть дня 24 -->
+<div class="mt-4">
+  <!-- Теплое приветствие -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3">🛡️ День 24: Проактивная гибкость</h5>
+    <p class="lead"><strong>Учимся применять навыки проактивно</strong> — до возникновения сложностей.</p>
+  </div>
+  
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Стоическое предвосхищение (Premeditatio Malorum)</strong> — техника, которая помогает быть психологически готовым к любым обстоятельствам.
+  </div>
+  
+  <!-- Научные факты -->
+  <div class="row mb-4">
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">35-45%</h4>
+          <small>меньше тревоги</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">50-60%</h4>
+          <small>выше уверенность</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">25-30%</h4>
+          <small>лучше гибкость</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">6</h4>
+          <small>шагов</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6 шагов (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#anticipationSteps">
+          📝 6 шагов к проактивной гибкости (нажмите для справки)
+        </button>
+      </h2>
+      <div id="anticipationSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Философская мудрость -->
+  <div class="card mb-4 bg-light">
+    <div class="card-body">
+      <p class="fst-italic mb-0">«Не события волнуют людей, а их мнения об событиях.»</p>
+      <p class="text-end mb-0">— Эпиктет</p>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startAnticipation">
+      <i class="fas fa-shield-alt me-2"></i>Создать План Гибкости
+    </button>
+    <p class="text-secondary small mt-2">6 шагов к проактивной подготовке (15-20 минут).</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="anticipationContainer" style="display: none;"></div>
+</div>

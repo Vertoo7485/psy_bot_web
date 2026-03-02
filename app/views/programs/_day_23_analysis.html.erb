@@ -1,0 +1,85 @@
+<!-- Интерактивная часть дня 23 -->
+<div class="mt-4">
+  <!-- Теплое приветствие -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3">📊 День 23: Научный анализ дневника эмоций</h5>
+    <p class="lead"><strong>Превратите ваши записи в мощные инсайты</strong> о ваших триггерах и паттернах мышления.</p>
+  </div>
+  
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>Анализ паттернов</strong> — это научный метод когнитивно-поведенческой терапии, который помогает выявить повторяющиеся связи "ситуация → мысль → эмоция".
+  </div>
+  
+  <!-- Научные факты -->
+  <div class="row mb-4">
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">35-45%</h4>
+          <small>снижение тревоги</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">40-50%</h4>
+          <small>меньше негативных мыслей</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">50-60%</h4>
+          <small>выше осознанность</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">6</h4>
+          <small>шагов анализа</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 6 шагов анализа -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#analysisSteps">
+          📝 6 шагов анализа (нажмите для справки)
+        </button>
+      </h2>
+      <div id="analysisSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["analysis_steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+                <p class="text-secondary small mt-1 ms-4"><%= step["description"] %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startAnalysis">
+      <i class="fas fa-chart-line me-2"></i>Начать анализ дневника
+    </button>
+    <p class="text-secondary small mt-2">6 шагов к пониманию своих эмоциональных паттернов.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="analysisContainer" style="display: none;"></div>
+</div>

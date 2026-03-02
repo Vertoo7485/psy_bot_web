@@ -1,0 +1,287 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 21 script loaded')
+    
+    const startBtn = document.getElementById('startThreeWeeksReflection')
+    const container = document.getElementById('reflectionContainer')
+    
+    // Категории рефлексии из seeds
+    const categories = <%= raw content["reflection_categories"].to_json %>
+    const motivationalQuotes = <%= raw content["motivational_quotes"].to_json %>
+    
+    let currentCategory = 0
+    let reflections = []
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start 3 weeks reflection clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentCategory = 0
+        showCategory()
+      })
+    }
+    
+    // ===== ПОКАЗ КАТЕГОРИИ =====
+    function showCategory() {
+      if (currentCategory >= categories.length) {
+        showCompletion()
+        return
+      }
+      
+      const cat = categories[currentCategory]
+      
+      // Прогресс-бар
+      const progress = ((currentCategory) / categories.length) * 100
+      
+      // Подсказки для категории
+      let questionsHtml = ''
+      if (cat.questions && cat.questions.length > 0) {
+        questionsHtml = `
+          <div class="mb-3">
+            <p class="small text-secondary">Вопросы для размышления:</p>
+            <ul class="small">
+              ${cat.questions.map(q => `<li>${q}</li>`).join('')}
+            </ul>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="category${currentCategory}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+              ${cat.emoji} Категория ${currentCategory + 1}/${categories.length}: ${cat.name}
+            </h6>
+          </div>
+          <div class="card-body">
+            <!-- Прогресс -->
+            <div class="progress mb-3" style="height: 5px;">
+              <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+            </div>
+            
+            <p class="fw-bold mb-3">${cat.prompt}</p>
+            
+            ${questionsHtml}
+            
+            <p class="text-secondary small mb-2"><i>Напишите ваш ответ максимально честно и подробно — это ваш личный навигатор прогресса.</i></p>
+            
+            <textarea class="form-control" id="category${currentCategory}Input" rows="4" placeholder="Напишите ваши мысли..."></textarea>
+            
+            <div class="text-end mt-3">
+              <button class="btn btn-success" onclick="saveCategory(${currentCategory})">
+                ${currentCategory < categories.length - 1 ? 'Сохранить и далее' : 'Завершить рефлексию'}
+              </button>
+              <button class="btn btn-link text-secondary" onclick="skipCategory(${currentCategory})">
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveCategory = function(categoryIndex) {
+      const input = document.getElementById(`category${categoryIndex}Input`)
+      const value = input.value.trim()
+      
+      if (!value) {
+        if (!confirm('Вы не написали ответ. Пропустить эту категорию?')) {
+          return
+        }
+        reflections[categoryIndex] = null
+      } else {
+        if (value.length < 20) {
+          if (!confirm('Ответ очень короткий (меньше 20 символов). Всё равно сохранить?')) {
+            return
+          }
+        }
+        reflections[categoryIndex] = value
+      }
+      
+      currentCategory++
+      document.getElementById(`category${categoryIndex}`).remove()
+      
+      if (currentCategory < categories.length) {
+        showCategory()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    window.skipCategory = function(categoryIndex) {
+      reflections[categoryIndex] = null
+      currentCategory++
+      document.getElementById(`category${categoryIndex}`).remove()
+      
+      if (currentCategory < categories.length) {
+        showCategory()
+      } else {
+        showCompletion()
+      }
+    }
+    
+    // ===== ЗАВЕРШЕНИЕ РЕФЛЕКСИИ =====
+    function showCompletion() {
+      // Случайная цитата для вдохновения
+      const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+      
+      // Подсчет завершенных категорий
+      const completedCount = reflections.filter(r => r !== null).length
+      
+      let summary = `<div class="alert alert-success mb-3"><strong>Ваши итоги 3 недель:</strong> Завершено ${completedCount} из ${categories.length} категорий</div>`
+      
+      categories.forEach((cat, index) => {
+        if (reflections[index]) {
+          summary += `
+            <div class="card mb-2">
+              <div class="card-body py-2">
+                <small class="text-primary fw-bold">${cat.emoji} ${cat.name}</small>
+                <p class="small mb-0">${reflections[index]}</p>
+              </div>
+            </div>
+          `
+        }
+      })
+      
+      container.innerHTML = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">✅ Рефлексия 3 недель завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">${randomQuote}</p>
+            
+            ${summary}
+            
+            <p class="text-secondary small mt-3">
+              <i class="fas fa-info-circle me-1"></i>
+              Ваша рефлексия сохранена. Вы можете вернуться к ней позже.
+            </p>
+            
+            <div class="row mt-4">
+              <div class="col-6">
+                <button class="btn btn-success w-100" id="completeDay21">
+                  Завершить день
+                </button>
+              </div>
+              <div class="col-6">
+                <button class="btn btn-outline-primary w-100" onclick="showRecommendations()">
+                  💡 Рекомендации
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+      
+      saveToDatabase()
+      
+      // Добавляем обработчик для кнопки завершения
+      setTimeout(() => {
+        const completeBtn = document.getElementById('completeDay21')
+        if (completeBtn) {
+          completeBtn.addEventListener('click', function() {
+            console.log('Complete day button clicked')
+            
+            const reflectionSection = document.getElementById('reflectionSection')
+            if (reflectionSection) {
+              reflectionSection.classList.remove('d-none')
+              reflectionSection.scrollIntoView({ behavior: 'smooth' })
+            }
+            
+            const completeDayBtn = document.getElementById('completeDay')
+            if (completeDayBtn) {
+              completeDayBtn.classList.remove('d-none')
+            }
+          })
+        }
+      }, 100)
+    }
+    
+    window.showRecommendations = function() {
+      // Генерация простых рекомендаций на основе ответов
+      let recommendations = []
+      
+      // Анализируем ответы для базовых рекомендаций
+      if (reflections[0] && reflections[0].toLowerCase().includes('тревог')) {
+        recommendations.push('🌊 **Работа с тревогой:** Продолжайте практику заземления 5-4-3-2-1 ежедневно.')
+      }
+      if (reflections[1] && reflections[1].toLowerCase().includes('дыхан')) {
+        recommendations.push('🌬️ **Дыхательные практики:** Углубите практику, попробуйте разные ритмы (4-7-8, квадратное дыхание).')
+      }
+      if (reflections[1] && reflections[1].toLowerCase().includes('медитац')) {
+        recommendations.push('🧘 **Медитация:** Постепенно увеличивайте время практики до 10-15 минут.')
+      }
+      
+      // Дефолтные рекомендации
+      if (recommendations.length === 0) {
+        recommendations = [
+          '📅 **Утренний ритуал:** 10 минут утром для настройки дня (дыхание + благодарность + 1 техника).',
+          '📝 **Дневник прогресса:** Ведите еженедельные заметки о применении техник и их эффекте.',
+          '🎯 **Фокус на 2-3 техниках:** Глубокое освоение лучше поверхностного знания многих.',
+          '🔄 **Система напоминаний:** Настройте напоминания для ключевых практик.'
+        ]
+      }
+      
+      let recHtml = `
+        <div class="card mb-4 border-info">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0">💡 Персональные рекомендации</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">На основе вашей рефлексии:</p>
+            <ul>
+              ${recommendations.map(r => `<li class="mb-2">${r}</li>`).join('')}
+            </ul>
+            <button class="btn btn-outline-secondary" onclick="backToSummary()">⬅️ Назад</button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = recHtml
+    }
+    
+    window.backToSummary = function() {
+      showCompletion()
+    }
+    
+    function saveToDatabase() {
+      // Формируем текст для сохранения
+      let fullText = ''
+      categories.forEach((cat, index) => {
+        if (reflections[index]) {
+          fullText += `${cat.emoji} ${cat.name}:\n${reflections[index]}\n\n`
+        }
+      })
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: fullText,
+            category: 'День 21: Рефлексия 3 недель'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

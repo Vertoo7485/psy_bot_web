@@ -1,0 +1,345 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 22 script loaded')
+    
+    const startBtn = document.getElementById('startSmartGoal')
+    const container = document.getElementById('smartContainer')
+    
+    // Сферы жизни из seeds
+    const lifeDomains = <%= raw content["life_domains"].to_json %>
+    
+    let currentStep = 0
+    let goalData = {
+      domain: null,
+      specific: null,
+      measurable: null,
+      achievable: null,
+      relevant: null,
+      timeBound: null,
+      fullGoal: null
+    }
+    
+    const steps = [
+      {
+        id: 'domain',
+        title: 'Выбор сферы жизни',
+        emoji: '🎯',
+        question: 'В какой сфере жизни вы хотите поставить цель?',
+        description: 'Выберите сферу, которая сейчас требует больше всего внимания. Фокус на одной ключевой сфере увеличивает вероятность успеха на 65%.',
+        help: 'Какая сфера, если вы её улучшите, позитивно повлияет на другие области?'
+      },
+      {
+        id: 'specific',
+        title: 'Конкретность (S)',
+        emoji: '🔹',
+        question: 'Сформулируйте цель максимально конкретно',
+        description: 'Что именно вы будете делать? Где? Когда? С кем? Конкретные цели активируют префронтальную кору мозга.',
+        help: 'Если цель нельзя сфотографировать или записать на видео — она недостаточно конкретна.'
+      },
+      {
+        id: 'measurable',
+        title: 'Измеримость (M)',
+        emoji: '📊',
+        question: 'Как вы будете измерять прогресс?',
+        description: 'Выберите метрики: количество, время, проценты. Измеримость активирует систему вознаграждения мозга.',
+        help: 'Что покажет вам, что вы двигаетесь к цели? Сколько, как часто, какой процент?'
+      },
+      {
+        id: 'achievable',
+        title: 'Достижимость (A)',
+        emoji: '💪',
+        question: 'Почему эта цель реалистична для вас?',
+        description: 'Есть ли у вас необходимые навыки, время, ресурсы? Цели должны быть в "зоне ближайшего развития".',
+        help: 'Что у вас уже есть, что поможет достичь цели? Какие шаги вы уже делали в этом направлении?'
+      },
+      {
+        id: 'relevant',
+        title: 'Актуальность (R)',
+        emoji: '❤️',
+        question: 'Почему эта цель важна именно для вас?',
+        description: 'Как она связана с вашими ценностями? Цели, соответствующие ценностям, активируют зоны мозга, отвечающие за смысл.',
+        help: 'Что эта цель даст вам кроме самого результата? Почему вы хотите этого через год?'
+      },
+      {
+        id: 'timeBound',
+        title: 'Сроки (T)',
+        emoji: '⏰',
+        question: 'Установите четкие временные рамки',
+        description: 'Когда вы хотите достичь цели? Без срока цель — это просто мечта.',
+        help: 'Установите не только конечный срок, но и промежуточные контрольные точки.'
+      },
+      {
+        id: 'summary',
+        title: 'Готовая SMART-цель',
+        emoji: '📝',
+        question: 'Ваша цель готова!',
+        description: 'Соберите все части в одну вдохновляющую формулировку.',
+        help: 'Прочитайте цель вслух. Звучит ли она вдохновляюще?'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start smart goal clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    // ===== ПОКАЗ ШАГА =====
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      let stepHtml = ''
+      
+      if (step.id === 'domain') {
+        // Специальный шаг с выбором сферы
+        let domainButtons = ''
+        lifeDomains.forEach(domain => {
+          domainButtons += `
+            <div class="col-12 col-sm-6 mb-3">
+              <button class="btn btn-outline-primary w-100 domain-btn h-100" data-domain="${domain.name}" style="padding: 1rem;">
+                <div style="font-size: 2rem;">${domain.emoji}</div>
+                <div><strong>${domain.name}</strong></div>
+                <small class="text-secondary">${domain.description}</small>
+              </button>
+            </div>
+          `
+        })
+        
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${domainButtons}
+              </div>
+              
+              <!-- Кнопка помощи -->
+              <div class="accordion mt-4">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep${currentStep}">
+                      ❓ ${step.help}
+                    </button>
+                  </h2>
+                  <div id="helpStep${currentStep}" class="accordion-collapse collapse">
+                    <div class="accordion-body bg-light">
+                      <p>Сфокусируйтесь на одной ключевой сфере. Лучше одна прорывная цель, чем три средних.</p>
+                      <p class="mb-0">Принцип 80/20: 20% усилий в правильной сфере дают 80% результата.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      } else {
+        stepHtml = `
+          <div class="card mb-4" id="step${currentStep}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <textarea class="form-control" id="step${currentStep}Input" rows="3" placeholder="Напишите ваш ответ..."></textarea>
+              
+              <!-- Кнопка помощи -->
+              <div class="accordion mt-4">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpStep${currentStep}">
+                      ❓ ${step.help}
+                    </button>
+                  </h2>
+                  <div id="helpStep${currentStep}" class="accordion-collapse collapse">
+                    <div class="accordion-body bg-light">
+                      <p>Будьте максимально конкретны и честны с собой. Это ваша цель — никто не будет её оценивать.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveStep(${currentStep})">
+                  ${currentStep < steps.length - 1 ? 'Далее' : 'Завершить цель'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+      }
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      if (step.id === 'domain') {
+        document.querySelectorAll('.domain-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const domain = this.dataset.domain
+            goalData.domain = domain
+            
+            document.querySelectorAll('.domain-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+            
+            setTimeout(() => {
+              document.getElementById(`step${currentStep}`).remove()
+              currentStep++
+              showStep()
+            }, 500)
+          })
+        })
+      }
+    }
+    
+    window.saveStep = function(stepNumber) {
+      if (stepNumber === 0) return // domain обрабатывается отдельно
+      
+      const input = document.getElementById(`step${stepNumber}Input`)
+      if (!input) return
+      
+      const value = input.value.trim()
+      
+      if (!value) {
+        if (!confirm('Вы не написали ответ. Всё равно продолжить?')) {
+          return
+        }
+      }
+      
+      const stepId = steps[stepNumber].id
+      goalData[stepId] = value || 'Не указано'
+      
+      document.getElementById(`step${stepNumber}`).remove()
+      currentStep++
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showSummary()
+      }
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      // Формируем полную SMART-цель
+      const fullGoal = `
+        Я буду ${goalData.specific || 'делать конкретное действие'}, 
+        чтобы ${goalData.measurable || 'достичь измеримого результата'}. 
+        Это достижимо, потому что ${goalData.achievable || 'у меня есть ресурсы'}. 
+        Эта цель важна для меня, так как ${goalData.relevant || 'соответствует моим ценностям'}. 
+        Я достигну этого к ${goalData.timeBound || 'конкретному сроку'}.
+      `.replace(/\s+/g, ' ').trim()
+      
+      goalData.fullGoal = fullGoal
+      
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🎉 Ваша SMART-цель создана!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Сфера:</strong> ${goalData.domain || 'Не выбрана'}</p>
+            
+            <div class="alert alert-light">
+              <p class="fw-bold mb-2">📝 Полная формулировка:</p>
+              <p class="fst-italic">${fullGoal}</p>
+            </div>
+            
+            <div class="alert alert-info">
+              <p class="mb-2"><strong>💡 Как использовать:</strong></p>
+              <ul class="mb-0 small">
+                <li>Сделайте скриншот и поставьте на заставку телефона</li>
+                <li>Каждое воскресенье просматривайте и отмечайте прогресс</li>
+                <li>Разбейте на микро-шаги и начните сегодня</li>
+              </ul>
+            </div>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay22">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      saveToDatabase()
+      
+      const completeBtn = document.getElementById('completeDay22')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving SMART goal:', goalData)
+      
+      // Сохраняем через reflection_entries как временное решение
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: `SMART-цель\nСфера: ${goalData.domain}\n\nФормулировка: ${goalData.fullGoal}`,
+            category: 'День 22: SMART-цели'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

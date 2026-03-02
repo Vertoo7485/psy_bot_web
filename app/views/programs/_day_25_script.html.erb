@@ -1,0 +1,531 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 25 script loaded')
+    
+    const startBtn = document.getElementById('startViewFromAbove')
+    const container = document.getElementById('viewContainer')
+    
+    // Категории фокуса из seeds
+    const focusCategories = <%= raw content["focus_categories"].to_json %>
+    const perspectiveLevels = <%= raw content["perspective_levels"].to_json %>
+    const anchorGestures = <%= raw content["anchor_gestures"].to_json %>
+    
+    let currentStep = 0
+    let currentLevel = 0
+    let viewData = {
+      focus: null,
+      focusDetails: null,
+      levelObservations: [],
+      insights: null,
+      anchor: null,
+      anchorPhrase: null
+    }
+    
+    const steps = [
+      {
+        id: 'focus',
+        title: 'Выбор фокуса',
+        emoji: '🎯',
+        question: 'Что вы хотите рассмотреть с космической перспективы?',
+        description: 'Выберите категорию или опишите свою ситуацию.'
+      },
+      {
+        id: 'journey',
+        title: 'Космическое восхождение',
+        emoji: '🚀',
+        question: '7 уровней перспективы',
+        description: 'Будем подниматься от вашей комнаты до края вселенной.'
+      },
+      {
+        id: 'insights',
+        title: 'Ключевые инсайты',
+        emoji: '💡',
+        question: 'Что вы поняли во время путешествия?',
+        description: 'Поделитесь основными открытиями.'
+      },
+      {
+        id: 'anchor',
+        title: 'Стоический якорь',
+        emoji: '🎯',
+        question: 'Выберите жест для быстрого доступа к перспективе',
+        description: 'Якорь поможет возвращаться к этому состоянию в любой момент.'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start view from above clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    // ===== ПОКАЗ ШАГА =====
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      if (step.id === 'focus') {
+        let focusButtons = ''
+        focusCategories.forEach((cat, index) => {
+          focusButtons += `
+            <div class="col-12 col-md-6 mb-2">
+              <button class="btn btn-outline-primary w-100 focus-category-btn" data-index="${index}" data-name="${cat.name}" data-emoji="${cat.emoji}">
+                ${cat.emoji} ${cat.name}
+              </button>
+            </div>
+          `
+        })
+        
+        let stepHtml = `
+          <div class="card mb-4" id="step0">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг 1/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${focusButtons}
+              </div>
+              
+              <div class="mt-3">
+                <button class="btn btn-outline-secondary w-100" onclick="showCustomFocus()">✍️ Своя ситуация</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+        document.querySelectorAll('.focus-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const index = this.dataset.index
+            const category = focusCategories[index]
+            
+            viewData.focus = {
+              name: category.name,
+              emoji: category.emoji,
+              examples: category.examples
+            }
+            
+            document.querySelectorAll('.focus-category-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+            
+            // Показываем поле для деталей
+            const detailsHtml = `
+              <div class="mt-4" id="focusDetails">
+                <p class="mb-2"><strong>Опишите вашу конкретную ситуацию:</strong></p>
+                <p class="small text-secondary mb-2">Например: ${category.examples[Math.floor(Math.random() * category.examples.length)]}</p>
+                <textarea class="form-control mb-3" id="focusDetailsInput" rows="2" placeholder="Опишите вашу ситуацию..."></textarea>
+                <button class="btn btn-success w-100" onclick="saveFocusDetails()">Продолжить</button>
+              </div>
+            `
+            
+            // Удаляем предыдущее поле, если было
+            const oldDetails = document.getElementById('focusDetails')
+            if (oldDetails) oldDetails.remove()
+            
+            this.closest('.card-body').insertAdjacentHTML('beforeend', detailsHtml)
+          })
+        })
+        
+      } else if (step.id === 'journey') {
+        // Показываем текущий уровень путешествия
+        if (currentLevel >= perspectiveLevels.length) {
+          currentStep++
+          showStep()
+          return
+        }
+        
+        const level = perspectiveLevels[currentLevel]
+        const levelProgress = (currentLevel / perspectiveLevels.length) * 100
+        
+        let stepHtml = `
+          <div class="card mb-4" id="level${currentLevel}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">🚀 Уровень ${currentLevel + 1}/${perspectiveLevels.length}: ${level.emoji} ${level.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс путешествия -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-info" style="width: ${levelProgress}%"></div>
+              </div>
+              
+              <p class="mb-3">${level.instruction}</p>
+              
+              <p class="text-secondary small mb-2"><i class="fas fa-clock me-1"></i> Закройте глаза на 30 секунд и представьте это...</p>
+              
+              <textarea class="form-control" id="levelObservation" rows="3" placeholder="Опишите, что вы видите и чувствуете..."></textarea>
+              
+              <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-outline-secondary" onclick="skipLevel()">Пропустить</button>
+                <button class="btn btn-success" onclick="saveLevel()">Сохранить и далее</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+      } else if (step.id === 'insights') {
+        let stepHtml = `
+          <div class="card mb-4" id="step2">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг 3/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <textarea class="form-control" id="insightsInput" rows="4" placeholder="Например: Я понял, что моя проблема — лишь мгновение в истории вселенной..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveInsights()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+      } else if (step.id === 'anchor') {
+        let anchorButtons = ''
+        anchorGestures.forEach((gesture, index) => {
+          anchorButtons += `
+            <div class="col-12 mb-2">
+              <button class="btn btn-outline-primary w-100 anchor-btn" data-index="${index}" data-name="${gesture.name}" data-emoji="${gesture.emoji}" data-desc="${gesture.description}">
+                ${gesture.emoji} ${gesture.name} — ${gesture.description}
+              </button>
+            </div>
+          `
+        })
+        
+        let stepHtml = `
+          <div class="card mb-4" id="step3">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг 4/${steps.length}: ${step.title}</h6>
+            </div>
+            <div class="card-body">
+              <!-- Прогресс -->
+              <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+              </div>
+              
+              <p class="mb-3"><strong>${step.question}</strong></p>
+              <p class="text-secondary small mb-3">${step.description}</p>
+              
+              <div class="row">
+                ${anchorButtons}
+              </div>
+              
+              <div class="mt-3">
+                <button class="btn btn-outline-secondary w-100" onclick="showCustomAnchor()">✨ Свой якорь</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+        document.querySelectorAll('.anchor-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const index = this.dataset.index
+            const gesture = anchorGestures[index]
+            
+            viewData.anchor = {
+              name: gesture.name,
+              emoji: gesture.emoji,
+              description: gesture.description
+            }
+            
+            document.querySelectorAll('.anchor-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+            
+            // Показываем поле для фразы
+            const phraseHtml = `
+              <div class="mt-4" id="anchorPhrase">
+                <p class="mb-2"><strong>Придумайте короткую фразу-напоминание:</strong></p>
+                <p class="small text-secondary mb-2">Например: "Вид сверху", "Космическая перспектива", "Всё проходит"</p>
+                <input type="text" class="form-control mb-3" id="anchorPhraseInput" placeholder="Ваша фраза...">
+                <button class="btn btn-success w-100" onclick="saveAnchor()">Сохранить якорь</button>
+              </div>
+            `
+            
+            const oldPhrase = document.getElementById('anchorPhrase')
+            if (oldPhrase) oldPhrase.remove()
+            
+            this.closest('.card-body').insertAdjacentHTML('beforeend', phraseHtml)
+          })
+        })
+      }
+    }
+    
+    // ===== ФУНКЦИИ ДЛЯ ШАГОВ =====
+    window.showCustomFocus = function() {
+      const customHtml = `
+        <div class="mt-4" id="focusDetails">
+          <p class="mb-2"><strong>Опишите вашу ситуацию:</strong></p>
+          <textarea class="form-control mb-3" id="focusDetailsInput" rows="3" placeholder="Что вы хотите рассмотреть с космической перспективы?"></textarea>
+          <button class="btn btn-success w-100" onclick="saveCustomFocus()">Продолжить</button>
+        </div>
+      `
+      
+      const oldDetails = document.getElementById('focusDetails')
+      if (oldDetails) oldDetails.remove()
+      
+      document.querySelector('#step0 .card-body').insertAdjacentHTML('beforeend', customHtml)
+    }
+    
+    window.saveFocusDetails = function() {
+      const details = document.getElementById('focusDetailsInput')?.value.trim()
+      if (!details) {
+        alert('Пожалуйста, опишите вашу ситуацию')
+        return
+      }
+      
+      viewData.focusDetails = details
+      document.getElementById('step0').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveCustomFocus = function() {
+      const details = document.getElementById('focusDetailsInput')?.value.trim()
+      if (!details) {
+        alert('Пожалуйста, опишите вашу ситуацию')
+        return
+      }
+      
+      viewData.focus = { name: 'Моя ситуация', emoji: '📝' }
+      viewData.focusDetails = details
+      document.getElementById('step0').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveLevel = function() {
+      const observation = document.getElementById('levelObservation')?.value.trim()
+      
+      viewData.levelObservations[currentLevel] = observation || 'Без описания'
+      currentLevel++
+      
+      if (currentLevel < perspectiveLevels.length) {
+        document.getElementById(`level${currentLevel-1}`).remove()
+        showStep()
+      } else {
+        document.getElementById(`level${perspectiveLevels.length-1}`).remove()
+        currentStep++
+        showStep()
+      }
+    }
+    
+    window.skipLevel = function() {
+      viewData.levelObservations[currentLevel] = 'Пропущено'
+      currentLevel++
+      
+      if (currentLevel < perspectiveLevels.length) {
+        document.getElementById(`level${currentLevel-1}`).remove()
+        showStep()
+      } else {
+        document.getElementById(`level${perspectiveLevels.length-1}`).remove()
+        currentStep++
+        showStep()
+      }
+    }
+    
+    window.saveInsights = function() {
+      const insights = document.getElementById('insightsInput')?.value.trim()
+      if (!insights) {
+        if (!confirm('Вы не написали инсайты. Пропустить этот шаг?')) {
+          return
+        }
+      }
+      
+      viewData.insights = insights || 'Не указано'
+      document.getElementById('step2').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveAnchor = function() {
+      const phrase = document.getElementById('anchorPhraseInput')?.value.trim()
+      if (!phrase) {
+        alert('Пожалуйста, придумайте фразу для якоря')
+        return
+      }
+      
+      viewData.anchorPhrase = phrase
+      document.getElementById('step3').remove()
+      showSummary()
+      saveToDatabase()
+    }
+    
+    window.showCustomAnchor = function() {
+      const customHtml = `
+        <div class="mt-4" id="anchorPhrase">
+          <p class="mb-2"><strong>Опишите ваш уникальный якорный жест:</strong></p>
+          <textarea class="form-control mb-3" id="customAnchorDesc" rows="2" placeholder="Например: три хлопка, поглаживание по голове..."></textarea>
+          
+          <p class="mb-2 mt-3"><strong>Фраза-напоминание:</strong></p>
+          <input type="text" class="form-control mb-3" id="customAnchorPhrase" placeholder="Ваша фраза...">
+          
+          <button class="btn btn-success w-100" onclick="saveCustomAnchor()">Сохранить якорь</button>
+        </div>
+      `
+      
+      const oldPhrase = document.getElementById('anchorPhrase')
+      if (oldPhrase) oldPhrase.remove()
+      
+      document.querySelector('#step3 .card-body').insertAdjacentHTML('beforeend', customHtml)
+    }
+    
+    window.saveCustomAnchor = function() {
+      const desc = document.getElementById('customAnchorDesc')?.value.trim()
+      const phrase = document.getElementById('customAnchorPhrase')?.value.trim()
+      
+      if (!desc) {
+        alert('Опишите ваш якорный жест')
+        return
+      }
+      if (!phrase) {
+        alert('Придумайте фразу для якоря')
+        return
+      }
+      
+      viewData.anchor = {
+        name: 'Мой якорь',
+        emoji: '✨',
+        description: desc
+      }
+      viewData.anchorPhrase = phrase
+      
+      document.getElementById('step3').remove()
+      showSummary()
+      saveToDatabase()
+    }
+    
+    // ===== ИТОГОВЫЙ ЭКРАН =====
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🌌 Ваше космическое путешествие завершено!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы прошли 7 уровней перспективы и создали свой стоический якорь.</p>
+            
+            <div class="alert alert-light">
+              <p><strong>🎯 Фокус:</strong> ${viewData.focus?.emoji || ''} ${viewData.focus?.name || 'Не указан'}</p>
+              <p><strong>📝 Детали:</strong> ${viewData.focusDetails || 'Не указаны'}</p>
+              
+              <p><strong>💡 Ключевые инсайты:</strong> ${viewData.insights || 'Не указаны'}</p>
+              
+              <p><strong>🎯 Стоический якорь:</strong> ${viewData.anchor?.emoji || ''} ${viewData.anchor?.name || 'Не создан'}</p>
+              <p><strong>🗝️ Фраза-якорь:</strong> "${viewData.anchorPhrase || 'Не указана'}"</p>
+            </div>
+            
+            <p class="fst-italic text-center mt-3">«Широкий взгляд усмиряет душу.» — Марк Аврелий</p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay25">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      const completeBtn = document.getElementById('completeDay25')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving view from above:', viewData)
+      
+      const journeyText = `
+Космическое путешествие
+
+Фокус: ${viewData.focus?.emoji || ''} ${viewData.focus?.name || 'Не указан'}
+Детали: ${viewData.focusDetails || 'Не указаны'}
+
+Уровни перспективы:
+${viewData.levelObservations.map((obs, i) => `Уровень ${i+1}: ${obs}`).join('\n')}
+
+Ключевые инсайты: ${viewData.insights || 'Не указаны'}
+
+Стоический якорь: ${viewData.anchor?.emoji || ''} ${viewData.anchor?.name || 'Не создан'}
+Фраза: "${viewData.anchorPhrase || 'Не указана'}"
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: journeyText,
+            category: 'День 25: Стоический "Вид сверху"'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>
