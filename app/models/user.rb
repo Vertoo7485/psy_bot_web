@@ -92,4 +92,31 @@ class User < ApplicationRecord
     return 0 unless subscription_ends_at && subscription_ends_at > Time.current
     (subscription_ends_at.to_date - Date.current).to_i
   end
+
+  def can_start_day?(day_number, program_id)
+  return true if day_number == 1
+  
+  previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
+  previous_progress = user_day_progresses.find_by(day: previous_day)
+  
+  return false unless previous_progress&.completed?
+  
+  Time.current - previous_progress.completed_at >= 12.hours
+end
+
+def time_until_next_day(day_number, program_id)
+  return 0 if day_number == 1
+  
+  previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
+  previous_progress = user_day_progresses.find_by(day: previous_day)
+  
+  return 0 unless previous_progress&.completed?
+  
+  time_passed = Time.current - previous_progress.completed_at
+  if time_passed < 12.hours
+    (12.hours - time_passed).ceil
+  else
+    0
+  end
+end
 end

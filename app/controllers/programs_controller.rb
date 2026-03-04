@@ -13,11 +13,22 @@ class ProgramsController < ApplicationController
   
   def day
   @day = @program.days.find_by(day_number: params[:day_number])
+  
+  # Проверяем, можно ли начать этот день
+  unless current_user.can_start_day?(@day.day_number, @program.id)
+    time_left = current_user.time_until_next_day(@day.day_number, @program.id)
+    hours = time_left / 3600
+    minutes = (time_left % 3600) / 60
+    
+    flash[:alert] = "Следующий день будет доступен через #{hours} ч #{minutes} мин"
+    redirect_to program_path(@program)
+    return
+  end
+  
   @progress = current_user.user_day_progresses.find_or_create_by(day: @day) do |p|
     p.started_at = Time.current
   end
   
-  # Загружаем сохраненные ответы для этого дня
   @reflection_answers = current_user.reflection_answers
                                     .where(day: @day)
                                     .pluck(:question_key, :answer)
@@ -42,6 +53,12 @@ end
     else
       render json: { success: false }, status: :unprocessable_entity
     end
+  end
+
+  def reset
+    @program = Program.find(params[:id])
+    current_user.user_day_progresses.where(day: @program.days).destroy_all
+    redirect_to program_path(@program), notice: "Программа сброшена. Можно начать заново!"
   end
   
   private

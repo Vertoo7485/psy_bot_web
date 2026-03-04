@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     member do
       get 'day/:day_number', to: 'programs#day', as: :day
       post 'day/:day_number/complete', to: 'programs#complete_day'
+      post 'reset', to: 'programs#reset'  # ← добавить эту строку
     end
   end
 
