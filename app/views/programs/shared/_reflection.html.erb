@@ -1,5 +1,11 @@
 <% if content["reflection"].present? %>
-  <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
+  <div id="reflectionSection" 
+       class="card mb-4 d-none" 
+       data-day-program-target="reflection"
+       data-controller="reflection"
+       data-reflection-day-id-value="<%= @day.id %>"
+       data-reflection-answers-value="<%= @reflection_answers.to_json %>">
+    
     <div class="card-body">
       <h4 class="card-title">
         <i class="fas fa-pen me-2"></i>
@@ -26,33 +32,80 @@
               "effect" => "Об эффекте",
               "questions" => "Вопросы"
             }
+            
+            # Собираем все вопросы с ключами для интерактива
+            all_questions = []
+            content["reflection"]["questions"].each do |category, questions|
+              questions.each_with_index do |q, idx|
+                all_questions << {
+                  key: "#{category}_#{idx}",
+                  text: q,
+                  category: category,
+                  category_name: russian_names[category] || category.capitalize
+                }
+              end
+            end
           %>
-          <% content["reflection"]["questions"].each_with_index do |(key, questions), index| %>
-            <% display_name = russian_names[key] || key.capitalize %>
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button <%= index == 0 ? '' : 'collapsed' %>" 
-                        type="button" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#collapse<%= key.capitalize %>">
-                  <%= display_name %>
-                </button>
-              </h2>
-              <div id="collapse<%= key.capitalize %>" 
-                   class="accordion-collapse collapse <%= index == 0 ? 'show' : '' %>" 
-                   data-bs-parent="#reflectionAccordion">
-                <div class="accordion-body">
-                  <ul class="list-unstyled">
-                    <% questions.each do |q| %>
-                      <li class="mb-2"><i class="fas fa-question-circle text-primary me-2"></i><%= q %></li>
-                    <% end %>
-                  </ul>
+          
+          <div class="reflection-questions">
+            <% all_questions.each do |q| %>
+              <div class="card mb-3 border-0 bg-light">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <small class="text-secondary"><%= q[:category_name] %></small>
+                      <p class="mb-2"><%= q[:text] %></p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary ms-3"
+                            data-action="click->reflection#askQuestion"
+                            data-question-key="<%= q[:key] %>"
+                            data-question-text="<%= q[:text] %>">
+                      <span class="answer-icon">✏️</span>
+                    </button>
+                  </div>
+                  
+                  <!-- Поле для ввода ответа (изначально скрыто) -->
+                  <div id="input-<%= q[:key] %>" 
+                       class="mt-3 d-none" 
+                       data-reflection-target="input">
+                    <form data-question-key="<%= q[:key] %>" 
+                          data-action="submit->reflection#saveAnswer">
+                      <textarea class="form-control mb-2" 
+                                rows="2" 
+                                placeholder="Напишите ваш ответ..."></textarea>
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="fas fa-check me-1"></i>Сохранить
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
         <% end %>
       </div>
+
+      <!-- Советы на каждый день -->
+      <% if content["daily_tips"].present? %>
+        <div class="mt-4">
+          <h5 class="mb-3">
+            <i class="fas fa-lightbulb text-info me-2"></i>
+            Как использовать в жизни
+          </h5>
+          <div class="row">
+            <% content["daily_tips"].each do |tip| %>
+              <div class="col-md-6 mb-3">
+                <div class="card bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title"><%= tip["title"] %></h6>
+                    <p class="small mb-0"><%= tip["description"] %></p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

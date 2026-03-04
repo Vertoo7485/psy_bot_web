@@ -21,6 +21,7 @@ class User < ApplicationRecord
   has_many :pleasure_activities, dependent: :destroy
   has_many :meditation_sessions, dependent: :destroy
   has_many :fear_conquests, dependent: :destroy
+  has_many :reflection_answers, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'

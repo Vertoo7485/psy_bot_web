@@ -12,13 +12,17 @@ class ProgramsController < ApplicationController
   end
   
   def day
-    @day = @program.days.find_by(day_number: params[:day_number])
-    
-    # Отмечаем начало дня, если еще не начат
-    @progress = current_user.user_day_progresses.find_or_create_by(day: @day) do |p|
-      p.started_at = Time.current
-    end
+  @day = @program.days.find_by(day_number: params[:day_number])
+  @progress = current_user.user_day_progresses.find_or_create_by(day: @day) do |p|
+    p.started_at = Time.current
   end
+  
+  # Загружаем сохраненные ответы для этого дня
+  @reflection_answers = current_user.reflection_answers
+                                    .where(day: @day)
+                                    .pluck(:question_key, :answer)
+                                    .to_h
+end
   
   def complete_day
     @day = @program.days.find_by(day_number: params[:day_number])

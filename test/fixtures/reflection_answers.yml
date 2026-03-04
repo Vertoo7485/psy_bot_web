@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  day: one
+  question_key: MyString
+  answer: MyText
+
+two:
+  user: two
+  day: two
+  question_key: MyString
+  answer: MyText
