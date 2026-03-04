@@ -33,6 +33,9 @@ class User < ApplicationRecord
   # Валидации
   validates :access_level, inclusion: { in: %w[free premium admin] }
 
+  # Callback для новых пользователей
+  after_create :set_initial_trial, if: :new_user?
+
   # Scopes (из бота)
   scope :free_users, -> { where(access_level: 'free') }
   scope :premium_users, -> { where(access_level: 'premium') }
@@ -59,7 +62,7 @@ class User < ApplicationRecord
   end
 
   def has_active_premium?
-    premium? && is_active && subscription_active?
+    premium? && is_active && (trial_active? || subscription_active?)
   end
 
   def subscription_active?
@@ -94,29 +97,65 @@ class User < ApplicationRecord
   end
 
   def can_start_day?(day_number, program_id)
-  return true if day_number == 1
-  
-  previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
-  previous_progress = user_day_progresses.find_by(day: previous_day)
-  
-  return false unless previous_progress&.completed?
-  
-  Time.current - previous_progress.completed_at >= 12.hours
-end
+    return true if day_number == 1
+    
+    previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
+    previous_progress = user_day_progresses.find_by(day: previous_day)
+    
+    return false unless previous_progress&.completed?
+    
+    Time.current - previous_progress.completed_at >= 12.hours
+  end
 
-def time_until_next_day(day_number, program_id)
-  return 0 if day_number == 1
+  def time_until_next_day(day_number, program_id)
+    return 0 if day_number == 1
+    
+    previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
+    previous_progress = user_day_progresses.find_by(day: previous_day)
+    
+    return 0 unless previous_progress&.completed?
+    
+    time_passed = Time.current - previous_progress.completed_at
+    if time_passed < 12.hours
+      (12.hours - time_passed).ceil
+    else
+      0
+    end
+  end
+
+  private
+
+  def set_initial_trial
+    update(
+      access_level: 'premium',
+      trial_ends_at: 3.days.from_now,
+      is_active: true
+    )
+    Rails.logger.info "User #{id} activated 3-day trial"
+  end
+
+  def new_user?
+    true # Все новые пользователи получают триал
+  end
+
+  # Проверка статуса подписки (вызывается перед сохранением)
+before_save :check_subscription_status
+
+private
+
+def check_subscription_status
+  # Если триал истек и нет активной подписки
+  if premium? && trial_ends_at && trial_ends_at <= Time.current && !subscription_active?
+    self.access_level = 'free'
+    self.trial_ends_at = nil
+    Rails.logger.info "User #{id} auto-downgraded from premium to free (trial expired)"
+  end
   
-  previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
-  previous_progress = user_day_progresses.find_by(day: previous_day)
-  
-  return 0 unless previous_progress&.completed?
-  
-  time_passed = Time.current - previous_progress.completed_at
-  if time_passed < 12.hours
-    (12.hours - time_passed).ceil
-  else
-    0
+  # Если подписка истекла
+  if premium? && subscription_ends_at && subscription_ends_at <= Time.current
+    self.access_level = 'free'
+    self.subscription_ends_at = nil
+    Rails.logger.info "User #{id} auto-downgraded from premium to free (subscription expired)"
   end
 end
 end
