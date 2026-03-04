@@ -1,0 +1,92 @@
+<!-- Интерактивная часть дня 28 -->
+<div class="mt-4">
+  <!-- Теплое приветствие -->
+  <div class="text-center mb-4">
+    <h5 class="mb-3">🎊 День 28: Гранд-финал программы</h5>
+    <p class="lead"><strong>Месяц назад вы начали нейронаучный эксперимент над самим собой.</strong> Сегодня мы празднуем завершение полного цикла нейропластичности!</p>
+  </div>
+  
+  <!-- Простое объяснение -->
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-heart me-2"></i>
+    <strong>28 дней = полный цикл формирования устойчивой привычки на уровне мозга.</strong> Вы не просто прошли программу — вы сознательно изменили работу своей нервной системы.
+  </div>
+  
+  <!-- Статистика -->
+  <div class="row mb-4">
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-success mb-0">28</h4>
+          <small>дней</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-primary mb-0">28+</h4>
+          <small>техник</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-warning mb-0">9.2%</h4>
+          <small>доходят до финала</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 mb-2">
+      <div class="card text-center bg-light">
+        <div class="card-body py-2">
+          <h4 class="text-danger mb-0">100%</h4>
+          <small>пройдено</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 7 шагов (свернуто) -->
+  <div class="accordion mb-4">
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#finalSteps">
+          🎯 7 шагов научного финала (нажмите для справки)
+        </button>
+      </h2>
+      <div id="finalSteps" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div class="row">
+            <% content["steps"].each do |step| %>
+              <div class="col-12 mb-3">
+                <span class="badge bg-success me-2"><%= step["step"] %></span> 
+                <strong><%= step["emoji"] %> <%= step["title"] %></strong>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Мудрость дня -->
+  <div class="card mb-4 bg-light">
+    <div class="card-body">
+      <p class="fst-italic mb-0">«Самый важный научный эксперимент — тот, который вы провели над собой. Вы доказали, что нейропластичность работает, когда вы работаете.»</p>
+      <p class="text-end mb-0">— Доктор Норман Дойдж</p>
+    </div>
+  </div>
+  
+  <!-- Кнопка начала -->
+  <div class="text-center mt-4">
+    <button class="btn btn-success btn-lg px-5" id="startFinale">
+      <i class="fas fa-trophy me-2"></i>Начать научный финал
+    </button>
+    <p class="text-secondary small mt-2">7 шагов к осознанию ваших достижений, 30 минут.</p>
+  </div>
+  
+  <!-- Контейнер для шагов -->
+  <div id="finaleContainer" style="display: none;"></div>
+</div>

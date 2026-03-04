@@ -1,0 +1,408 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 27 script loaded')
+    
+    const startBtn = document.getElementById('startNeurohacking')
+    const container = document.getElementById('neuroContainer')
+    
+    // Данные из seeds
+    const pleasureTypes = <%= raw content["pleasure_types"].to_json %>
+    const savoringTechniques = <%= raw content["savoring_techniques"].to_json %>
+    const microRituals = <%= raw content["micro_rituals"].to_json %>
+    const dopaminePauses = <%= raw content["dopamine_pauses"].to_json %>
+    
+    let currentStep = 0
+    let neuroData = {
+      brainInsights: null,
+      pleasureAudit: null,
+      chosenTechnique: null,
+      dopamineBalance: null,
+      microRitual: null,
+      integrationPlan: null,
+      dopaminePause: null,
+      personalAlgorithm: null
+    }
+    
+    const steps = [
+      {
+        id: 'brain',
+        title: 'Нейробиология удовольствия',
+        emoji: '🔬',
+        question: 'Как обычно вы отмечаете достижения? Что происходит в вашей системе награды?',
+        help: 'Дофамин — это про ожидание, а не про само удовольствие. Мы часто гоняемся за "дозой", забывая наслаждаться моментом.',
+        example: 'Я часто проверяю соцсети после работы — это дает быстрый дофамин, но быстро проходит.'
+      },
+      {
+        id: 'audit',
+        title: 'Аудит источников радости',
+        emoji: '📊',
+        question: 'Какие у вас основные источники удовольствия?',
+        help: 'Разделите их на три типа: естественные и необходимые (еда, сон, движение), естественные и не необходимые (музыка, творчество), неестественные (соцсети, шопинг).',
+        example: 'Я заметил, что 70% моего удовольствия — из соцсетей, и только 30% — из реальной жизни.'
+      },
+      {
+        id: 'savoring',
+        title: 'Техники смакования',
+        emoji: '🎭',
+        question: 'Какую технику вы хотите попробовать? Как будете её применять?',
+        help: 'Можно использовать внимательное присутствие, ментальную фотографию, режиссуру удовольствия или совместное смакование.',
+        example: 'Я буду практиковать "ментальную фотографию" во время утреннего кофе.'
+      },
+      {
+        id: 'dopamine',
+        title: 'Балансировка дофамина',
+        emoji: '⚖️',
+        question: 'Что в вашей жизни работает по здоровому циклу, а что по разрушительному?',
+        help: 'Здоровый цикл: ожидание → действие → достижение → интеграция → новое ожидание. Разрушительный: постоянная стимуляция → привыкание → выгорание.',
+        example: 'Работа часто идет по разрушительному циклу: бесконечные дедлайны без пауз на празднование.'
+      },
+      {
+        id: 'ritual',
+        title: 'Микро-ритуалы',
+        emoji: '🎯',
+        question: 'Какой микро-ритуал вы можете создать для маленьких достижений?',
+        help: 'Придумайте 1-2 минутный ритуал: особый напиток, музыку, свечу, жест. Главное — делать его осознанно.',
+        example: 'После завершения задачи буду зажигать свечу на 1 минуту и благодарить себя.'
+      },
+      {
+        id: 'integration',
+        title: 'Система интеграции',
+        emoji: '🔄',
+        question: 'Где в вашем расписании могут появиться эти практики?',
+        help: 'Подумайте о ежедневных микро-праздниках, еженедельных обзорах и ежемесячных практиках.',
+        example: 'Каждый вечер буду записывать одну маленькую победу. По воскресеньям — обзор недели.'
+      },
+      {
+        id: 'pause',
+        title: 'Дофаминовое голодание',
+        emoji: '🧹',
+        question: 'Какую дофаминовую паузу вы хотите попробовать?',
+        help: 'Выберите один стимулятор на паузу: соцсети на 12 часов, сладкое на 3 дня, покупки на неделю. Заполните паузу естественными радостями.',
+        example: 'В выходные сделаю 12-часовой цифровой детокс и пойду гулять в парк.'
+      },
+      {
+        id: 'algorithm',
+        title: 'Ваш алгоритм радости',
+        emoji: '⚙️',
+        question: 'Создайте ваш персональный алгоритм празднования',
+        help: 'Используйте формулу: Триггер → Нейро-техника → Ритуал → Длительность → Интеграция',
+        example: 'Завершение задачи → 3 вдоха → чай с полным присутствием → 2 минуты → благодарность'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start neurohacking clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      // Специальные кнопки для определенных шагов
+      let extraButtons = ''
+      if (step.id === 'audit') {
+        extraButtons = `
+          <div class="mt-3">
+            <button class="btn btn-outline-info w-100 mb-2" onclick="showPleasureTypes()">
+              📊 Показать типы удовольствий
+            </button>
+          </div>
+        `
+      } else if (step.id === 'savoring') {
+        extraButtons = `
+          <div class="mt-3">
+            <button class="btn btn-outline-info w-100 mb-2" onclick="showSavoringTechniques()">
+              🎭 Показать техники смакования
+            </button>
+          </div>
+        `
+      } else if (step.id === 'ritual') {
+        extraButtons = `
+          <div class="mt-3">
+            <button class="btn btn-outline-info w-100 mb-2" onclick="showMicroRituals()">
+              🎯 Идеи микро-ритуалов
+            </button>
+          </div>
+        `
+      } else if (step.id === 'pause') {
+        extraButtons = `
+          <div class="mt-3">
+            <button class="btn btn-outline-info w-100 mb-2" onclick="showDopaminePauses()">
+              🧹 Варианты дофаминовых пауз
+            </button>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step${currentStep}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+          </div>
+          <div class="card-body">
+            <!-- Прогресс -->
+            <div class="progress mb-3" style="height: 5px;">
+              <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+            </div>
+            
+            <p class="fw-bold mb-3">${step.question}</p>
+            
+            <div class="alert alert-light mb-3">
+              <p class="small mb-1"><i class="fas fa-lightbulb me-1"></i> ${step.help}</p>
+              <p class="small mb-0"><i class="fas fa-example me-1"></i> Например: ${step.example}</p>
+            </div>
+            
+            ${extraButtons}
+            
+            <textarea class="form-control mt-3" id="step${currentStep}Input" rows="4" placeholder="Напишите ваш ответ..."></textarea>
+            
+            <div class="d-flex justify-content-between mt-3">
+              <button class="btn btn-outline-secondary" onclick="skipStep()">Пропустить</button>
+              <button class="btn btn-success" onclick="saveStep()">Сохранить и дальше</button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveStep = function() {
+      const input = document.getElementById(`step${currentStep}Input`)?.value.trim()
+      
+      // Сохраняем в зависимости от текущего шага
+      switch(currentStep) {
+        case 0: neuroData.brainInsights = input || 'Без ответа'; break
+        case 1: neuroData.pleasureAudit = input || 'Без ответа'; break
+        case 2: neuroData.chosenTechnique = input || 'Без ответа'; break
+        case 3: neuroData.dopamineBalance = input || 'Без ответа'; break
+        case 4: neuroData.microRitual = input || 'Без ответа'; break
+        case 5: neuroData.integrationPlan = input || 'Без ответа'; break
+        case 6: neuroData.dopaminePause = input || 'Без ответа'; break
+        case 7: neuroData.personalAlgorithm = input || 'Без ответа'; break
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showSummary()
+      }
+    }
+    
+    window.skipStep = function() {
+      switch(currentStep) {
+        case 0: neuroData.brainInsights = 'Пропущено'; break
+        case 1: neuroData.pleasureAudit = 'Пропущено'; break
+        case 2: neuroData.chosenTechnique = 'Пропущено'; break
+        case 3: neuroData.dopamineBalance = 'Пропущено'; break
+        case 4: neuroData.microRitual = 'Пропущено'; break
+        case 5: neuroData.integrationPlan = 'Пропущено'; break
+        case 6: neuroData.dopaminePause = 'Пропущено'; break
+        case 7: neuroData.personalAlgorithm = 'Пропущено'; break
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showSummary()
+      }
+    }
+    
+    window.showPleasureTypes = function() {
+      let message = '📊 *Три типа удовольствий:*\n\n'
+      pleasureTypes.forEach(type => {
+        message += `${type.emoji} *${type.name}*\n`
+        message += `${type.description}\n`
+        message += `Примеры: ${type.examples.join(', ')}\n\n`
+      })
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.className = 'alert alert-info mt-2'
+      tempDiv.innerHTML = message.replace(/\n/g, '<br>')
+      
+      const stepDiv = document.getElementById(`step${currentStep}`)
+      stepDiv.querySelector('.card-body').appendChild(tempDiv)
+    }
+    
+    window.showSavoringTechniques = function() {
+      let message = '🎭 *4 техники смакования:*\n\n'
+      savoringTechniques.forEach(tech => {
+        message += `${tech.emoji} *${tech.name}*\n`
+        tech.steps.forEach((step, idx) => {
+          message += `${idx+1}. ${step}\n`
+        })
+        message += `Пример: ${tech.example}\n\n`
+      })
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.className = 'alert alert-info mt-2'
+      tempDiv.innerHTML = message.replace(/\n/g, '<br>')
+      
+      const stepDiv = document.getElementById(`step${currentStep}`)
+      stepDiv.querySelector('.card-body').appendChild(tempDiv)
+    }
+    
+    window.showMicroRituals = function() {
+      let message = '🎯 *Идеи микро-ритуалов:*\n\n'
+      microRituals.forEach(ritual => {
+        message += `${ritual.emoji} *${ritual.name}*\n`
+        ritual.steps.forEach((step, idx) => {
+          message += `${idx+1}. ${step}\n`
+        })
+        message += '\n'
+      })
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.className = 'alert alert-info mt-2'
+      tempDiv.innerHTML = message.replace(/\n/g, '<br>')
+      
+      const stepDiv = document.getElementById(`step${currentStep}`)
+      stepDiv.querySelector('.card-body').appendChild(tempDiv)
+    }
+    
+    window.showDopaminePauses = function() {
+      let message = '🧹 *Варианты дофаминовых пауз:*\n\n'
+      dopaminePauses.forEach(pause => {
+        message += `${pause.emoji} *${pause.name}* (${pause.duration})\n`
+        message += `Избегать: ${pause.avoid.join(', ')}\n`
+        message += `Делать вместо: ${pause.do.join(', ')}\n\n`
+      })
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.className = 'alert alert-info mt-2'
+      tempDiv.innerHTML = message.replace(/\n/g, '<br>')
+      
+      const stepDiv = document.getElementById(`step${currentStep}`)
+      stepDiv.querySelector('.card-body').appendChild(tempDiv)
+    }
+    
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🧠 Ваш нейрохакинг радости готов!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Вы создали научно обоснованную систему для осознанного празднования.</p>
+            
+            <div class="alert alert-light">
+              <p><strong>🔬 Инсайты о мозге:</strong> ${neuroData.brainInsights || '—'}</p>
+              <p><strong>📊 Аудит удовольствий:</strong> ${neuroData.pleasureAudit || '—'}</p>
+              <p><strong>🎭 Техника смакования:</strong> ${neuroData.chosenTechnique || '—'}</p>
+              <p><strong>⚖️ Балансировка дофамина:</strong> ${neuroData.dopamineBalance || '—'}</p>
+              <p><strong>🎯 Микро-ритуал:</strong> ${neuroData.microRitual || '—'}</p>
+              <p><strong>🔄 План интеграции:</strong> ${neuroData.integrationPlan || '—'}</p>
+              <p><strong>🧹 Дофаминовая пауза:</strong> ${neuroData.dopaminePause || '—'}</p>
+              <p><strong>⚙️ Алгоритм радости:</strong> ${neuroData.personalAlgorithm || '—'}</p>
+            </div>
+            
+            <p class="small text-secondary mt-3">
+              <i class="fas fa-lightbulb me-1"></i>
+              Начните с одного микро-ритуала сегодня и практикуйте его 7 дней для создания нейронного пути.
+            </p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay27">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      const completeBtn = document.getElementById('completeDay27')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+      
+      saveToDatabase()
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving neurohacking data:', neuroData)
+      
+      const neuroText = `
+Нейрохакинг радости
+
+🔬 Инсайты о мозге:
+${neuroData.brainInsights || 'Не указано'}
+
+📊 Аудит удовольствий:
+${neuroData.pleasureAudit || 'Не указано'}
+
+🎭 Техника смакования:
+${neuroData.chosenTechnique || 'Не указано'}
+
+⚖️ Балансировка дофамина:
+${neuroData.dopamineBalance || 'Не указано'}
+
+🎯 Микро-ритуал:
+${neuroData.microRitual || 'Не указано'}
+
+🔄 План интеграции:
+${neuroData.integrationPlan || 'Не указано'}
+
+🧹 Дофаминовая пауза:
+${neuroData.dopaminePause || 'Не указано'}
+
+⚙️ Алгоритм радости:
+${neuroData.personalAlgorithm || 'Не указано'}
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: neuroText,
+            category: 'День 27: Нейрохакинг радости'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

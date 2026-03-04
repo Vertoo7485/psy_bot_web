@@ -1,0 +1,523 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 26 script loaded (очень простая версия)')
+    
+    const startBtn = document.getElementById('startValuesChain')
+    const container = document.getElementById('valuesContainer')
+    
+    // Категории действий
+    const actionCategories = <%= raw content["action_categories"].to_json %>
+    
+    let currentStep = 0
+    let currentLevel = 0
+    let valuesData = {
+      actionCategory: null,
+      actionDescription: null,
+      level1: null,
+      level2: null,
+      level3: null,
+      level4: null,
+      level5: null,
+      level6: null,
+      gaps: null,
+      bridges: null,
+      ritual: null,
+      ritualDesc: null
+    }
+    
+    // Максимально простые вопросы (как в разговоре с другом)
+    const levels = [
+      {
+        question: "Что именно вы делаете?",
+        help: "Опишите как можно конкретнее: что, где, когда, с кем?",
+        example: "Каждый вечер после работы я проверяю рабочую почту и отвечаю на сообщения.",
+        simple: true
+      },
+      {
+        question: "Зачем вы это делаете? Что будет, если этого не сделать?",
+        help: "Какая самая простая, очевидная причина?",
+        example: "Чтобы коллеги не ждали ответ, чтобы ничего не пропустить, чтобы работа не встала.",
+        simple: true
+      },
+      {
+        question: "А что это дает вам? Что вы чувствуете, когда это сделано?",
+        help: "Какое у вас состояние после? Спокойствие? Удовлетворение? Чувство, что всё под контролем?",
+        example: "Когда я ответил на все письма, я чувствую спокойствие и контроль. Я знаю, что ничего не пропустил.",
+        simple: true
+      },
+      {
+        question: "Что это говорит о вас как о человеке?",
+        help: "Какие ваши качества здесь проявляются? Вы ответственный? Надежный? Заботливый?",
+        example: "Я — человек, на которого можно положиться. Я выполняю свои обязательства, я профессионален.",
+        simple: true
+      },
+      {
+        question: "Как это влияет на других людей?",
+        help: "Кому еще это важно? Коллегам? Семье? Клиентам?",
+        example: "Мои коллеги знают, что я отвечу, и могут рассчитывать на меня. Работа идет без задержек.",
+        simple: true
+      },
+      {
+        question: "Если совсем честно — какой в этом самый глубокий смысл?",
+        help: "Зачем вообще это делать в масштабе всей жизни? О чем это на самом деле?",
+        example: "Это про уважение к себе и другим. Про то, что я живу не зря, что моя работа важна. Про достоинство.",
+        simple: true
+      }
+    ]
+    
+    const steps = [
+      {
+        id: 'action',
+        title: 'Выбираем дело',
+        emoji: '🔧'
+      },
+      {
+        id: 'levels',
+        title: 'Копаем глубже',
+        emoji: '🔗'
+      },
+      {
+        id: 'gaps',
+        title: 'Где споткнулись?',
+        emoji: '🔍'
+      },
+      {
+        id: 'bridges',
+        title: 'Что исправить?',
+        emoji: '🌉'
+      },
+      {
+        id: 'ritual',
+        title: 'Особый ритуал',
+        emoji: '🎭'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start values chain clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      if (step.id === 'action') {
+        let actionButtons = ''
+        actionCategories.forEach((cat, index) => {
+          actionButtons += `
+            <div class="col-12 col-md-6 mb-2">
+              <button class="btn btn-outline-primary w-100 action-category-btn" data-index="${index}" data-name="${cat.name}" data-emoji="${cat.emoji}">
+                ${cat.emoji} ${cat.name}
+              </button>
+            </div>
+          `
+        })
+        
+        let stepHtml = `
+          <div class="card mb-4" id="step0">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">${step.emoji} Шаг 1/${steps.length}: Выберите дело</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3"><strong>Какое обычное дело вы хотите исследовать?</strong></p>
+              <p class="text-secondary small">Выберите что-то простое, что вы делаете регулярно. Это может быть работа, домашние дела, общение с кем-то.</p>
+              
+              <div class="row">
+                ${actionButtons}
+              </div>
+              
+              <div class="mt-3">
+                <button class="btn btn-outline-secondary w-100" onclick="showCustomAction()">✍️ Своё дело</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+        document.querySelectorAll('.action-category-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const index = this.dataset.index
+            const category = actionCategories[index]
+            
+            valuesData.actionCategory = {
+              name: category.name,
+              emoji: category.emoji
+            }
+            
+            document.querySelectorAll('.action-category-btn').forEach(b => {
+              b.classList.remove('btn-primary', 'text-white')
+              b.classList.add('btn-outline-primary')
+            })
+            this.classList.remove('btn-outline-primary')
+            this.classList.add('btn-primary', 'text-white')
+            
+            const detailsHtml = `
+              <div class="mt-4" id="actionDetails">
+                <p class="mb-2"><strong>Опишите конкретно, что вы делаете:</strong></p>
+                <p class="small text-secondary mb-2">Например: ${category.examples[Math.floor(Math.random() * category.examples.length)]}</p>
+                <textarea class="form-control mb-3" id="actionDescription" rows="2" placeholder="Что, когда, где, как часто?"></textarea>
+                <button class="btn btn-success w-100" onclick="saveAction()">Продолжить</button>
+              </div>
+            `
+            
+            const oldDetails = document.getElementById('actionDetails')
+            if (oldDetails) oldDetails.remove()
+            
+            this.closest('.card-body').insertAdjacentHTML('beforeend', detailsHtml)
+          })
+        })
+        
+      } else if (step.id === 'levels') {
+        if (currentLevel >= levels.length) {
+          currentStep++
+          showStep()
+          return
+        }
+        
+        const level = levels[currentLevel]
+        
+        let stepHtml = `
+          <div class="card mb-4" id="level${currentLevel}">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">🔗 Шаг 2/${steps.length}: Вопрос ${currentLevel + 1} из ${levels.length}</h6>
+            </div>
+            <div class="card-body">
+              <p class="fw-bold mb-3">${level.question}</p>
+              
+              <div class="alert alert-light mb-3">
+                <p class="small mb-1"><i class="fas fa-lightbulb me-1"></i> ${level.help}</p>
+                <p class="small mb-0"><i class="fas fa-example me-1"></i> Например: ${level.example}</p>
+              </div>
+              
+              <textarea class="form-control" id="levelObservation" rows="3" placeholder="Напишите ваш ответ простыми словами..."></textarea>
+              
+              <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-outline-secondary" onclick="skipLevel()">Пропустить</button>
+                <button class="btn btn-success" onclick="saveLevel()">Ответить и дальше</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+      } else if (step.id === 'gaps') {
+        let chainHtml = '<div class="alert alert-light mb-3"><p class="mb-1"><strong>Ваша цепочка смыслов:</strong></p>'
+        chainHtml += `<p class="small mb-1"><strong>🔧 Что делаю:</strong> ${valuesData.level1 || '—'}</p>`
+        chainHtml += `<p class="small mb-1"><strong>🎯 Зачем:</strong> ${valuesData.level2 || '—'}</p>`
+        chainHtml += `<p class="small mb-1"><strong>⚙️ Что дает:</strong> ${valuesData.level3 || '—'}</p>`
+        chainHtml += `<p class="small mb-1"><strong>❤️ Что говорит обо мне:</strong> ${valuesData.level4 || '—'}</p>`
+        chainHtml += `<p class="small mb-1"><strong>🤝 Для других:</strong> ${valuesData.level5 || '—'}</p>`
+        chainHtml += `<p class="small mb-1"><strong>🌟 Глубинный смысл:</strong> ${valuesData.level6 || '—'}</p>`
+        chainHtml += '</div>'
+        
+        let stepHtml = `
+          <div class="card mb-4" id="step2">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">🔍 Шаг 3/${steps.length}: Где потерялась связь?</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3"><strong>Посмотрите на вашу цепочку. Где она провисает?</strong></p>
+              <p class="text-secondary small">Может быть, какой-то ответ вам не нравится? Или связь кажется натянутой? Что можно улучшить?</p>
+              
+              ${chainHtml}
+              
+              <textarea class="form-control" id="gapsInput" rows="4" placeholder="Например: 'Я понял, что делаю это на автомате и не чувствую связи с ценностями' или 'Тут все хорошо, ничего менять не хочу'..."></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveGaps()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+      } else if (step.id === 'bridges') {
+        let stepHtml = `
+          <div class="card mb-4" id="step3">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">🌉 Шаг 4/${steps.length}: Усиливаем связь</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3"><strong>Что можно сделать, чтобы это дело стало более осмысленным?</strong></p>
+              <p class="text-secondary small">Например:</p>
+              <ul class="small">
+                <li>Делать это осознанно, а не на автомате</li>
+                <li>Добавить маленький ритуал (зажечь свечу, включить музыку)</li>
+                <li>Напоминать себе о смысле перед началом</li>
+                <li>Поблагодарить себя после</li>
+              </ul>
+              
+              <textarea class="form-control" id="bridgesInput" rows="4" placeholder="Что вы будете делать по-другому?"></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveBridges()">Далее</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+        
+      } else if (step.id === 'ritual') {
+        let stepHtml = `
+          <div class="card mb-4" id="step4">
+            <div class="card-header bg-primary text-white">
+              <h6 class="mb-0">🎭 Шаг 5/${steps.length}: Ваш особый ритуал</h6>
+            </div>
+            <div class="card-body">
+              <p class="mb-3"><strong>Придумайте маленький ритуал, который будет напоминать вам о смысле.</strong></p>
+              <p class="text-secondary small">Это может быть что угодно:</p>
+              <ul class="small">
+                <li>🕯️ Зажечь свечу перед началом</li>
+                <li>🎵 Включить особенную музыку</li>
+                <li>🧘 3 глубоких вдоха</li>
+                <li>📝 Сказать про себя фразу-напоминалку</li>
+              </ul>
+              
+              <textarea class="form-control" id="ritualDesc" rows="3" placeholder="Что вы будете делать?"></textarea>
+              
+              <div class="text-end mt-3">
+                <button class="btn btn-success" onclick="saveRitual()">Завершить</button>
+              </div>
+            </div>
+          </div>
+        `
+        
+        container.innerHTML = stepHtml
+        container.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+    
+    window.showCustomAction = function() {
+      const customHtml = `
+        <div class="mt-4" id="actionDetails">
+          <p class="mb-2"><strong>Опишите ваше дело:</strong></p>
+          <textarea class="form-control mb-3" id="actionDescription" rows="3" placeholder="Что именно? Где? Когда? Как часто?"></textarea>
+          <button class="btn btn-success w-100" onclick="saveCustomAction()">Продолжить</button>
+        </div>
+      `
+      
+      const oldDetails = document.getElementById('actionDetails')
+      if (oldDetails) oldDetails.remove()
+      
+      document.querySelector('#step0 .card-body').insertAdjacentHTML('beforeend', customHtml)
+    }
+    
+    window.saveAction = function() {
+      const desc = document.getElementById('actionDescription')?.value.trim()
+      if (!desc) {
+        alert('Пожалуйста, опишите ваше действие')
+        return
+      }
+      
+      valuesData.actionDescription = desc
+      valuesData.level1 = desc
+      document.getElementById('step0').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveCustomAction = function() {
+      const desc = document.getElementById('actionDescription')?.value.trim()
+      if (!desc) {
+        alert('Пожалуйста, опишите ваше действие')
+        return
+      }
+      
+      valuesData.actionCategory = { name: 'Моё дело', emoji: '📝' }
+      valuesData.actionDescription = desc
+      valuesData.level1 = desc
+      document.getElementById('step0').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveLevel = function() {
+      const observation = document.getElementById('levelObservation')?.value.trim()
+      
+      switch(currentLevel) {
+        case 0: valuesData.level1 = observation || 'Без ответа'; break
+        case 1: valuesData.level2 = observation || 'Без ответа'; break
+        case 2: valuesData.level3 = observation || 'Без ответа'; break
+        case 3: valuesData.level4 = observation || 'Без ответа'; break
+        case 4: valuesData.level5 = observation || 'Без ответа'; break
+        case 5: valuesData.level6 = observation || 'Без ответа'; break
+      }
+      
+      currentLevel++
+      
+      if (currentLevel < levels.length) {
+        document.getElementById(`level${currentLevel-1}`).remove()
+        showStep()
+      } else {
+        document.getElementById(`level${levels.length-1}`).remove()
+        currentStep++
+        showStep()
+      }
+    }
+    
+    window.skipLevel = function() {
+      switch(currentLevel) {
+        case 0: valuesData.level1 = 'Пропущено'; break
+        case 1: valuesData.level2 = 'Пропущено'; break
+        case 2: valuesData.level3 = 'Пропущено'; break
+        case 3: valuesData.level4 = 'Пропущено'; break
+        case 4: valuesData.level5 = 'Пропущено'; break
+        case 5: valuesData.level6 = 'Пропущено'; break
+      }
+      
+      currentLevel++
+      
+      if (currentLevel < levels.length) {
+        document.getElementById(`level${currentLevel-1}`).remove()
+        showStep()
+      } else {
+        document.getElementById(`level${levels.length-1}`).remove()
+        currentStep++
+        showStep()
+      }
+    }
+    
+    window.saveGaps = function() {
+      const gaps = document.getElementById('gapsInput')?.value.trim()
+      valuesData.gaps = gaps || 'Не указано'
+      document.getElementById('step2').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveBridges = function() {
+      const bridges = document.getElementById('bridgesInput')?.value.trim()
+      valuesData.bridges = bridges || 'Не указано'
+      document.getElementById('step3').remove()
+      currentStep++
+      showStep()
+    }
+    
+    window.saveRitual = function() {
+      const ritual = document.getElementById('ritualDesc')?.value.trim()
+      valuesData.ritualDesc = ritual || 'Не указано'
+      document.getElementById('step4').remove()
+      showSummary()
+      saveToDatabase()
+    }
+    
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🔗 Готово! Вот ваша цепочка смыслов</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3"><strong>Дело:</strong> ${valuesData.actionCategory?.emoji || ''} ${valuesData.actionCategory?.name || ''}</p>
+            <p><strong>${valuesData.level1}</strong></p>
+            
+            <div class="mt-3 p-3 bg-light rounded">
+              <p class="mb-2"><strong>🔗 Как это связано с вами:</strong></p>
+              <p class="mb-1">🎯 <strong>Зачем:</strong> ${valuesData.level2 || '—'}</p>
+              <p class="mb-1">⚙️ <strong>Что дает:</strong> ${valuesData.level3 || '—'}</p>
+              <p class="mb-1">❤️ <strong>Что говорит обо мне:</strong> ${valuesData.level4 || '—'}</p>
+              <p class="mb-1">🤝 <strong>Для других:</strong> ${valuesData.level5 || '—'}</p>
+              <p class="mb-0">🌟 <strong>Глубинный смысл:</strong> ${valuesData.level6 || '—'}</p>
+            </div>
+            
+            ${valuesData.ritualDesc ? `
+            <div class="mt-3">
+              <p><strong>🎭 Мой особый ритуал:</strong> ${valuesData.ritualDesc}</p>
+            </div>
+            ` : ''}
+            
+            <p class="text-center mt-4">
+              <small class="text-secondary">Из простого дела выросла целая философия!</small>
+            </p>
+            
+            <button class="btn btn-success w-100 mt-3" id="completeDay26">
+              <i class="fas fa-check-circle me-2"></i>Завершить день
+            </button>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      const completeBtn = document.getElementById('completeDay26')
+      if (completeBtn) {
+        completeBtn.addEventListener('click', function() {
+          const reflectionSection = document.getElementById('reflectionSection')
+          if (reflectionSection) {
+            reflectionSection.classList.remove('d-none')
+            reflectionSection.scrollIntoView({ behavior: 'smooth' })
+          }
+          
+          const completeDayBtn = document.getElementById('completeDay')
+          if (completeDayBtn) {
+            completeDayBtn.classList.remove('d-none')
+          }
+        })
+      }
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving values chain:', valuesData)
+      
+      const chainText = `
+Цепочка смыслов для дела: ${valuesData.actionCategory?.emoji || ''} ${valuesData.actionCategory?.name || ''}
+
+Что делаю: ${valuesData.level1 || 'Не указано'}
+Зачем: ${valuesData.level2 || 'Не указано'}
+Что дает: ${valuesData.level3 || 'Не указано'}
+Что говорит обо мне: ${valuesData.level4 || 'Не указано'}
+Для других: ${valuesData.level5 || 'Не указано'}
+Глубинный смысл: ${valuesData.level6 || 'Не указано'}
+
+Что заметил(а): ${valuesData.gaps || 'Не указано'}
+Что изменю: ${valuesData.bridges || 'Не указано'}
+Мой ритуал: ${valuesData.ritualDesc || 'Не указано'}
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: chainText,
+            category: 'День 26: Цепочка ценностей'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

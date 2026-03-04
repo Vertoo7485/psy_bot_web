@@ -1,0 +1,355 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Day 28 script loaded')
+    
+    const startBtn = document.getElementById('startFinale')
+    const container = document.getElementById('finaleContainer')
+    
+    // Данные из seeds
+    const achievementCategories = <%= raw content["achievement_categories"].to_json %>
+    const maintenanceChecklist = <%= raw content["maintenance_checklist"].to_json %>
+    
+    let currentStep = 0
+    let finaleData = {
+      celebrationFeelings: null,
+      topAchievements: [],
+      mostValuableSkill: null,
+      joyPractice: null,
+      futureInterests: [],
+      scientificLetter: null,
+      scientificNote: null
+    }
+    
+    const steps = [
+      {
+        id: 'celebration',
+        title: 'Церемония признания',
+        emoji: '🎉',
+        question: 'Как вы себя чувствуете, достигнув финишной черты?',
+        help: 'Опишите свои эмоции через призму нейробиологии: гордость, радость, облегчение, удивление?',
+        example: 'Я чувствую огромную гордость и удивление, что смог пройти весь путь до конца. Мой мозг изменился!'
+      },
+      {
+        id: 'review',
+        title: 'Анализ пути',
+        emoji: '📊',
+        question: 'Какие 3 самых значимых достижения за 28 дней?',
+        help: 'Что изменилось в вашем мышлении, эмоциях, поведении? Какие навыки стали частью вас?',
+        example: '1. Научился(ась) замечать автоматические мысли\n2. Могу успокоиться через дыхание 4-7-8\n3. Перестал(а) откладывать важные дела'
+      },
+      {
+        id: 'skills',
+        title: 'Интеграция навыков',
+        emoji: '🧩',
+        question: 'Какой научный инструмент стал для вас самым ценным?',
+        help: 'Какая техника помогла больше всего? Почему? Как вы будете её применять дальше?',
+        example: 'Техника "вид сверху" — она помогает мне видеть проблемы в масштабе и не паниковать из-за мелочей.'
+      },
+      {
+        id: 'support',
+        title: 'Система поддержки',
+        emoji: '📋',
+        question: 'Какую практику радости вы добавите в свою жизнь?',
+        help: 'Что будет приносить вам удовольствие с научной точки зрения? Музыка, природа, общение, новизна?',
+        example: 'Каждое воскресенье буду ходить в парк и слушать любимую музыку — это сочетает природу, музыку и осознанность.'
+      },
+      {
+        id: 'future',
+        title: 'Горизонты развития',
+        emoji: '🚀',
+        question: 'Что вас интересует для дальнейшего изучения?',
+        help: 'Какие научные направления вы хотите исследовать? Углубленная КПТ? Нейронаука? Позитивная психология?',
+        example: 'Меня интересует нейробиология стресса и как можно использовать биологическую обратную связь.'
+      },
+      {
+        id: 'letter',
+        title: 'Письмо себе',
+        emoji: '🌟',
+        question: 'Напишите научное письмо себе на будущее',
+        help: 'Обратитесь к себе от лица нейроученого. Напомните о своих достижениях и самых сильных техниках.',
+        example: 'Дорогой(ая) я, помни: ты научился(ась) замечать автоматические мысли и не поддаваться им. Твоя самая сильная техника — "вид сверху". Когда будет трудно, вспомни, как далеко ты зашёл(а)!'
+      }
+    ]
+    
+    if (startBtn) {
+      startBtn.addEventListener('click', function() {
+        console.log('Start finale clicked')
+        startBtn.style.display = 'none'
+        container.style.display = 'block'
+        currentStep = 0
+        showStep()
+      })
+    }
+    
+    function showStep() {
+      if (currentStep >= steps.length) {
+        showSummary()
+        return
+      }
+      
+      const step = steps[currentStep]
+      const progress = (currentStep / steps.length) * 100
+      
+      // Специальные кнопки для определенных шагов
+      let extraButtons = ''
+      if (step.id === 'review') {
+        extraButtons = `
+          <div class="mt-3">
+            <button class="btn btn-outline-info w-100 mb-2" onclick="showAchievementCategories()">
+              🧠 Показать категории достижений
+            </button>
+          </div>
+        `
+      }
+      
+      let stepHtml = `
+        <div class="card mb-4" id="step${currentStep}">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">${step.emoji} Шаг ${currentStep + 1}/${steps.length}: ${step.title}</h6>
+          </div>
+          <div class="card-body">
+            <!-- Прогресс -->
+            <div class="progress mb-3" style="height: 5px;">
+              <div class="progress-bar bg-success" style="width: ${progress}%"></div>
+            </div>
+            
+            <p class="fw-bold mb-3">${step.question}</p>
+            
+            <div class="alert alert-light mb-3">
+              <p class="small mb-1"><i class="fas fa-lightbulb me-1"></i> ${step.help}</p>
+              <p class="small mb-0"><i class="fas fa-example me-1"></i> Например: ${step.example}</p>
+            </div>
+            
+            ${extraButtons}
+            
+            <textarea class="form-control mt-3" id="step${currentStep}Input" rows="4" placeholder="Напишите ваш ответ..."></textarea>
+            
+            <div class="d-flex justify-content-between mt-3">
+              <button class="btn btn-outline-secondary" onclick="skipStep()">Пропустить</button>
+              <button class="btn btn-success" onclick="saveStep()">Сохранить и дальше</button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = stepHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+    
+    window.saveStep = function() {
+      const input = document.getElementById(`step${currentStep}Input`)?.value.trim()
+      
+      // Сохраняем в зависимости от текущего шага
+      switch(currentStep) {
+        case 0: finaleData.celebrationFeelings = input || 'Без ответа'; break
+        case 1: 
+          if (input) {
+            finaleData.topAchievements = input.split('\n').filter(a => a.trim() !== '').slice(0, 3)
+          }
+          break
+        case 2: finaleData.mostValuableSkill = input || 'Без ответа'; break
+        case 3: finaleData.joyPractice = input || 'Без ответа'; break
+        case 4: 
+          if (input) {
+            finaleData.futureInterests = input.split('\n').filter(i => i.trim() !== '')
+          }
+          break
+        case 5: finaleData.scientificLetter = input || 'Без ответа'; break
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showSummary()
+      }
+    }
+    
+    window.skipStep = function() {
+      switch(currentStep) {
+        case 0: finaleData.celebrationFeelings = 'Пропущено'; break
+        case 1: finaleData.topAchievements = ['Пропущено']; break
+        case 2: finaleData.mostValuableSkill = 'Пропущено'; break
+        case 3: finaleData.joyPractice = 'Пропущено'; break
+        case 4: finaleData.futureInterests = ['Пропущено']; break
+        case 5: finaleData.scientificLetter = 'Пропущено'; break
+      }
+      
+      document.getElementById(`step${currentStep}`).remove()
+      currentStep++
+      
+      if (currentStep < steps.length) {
+        showStep()
+      } else {
+        showSummary()
+      }
+    }
+    
+    window.showAchievementCategories = function() {
+      let message = '🧠 *Категории достижений для вдохновения:*\n\n'
+      achievementCategories.forEach(cat => {
+        message += `${cat.emoji} *${cat.name}*\n`
+        message += `${cat.neuroscience}\n`
+        message += `Примеры: ${cat.achievements.join(', ')}\n\n`
+      })
+      
+      const tempDiv = document.createElement('div')
+      tempDiv.className = 'alert alert-info mt-2'
+      tempDiv.innerHTML = message.replace(/\n/g, '<br>')
+      
+      const stepDiv = document.getElementById(`step${currentStep}`)
+      stepDiv.querySelector('.card-body').appendChild(tempDiv)
+    }
+    
+    function showSummary() {
+      let summaryHtml = `
+        <div class="card mb-4 border-success">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">🎉 Программа успешно завершена!</h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Поздравляю! Вы прошли полный 28-дневный научный эксперимент над собой.</p>
+            
+            <div class="alert alert-light">
+              <p><strong>🎉 Эмоции финиша:</strong> ${finaleData.celebrationFeelings || '—'}</p>
+              
+              <p><strong>🏆 Главные достижения:</strong></p>
+              <ul>
+                ${finaleData.topAchievements.map(a => `<li>${a}</li>`).join('') || '<li>—</li>'}
+              </ul>
+              
+              <p><strong>🧩 Самый ценный инструмент:</strong> ${finaleData.mostValuableSkill || '—'}</p>
+              
+              <p><strong>🌈 Практика радости:</strong> ${finaleData.joyPractice || '—'}</p>
+              
+              <p><strong>🚀 Дальнейшие интересы:</strong></p>
+              <ul>
+                ${finaleData.futureInterests.map(i => `<li>${i}</li>`).join('') || '<li>—</li>'}
+              </ul>
+            </div>
+            
+            <p class="small text-secondary mt-3">
+              <i class="fas fa-lightbulb me-1"></i>
+              Вы вошли в элитную группу 9.2% людей, завершающих такие программы полностью!
+            </p>
+            
+            <div class="d-grid gap-2 mt-4">
+              <button class="btn btn-success" id="showCertificateBtn">
+                📜 Получить сертификат
+              </button>
+              <button class="btn btn-outline-primary" id="completeDay28">
+                ✅ Завершить программу
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+      
+      container.innerHTML = summaryHtml
+      container.scrollIntoView({ behavior: 'smooth' })
+      
+      document.getElementById('showCertificateBtn').addEventListener('click', showCertificate)
+      document.getElementById('completeDay28').addEventListener('click', function() {
+        const reflectionSection = document.getElementById('reflectionSection')
+        if (reflectionSection) {
+          reflectionSection.classList.remove('d-none')
+          reflectionSection.scrollIntoView({ behavior: 'smooth' })
+        }
+        
+        const completeDayBtn = document.getElementById('completeDay')
+        if (completeDayBtn) {
+          completeDayBtn.classList.remove('d-none')
+        }
+      })
+      
+      saveToDatabase()
+    }
+    
+    function showCertificate() {
+      const userName = '<%= current_user.email.split("@").first %>' || "Участник"
+      const today = new Date().toLocaleDateString('ru-RU')
+      
+      const certificateHtml = `
+        <div class="card mb-4 border-warning bg-light">
+          <div class="card-header bg-warning text-dark">
+            <h6 class="mb-0">📜 СЕРТИФИКАТ ЗАВЕРШЕНИЯ</h6>
+          </div>
+          <div class="card-body text-center">
+            <h4 class="mb-4">🎓 НАГРАЖДАЕТСЯ</h4>
+            <h2 class="mb-4">${userName}</h2>
+            <p class="lead mb-4">за успешное завершение 28-дневной программы</p>
+            <p class="mb-2"><strong>"Научный подход к психологической устойчивости"</strong></p>
+            <p class="mb-4">28 дней • 28+ техник • 100% завершения</p>
+            <p class="small text-secondary">Дата завершения: ${today}</p>
+            <hr>
+            <p class="fst-italic">«Самый важный научный эксперимент — тот, который вы провели над собой»</p>
+            <button class="btn btn-outline-secondary mt-3" onclick="document.getElementById('showCertificateBtn').scrollIntoView()">← Назад</button>
+          </div>
+        </div>
+      `
+      
+      // Добавляем сертификат после основного контента
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = certificateHtml
+      container.appendChild(tempDiv)
+    }
+    
+    function saveToDatabase() {
+      console.log('Saving finale data:', finaleData)
+      
+      const finaleText = `
+ФИНАЛЬНЫЙ ОТЧЕТ 28-ДНЕВНОЙ ПРОГРАММЫ
+
+🎉 Эмоции завершения:
+${finaleData.celebrationFeelings || 'Не указано'}
+
+🏆 Главные достижения:
+${finaleData.topAchievements.join('\n') || 'Не указаны'}
+
+🧩 Самый ценный инструмент:
+${finaleData.mostValuableSkill || 'Не указано'}
+
+🌈 Практика радости:
+${finaleData.joyPractice || 'Не указано'}
+
+🚀 Дальнейшие интересы:
+${finaleData.futureInterests.join('\n') || 'Не указаны'}
+
+🌟 Письмо себе:
+${finaleData.scientificLetter || 'Не указано'}
+
+📊 Статистика завершения:
+• Дней пройдено: 28
+• Прогресс: 100%
+• Статус: Программа успешно завершена
+      `
+      
+      fetch('/reflection_entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          entries: [{
+            text: finaleText,
+            category: 'День 28: Финальный отчет'
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Saved successfully')
+        } else {
+          console.error('Save error:', data.error)
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error)
+      })
+    }
+  })
+</script>

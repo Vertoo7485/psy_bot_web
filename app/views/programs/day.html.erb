@@ -253,6 +253,23 @@
       <%= render 'day_25_script', content: content %>
     <% end %>
 
+    <!-- День 26: КПТ "Цепочка ценностей" -->
+    <% if day.day_number == 26 %>
+      <%= render 'day_26_values_chain', content: content %>
+      <%= render 'day_26_script', content: content %>
+    <% end %>
+
+    <!-- День 27: Нейрохакинг радости -->
+    <% if day.day_number == 27 %>
+      <%= render 'day_27_neurohacking', content: content %>
+      <%= render 'day_27_script', content: content %>
+    <% end %>
+
+    <!-- День 28: Гранд-финал -->
+    <% if day.day_number == 28 %>
+      <%= render 'day_28_finale', content: content %>
+      <%= render 'day_28_script', content: content %>
+    <% end %>
 
     <!-- Трудности и советы -->
     <%= render 'programs/shared/challenges', content: content %>
