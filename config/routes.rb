@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'support/new'
+  get 'support/create'
   get 'start/index'
   get 'premium/index'
   get 'reflection_answers/create'
@@ -35,6 +37,7 @@ Rails.application.routes.draw do
   namespace :admin do
     get 'dashboard', to: 'dashboard#index'
     resources :users, only: [:index, :show, :edit, :update]
+    resources :support_messages, only: [:index, :show, :destroy]
   end
 
   resources :gratitude_entries, only: [:create, :index]
@@ -62,6 +65,8 @@ Rails.application.routes.draw do
   resources :reflection_answers, only: [:create]
   get 'premium', to: 'premium#index'
   get 'start', to: 'start#index'
+  get 'support', to: 'support#new'
+  post 'support', to: 'support#create'
   
   # Главная страница
   root to: 'home#index'

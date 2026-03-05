@@ -1,0 +1,19 @@
+<div class="container py-4">
+  <h1 class="mb-4">Сообщение от <%= @message.name %></h1>
+  
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex justify-content-between">
+        <span><strong>От:</strong> <%= @message.name %></span>
+        <span><strong>Дата:</strong> <%= @message.created_at.strftime('%d.%m.%Y %H:%M') %></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-text"><%= @message.message %></p>
+    </div>
+    <div class="card-footer">
+      <%= link_to "Назад", admin_support_messages_path, class: "btn btn-secondary" %>
+      <%= link_to "Удалить", admin_support_message_path(@message), method: :delete, class: "btn btn-danger", data: { confirm: "Удалить?" } %>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_04_143512) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_05_114458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -206,6 +206,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_143512) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_self_compassion_practices_on_user_id"
+  end
+
+  create_table "support_messages", force: :cascade do |t|
+    t.string "name"
+    t.text "message"
+    t.integer "status"
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "test_results", force: :cascade do |t|
