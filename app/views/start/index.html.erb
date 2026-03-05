@@ -1,0 +1,101 @@
+<div class="container py-5">
+  <!-- Шапка -->
+  <div class="text-center mb-5">
+    <h1 class="display-4 mb-3">🚀 Добро пожаловать в PsyBot!</h1>
+    <p class="lead">Ваш персональный психологический помощник на каждый день</p>
+  </div>
+
+  <!-- Триал-баннер -->
+  <div class="alert alert-success text-center p-4 mb-5">
+    <h2 class="h4 mb-3">🎁 У вас <strong>3 дня полного доступа</strong> ко всем функциям!</h2>
+    <p class="mb-0">За это время вы сможете попробовать всё, а потом решить — нужна ли вам подписка.</p>
+  </div>
+
+  <!-- Что доступно -->
+  <div class="row mb-5">
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+          <h5>Все тесты</h5>
+          <p class="text-secondary">Тревожность, депрессия, эмоциональный интеллект</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="fas fa-seedling fa-3x text-success mb-3"></i>
+          <h5>28-дневная программа</h5>
+          <p class="text-secondary">Практики КПТ на каждый день</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+          <h5>Дневники</h5>
+          <p class="text-secondary">Эмоции, благодарность, рефлексия</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Три варианта первого шага -->
+  <h3 class="text-center mb-4">С чего начать?</h3>
+  
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="display-1 mb-3">🧠</div>
+          <h4 class="card-title">Узнать себя</h4>
+          <p class="card-text">Пройдите тест тревожности и узнайте свой уровень</p>
+          <p class="text-secondary small">10 минут</p>
+          <%= link_to "Начать тест", test_path(Test.find_by(category: 'anxiety')), class: "btn btn-outline-primary w-100" %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="display-1 mb-3">🧘</div>
+          <h4 class="card-title">Начать практику</h4>
+          <p class="card-text">Попробуйте День 1 программы — осознанное дыхание</p>
+          <p class="text-secondary small">15 минут</p>
+          <%= link_to "Начать день", day_program_path(Program.first, day_number: 1), class: "btn btn-outline-success w-100" %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="display-1 mb-3">📊</div>
+          <h4 class="card-title">Оценить состояние</h4>
+          <p class="card-text">Пройдите тест депрессии для общей картины</p>
+          <p class="text-secondary small">5 минут</p>
+          <%= link_to "Начать тест", test_path(Test.find_by(category: 'depression')), class: "btn btn-outline-warning w-100" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Дисклеймер -->
+  <div class="text-center mt-5 pt-3 border-top">
+    <p class="text-secondary">
+      <i class="fas fa-info-circle me-1"></i>
+      Через 3 дня доступ автоматически станет бесплатным (тесты и дневники останутся). 
+      <%= link_to "Узнать о премиум-подписке", premium_path, class: "text-decoration-none" %>
+    </p>
+    
+    <% unless user_signed_in? %>
+      <div class="mt-4">
+        <%= link_to "Уже есть аккаунт? Войти", new_user_session_path, class: "btn btn-outline-primary me-2" %>
+        <%= link_to "Зарегистрироваться", new_user_registration_path, class: "btn btn-success" %>
+      </div>
+    <% end %>
+  </div>
+</div>
