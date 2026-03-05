@@ -55,7 +55,13 @@
                 <%= link_to "Профиль", profile_path, class: "nav-link" %>
               </li>
               <li class="nav-item">
-                <%= link_to "Выйти", destroy_user_session_path, method: :delete, class: "nav-link" %>
+                <%= button_to destroy_user_session_path, 
+              method: :delete,
+              form_class: "d-inline",
+              class: "btn btn-link nav-link p-0 border-0",
+              data: { turbo: false } do %>
+  <i class="fas fa-sign-out-alt me-1"></i> Выйти
+<% end %>
               </li>
             <% else %>
               <li class="nav-item">

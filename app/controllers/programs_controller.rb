@@ -1,5 +1,6 @@
 class ProgramsController < ApplicationController
   before_action :authenticate_user!
+  before_action :require_premium, except: [:index]
   before_action :set_program, only: [:show, :day, :complete_day]
   
   def show
@@ -66,4 +67,10 @@ end
   def set_program
     @program = Program.find(params[:id])
   end
+
+  def require_premium
+  unless current_user.has_active_premium?
+    redirect_to premium_path, alert: "Программа самопомощи доступна только с премиум-подпиской"
+  end
+end
 end

@@ -21,7 +21,7 @@
           </div>
         </div>
         
-        <% if @user.premium? %>
+        <% if @user.premium? && @user.subscription_ends_at.present? %>
           <div class="row mb-3">
             <div class="col-sm-3 fw-bold">Подписка до:</div>
             <div class="col-sm-9">

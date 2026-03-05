@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'premium/index'
   get 'reflection_answers/create'
   get 'gratitude_entries/create'
   get 'gratitude_entries/index'
@@ -53,6 +54,7 @@ Rails.application.routes.draw do
   resources :meditation_sessions, only: [:create, :index]
   resources :fear_conquests, only: [:create, :index]
   resources :reflection_answers, only: [:create]
+  get 'premium', to: 'premium#index'
   
   # Главная страница
   root to: 'home#index'
