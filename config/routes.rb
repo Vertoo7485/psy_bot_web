@@ -31,6 +31,11 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :admin do
+    get 'dashboard', to: 'dashboard#index'
+    resources :users, only: [:index, :show, :edit, :update]
+  end
+
   resources :gratitude_entries, only: [:create, :index]
 
   resources :test_results, only: [:show]

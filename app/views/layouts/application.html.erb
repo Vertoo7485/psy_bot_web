@@ -27,41 +27,51 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
 
-             <li class="nav-item">
-                <%= link_to programs_path, class: "nav-link" do %>
-                  <i class="fas fa-seedling me-1"></i> Программа
-                <% end %>
-              </li>
+            <li class="nav-item">
+              <%= link_to programs_path, class: "nav-link" do %>
+                <i class="fas fa-seedling me-1"></i> Программа
+              <% end %>
+            </li>
 
-              <li class="nav-item">
-                <%= link_to gratitude_entries_path, class: "nav-link" do %>
-                  <i class="fas fa-heart me-1"></i> Благодарности
-                <% end %>
-              </li>
+            <li class="nav-item">
+              <%= link_to gratitude_entries_path, class: "nav-link" do %>
+                <i class="fas fa-heart me-1"></i> Благодарности
+              <% end %>
+            </li>
 
-              <li class="nav-item">
-                <%= link_to new_emotion_diary_path, class: "nav-link" do %>
-                  <i class="fas fa-book-open me-1"></i> Дневник эмоций
-                <% end %>
-              </li>
+            <li class="nav-item">
+              <%= link_to new_emotion_diary_path, class: "nav-link" do %>
+                <i class="fas fa-book-open me-1"></i> Дневник эмоций
+              <% end %>
+            </li>
   
             <li class="nav-item">
               <%= link_to tests_path, class: "nav-link" do %>
                 <i class="fas fa-clipboard-list me-1"></i> Тесты
               <% end %>
             </li>
+
             <% if user_signed_in? %>
+              <% if current_user.admin? %>
+                <li class="nav-item">
+                  <%= link_to admin_dashboard_path, class: "nav-link" do %>
+                    <i class="fas fa-crown me-1"></i> Админ
+                  <% end %>
+                </li>
+              <% end %>
+
               <li class="nav-item">
                 <%= link_to "Профиль", profile_path, class: "nav-link" %>
               </li>
+
               <li class="nav-item">
                 <%= button_to destroy_user_session_path, 
-              method: :delete,
-              form_class: "d-inline",
-              class: "btn btn-link nav-link p-0 border-0",
-              data: { turbo: false } do %>
-  <i class="fas fa-sign-out-alt me-1"></i> Выйти
-<% end %>
+                              method: :delete,
+                              form_class: "d-inline",
+                              class: "btn btn-link nav-link p-0 border-0",
+                              data: { turbo: false } do %>
+                  <i class="fas fa-sign-out-alt me-1"></i> Выйти
+                <% end %>
               </li>
             <% else %>
               <li class="nav-item">

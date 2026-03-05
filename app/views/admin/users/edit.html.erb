@@ -1,0 +1,32 @@
+<div class="container py-4">
+  <h1 class="mb-4">Редактировать пользователя: <%= @user.email %></h1>
+  
+  <%= form_with model: [:admin, @user], local: true do |f| %>
+    <div class="card">
+      <div class="card-body">
+        <div class="mb-3">
+          <%= f.label :access_level, "Уровень доступа", class: "form-label" %>
+          <%= f.select :access_level, 
+                       options_for_select([['Бесплатный', 'free'], ['Премиум', 'premium'], ['Админ', 'admin']], @user.access_level),
+                       {}, 
+                       class: "form-select" %>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :trial_ends_at, "Триал до", class: "form-label" %>
+          <%= f.datetime_local_field :trial_ends_at, class: "form-control" %>
+        </div>
+
+        <div class="mb-3">
+          <%= f.label :subscription_ends_at, "Подписка до", class: "form-label" %>
+          <%= f.datetime_local_field :subscription_ends_at, class: "form-control" %>
+        </div>
+
+        <div class="d-flex justify-content-between">
+          <%= link_to "Назад", admin_user_path(@user), class: "btn btn-secondary" %>
+          <%= f.submit "Сохранить", class: "btn btn-primary" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

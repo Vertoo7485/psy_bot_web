@@ -1,0 +1,72 @@
+<div class="container py-4">
+  <h1 class="mb-4">Панель администратора</h1>
+  
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Всего пользователей</h5>
+          <h2><%= @users_count %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">Премиум</h5>
+          <h2><%= @premium_users %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-secondary">
+        <div class="card-body">
+          <h5 class="card-title">Бесплатные</h5>
+          <h2><%= @free_users %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <h5 class="card-title">Завершённых дней</h5>
+          <h2><%= @program_completions %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <h2 class="mt-4 mb-3">Последние пользователи</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Статус</th>
+        <th>Дата регистрации</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @recent_users.each do |user| %>
+        <tr>
+          <td><%= user.id %></td>
+          <td><%= user.email %></td>
+          <td>
+            <% if user.admin? %>
+              <span class="badge bg-danger">Админ</span>
+            <% elsif user.premium? %>
+              <span class="badge bg-success">Премиум</span>
+            <% else %>
+              <span class="badge bg-secondary">Бесплатный</span>
+            <% end %>
+          </td>
+          <td><%= user.created_at.strftime('%d.%m.%Y') %></td>
+          <td><%= link_to "Просмотр", admin_user_path(user), class: "btn btn-sm btn-outline-primary" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  
+  <%= link_to "Все пользователи", admin_users_path, class: "btn btn-primary" %>
+</div>

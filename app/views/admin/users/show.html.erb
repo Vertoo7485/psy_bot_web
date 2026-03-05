@@ -1,0 +1,47 @@
+<div class="container py-4">
+  <h1 class="mb-4">Пользователь <%= @user.email %></h1>
+  
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Информация</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>ID:</strong> <%= @user.id %></p>
+          <p><strong>Email:</strong> <%= @user.email %></p>
+          <p><strong>Статус:</strong> 
+            <% if @user.admin? %>
+              <span class="badge bg-danger">Админ</span>
+            <% elsif @user.premium? %>
+              <span class="badge bg-success">Премиум</span>
+            <% else %>
+              <span class="badge bg-secondary">Бесплатный</span>
+            <% end %>
+          </p>
+          <p><strong>Триал до:</strong> <%= @user.trial_ends_at&.strftime('%d.%m.%Y %H:%M') || '-' %></p>
+          <p><strong>Подписка до:</strong> <%= @user.subscription_ends_at&.strftime('%d.%m.%Y %H:%M') || '-' %></p>
+          <p><strong>Активен:</strong> <%= @user.is_active ? 'Да' : 'Нет' %></p>
+          <p><strong>Дата регистрации:</strong> <%= @user.created_at.strftime('%d.%m.%Y %H:%M') %></p>
+          <%= link_to "Редактировать", edit_admin_user_path(@user), class: "btn btn-primary" %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Прогресс</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Пройдено дней:</strong> <%= @user.user_day_progresses.where(completed: true).count %>/<%= Day.count %></p>
+          <p><strong>Тестов пройдено:</strong> <%= @user.test_results.count %></p>
+          <p><strong>Записей благодарности:</strong> <%= @user.gratitude_entries.count %></p>
+          <p><strong>Записей рефлексии:</strong> <%= @user.reflection_entries.count %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <%= link_to "Назад", admin_users_path, class: "btn btn-secondary" %>
+</div>
