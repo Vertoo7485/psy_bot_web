@@ -21,6 +21,8 @@
   </head>
 
   <body>
+    <div data-controller="push"
+     data-push-vapid-public-key="<%= ENV['VAPID_PUBLIC_KEY'] %>"></div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
         <%= link_to "PsyBot", root_path, class: "navbar-brand" %>

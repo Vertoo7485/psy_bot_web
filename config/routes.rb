@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'push_subscriptions/create'
   get 'support/new'
   get 'support/create'
   get 'start/index'
@@ -67,6 +68,8 @@ Rails.application.routes.draw do
   get 'start', to: 'start#index'
   get 'support', to: 'support#new'
   post 'support', to: 'support#create'
+
+  resources :push_subscriptions, only: [:create]
   
   # Главная страница
   root to: 'home#index'
