@@ -54,6 +54,9 @@ end
     else
       render json: { success: false }, status: :unprocessable_entity
     end
+
+    current_user.add_experience(30)  # +30 опыта за день
+    current_user.update_streak
   end
 
   def reset

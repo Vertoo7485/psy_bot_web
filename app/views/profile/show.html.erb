@@ -1,76 +1,212 @@
-<div class="row">
-  <div class="col-md-8 offset-md-2">
-    <div class="card">
-      <div class="card-header bg-primary text-white">
-        <h3 class="mb-0">Мой профиль</h3>
-      </div>
-      <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-sm-3 fw-bold">Email:</div>
-          <div class="col-sm-9"><%= @user.email %></div>
-        </div>
-        
-        <div class="row mb-3">
-          <div class="col-sm-3 fw-bold">Статус:</div>
-          <div class="col-sm-9">
-            <% if @user.premium? %>
-              <span class="badge bg-success">Премиум</span>
-            <% else %>
-              <span class="badge bg-secondary">Бесплатный</span>
-            <% end %>
-          </div>
-        </div>
-        
-        <% if @user.premium? && @user.subscription_ends_at.present? %>
-          <div class="row mb-3">
-            <div class="col-sm-3 fw-bold">Подписка до:</div>
-            <div class="col-sm-9">
-              <%= @user.subscription_ends_at.strftime('%d.%m.%Y') %>
-              <span class="badge bg-info ms-2">Осталось дней: <%= @user.days_until_subscription_ends %></span>
-            </div>
-          </div>
-        <% end %>
+<% 
+  experience = @user.experience || @user.create_experience
+  streak = @user.streak || @user.create_streak(current_streak: 0, longest_streak: 0, last_activity_at: Time.current)
+  garden_elements = @user.garden_elements.order(unlocked_at: :desc)
+  achievements = @user.user_achievements.includes(:achievement).order(earned_at: :desc)
+%>
 
-        <% if @user.test_results.any? %>
-          <hr class="my-4">
-          
-          <h5 class="mb-3"><i class="fas fa-history me-2"></i>История тестов</h5>
-          
-          <div class="list-group mb-4">
-            <% @user.test_results.order(created_at: :desc).limit(5).each do |result| %>
-              <%= link_to test_result_path(result), class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" do %>
-                <div>
-                  <strong><%= result.test.title %></strong>
-                  <br>
-                  <small class="text-muted"><%= result.created_at.strftime('%d.%m.%Y %H:%M') %></small>
-                </div>
-                <span class="badge bg-primary rounded-pill">
-                  <% score = JSON.parse(result.score) rescue {} %>
-                  <%= score["total"] || "?" %> баллов
-                </span>
-              <% end %>
-            <% end %>
-          </div>
-          
-          <% if @user.test_results.count > 5 %>
-            <div class="text-center">
-              <%= link_to "Все результаты (#{@user.test_results.count})", "#", class: "btn btn-outline-secondary btn-sm" %>
-            </div>
-          <% end %>
-        <% end %>
-        
-        <div class="row mb-3">
-          <div class="col-sm-3 fw-bold">Дата регистрации:</div>
-          <div class="col-sm-9"><%= @user.created_at.strftime('%d.%m.%Y') %></div>
+<div class="container py-4">
+  <!-- Шапка профиля -->
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="mb-3">Профиль</h1>
+      <p class="lead"><%= @user.email %></p>
+    </div>
+  </div>
+
+  <!-- Основная информация -->
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Статистика</h5>
         </div>
-        
-        <div class="d-flex justify-content-between mt-4">
-          <%= link_to "Редактировать профиль", edit_user_registration_path, class: "btn btn-outline-primary" %>
-          <% unless @user.premium? %>
-            <%= link_to "Оформить Premium", "#", class: "btn btn-success" %>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <i class="fas fa-star text-warning me-2"></i>
+              <strong>Уровень:</strong> <%= experience.level %>
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-bolt text-info me-2"></i>
+              <strong>Опыт:</strong> <%= experience.total_points %> / <%= experience.total_points + experience.next_level_at %>
+            </li>
+            <li class="mb-3">
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar bg-success" 
+                     style="width: <%= (experience.total_points.to_f / (experience.total_points + experience.next_level_at) * 100) %>%">
+                </div>
+              </div>
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-fire text-danger me-2"></i>
+              <strong>Серия:</strong> <%= streak.current_streak %> дней
+              <% if streak.longest_streak && streak.longest_streak > streak.current_streak %>
+                <span class="text-secondary">(рекорд: <%= streak.longest_streak %>)</span>
+              <% end %>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">Подписка</h5>
+        </div>
+        <div class="card-body">
+          <% if @user.premium? %>
+            <div class="alert alert-success">
+              <i class="fas fa-crown me-2"></i>
+              Премиум активен
+            </div>
+            <% if @user.trial_active? %>
+              <p>Пробный период до: <%= @user.trial_ends_at.strftime('%d.%m.%Y') %></p>
+            <% elsif @user.subscription_active? %>
+              <p>Подписка до: <%= @user.subscription_ends_at.strftime('%d.%m.%Y') %></p>
+            <% end %>
+          <% else %>
+            <div class="alert alert-secondary">
+              <i class="fas fa-star me-2"></i>
+              Бесплатный аккаунт
+            </div>
+            <%= link_to "Оформить премиум", premium_path, class: "btn btn-success" %>
           <% end %>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Сад пользователя -->
+<div class="card mb-4">
+  <div class="card-header bg-info text-white">
+    <h5 class="mb-0">🌳 Мой сад</h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="garden-container">
+      
+      <!-- Трава -->
+      <div class="grass"></div>
+      
+      <!-- Элементы сада -->
+<% 
+  # Задаем координаты для каждого типа элемента
+  positions = {
+    'tree' => { left: -180, bottom: 25},    # дерево слева
+    'house' => { left: 950, bottom: 20 },  # домик справа
+    'bench' => { left: 450, bottom: 0 },   # скамейка в центре внизу
+    'pond' => { left: 150, bottom: -20 },     # пруд слева внизу
+    'sprout' => { left: 120, bottom: 140 }, # росток у дерева
+    'bush' => { left: 180, bottom: 130 },   # куст у домика
+    'flower' => { left: 90, bottom: 160 },  # цветок у дерева
+    'lantern' => { left: 220, bottom: 140 } # фонарик у домика
+  }
+
+  sizes = {
+    'tree' => { width: 650, height: 300 },
+    'house' => { width: 400, height: 200 },
+    'bench' => { width: 350, height: 140 },
+    'pond' => { width: 500, height: 200 },
+    'sprout' => { width: 35, height: 45 },
+    'bush' => { width: 50, height: 45 },
+    'flower' => { width: 30, height: 40 },
+    'lantern' => { width: 30, height: 40 }
+  }
+%>
+
+<% garden_elements.each do |element| %>
+  <%
+    pos = positions[element.element_type] || { left: 100, bottom: 100 }
+    size = sizes[element.element_type] || { width: 50, height: 50 }
+  %>
+  
+  <div class="garden-element" 
+       data-type="<%= element.element_type %>"
+       style="left: <%= pos[:left] %>px; bottom: <%= pos[:bottom] %>px;"
+       data-bs-toggle="tooltip" 
+       title="<%= element.name %> (получено <%= element.unlocked_at.strftime('%d.%m.%Y') %>)">
+    
+    <%= image_tag "garden/#{element.element_type}.png", 
+        style: "width: #{size[:width]}px; height: #{size[:height]}px; object-fit: contain;",
+        class: "garden-image",
+        alt: element.name %>
+  </div>
+<% end %>
+
+      <!-- Если сад пустой -->
+      <% if garden_elements.empty? %>
+        <div class="text-center py-5">
+          <i class="fas fa-seedling fa-4x text-secondary mb-3"></i>
+          <p class="text-secondary">Ваш сад пока пуст. Начните практику, чтобы вырастить первые растения!</p>
+        </div>
+      <% end %>
+    </div>
+    
+    <div class="p-3">
+      <p class="text-secondary small mb-0">
+        <i class="fas fa-info-circle me-1"></i>
+        Элементов в саду: <%= garden_elements.count %>. 
+        Новые элементы открываются за достижения.
+      </p>
+    </div>
+  </div>
 </div>
+
+  <!-- Достижения -->
+  <div class="card mb-4">
+    <div class="card-header bg-warning text-dark">
+      <h5 class="mb-0">🏆 Достижения</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <% achievements.each do |ua| %>
+          <div class="col-md-4 col-6 mb-3">
+            <div class="card bg-light text-center h-100">
+              <div class="card-body">
+                <i class="<%= ua.achievement.icon %> fa-3x mb-2" style="color: 
+                  <% if ua.achievement.rarity == 'bronze' %>#CD7F32
+                  <% elsif ua.achievement.rarity == 'silver' %>#C0C0C0
+                  <% elsif ua.achievement.rarity == 'gold' %>#FFD700
+                  <% else %>#6c757d
+                  <% end %>">
+                </i>
+                <h6 class="card-title"><%= ua.achievement.title %></h6>
+                <p class="small text-secondary mb-0"><%= ua.achievement.description %></p>
+                <small class="text-muted"><%= ua.earned_at.strftime('%d.%m.%Y') %></small>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if achievements.empty? %>
+          <div class="col-12 text-center py-4">
+            <i class="fas fa-trophy fa-3x text-secondary mb-3"></i>
+            <p class="text-secondary">У вас пока нет достижений. Выполняйте задания, чтобы получить их!</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кнопки действий -->
+  <div class="d-flex justify-content-between">
+    <%= link_to edit_user_registration_path, class: "btn btn-outline-primary" do %>
+      <i class="fas fa-edit me-2"></i>Редактировать профиль
+    <% end %>
+    
+    <%= link_to start_path, class: "btn btn-outline-success" do %>
+      <i class="fas fa-rocket me-2"></i>С чего начать?
+    <% end %>
+  </div>
+</div>
+
+<!-- Инициализация тултипов -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+  })
+</script>

@@ -4695,144 +4695,310 @@
 
 # puts "✅ Добавлен День 27 программы самопомощи"
 
-# День 28: Гранд-финал и научная рефлексия
-Day.create!(
-  program: program,
-  day_number: 28,
-  title: "Гранд-финал программы",
-  description: "Подводим научные итоги 28-дневного эксперимента и создаем план поддержки результатов",
-  content: {
-    intro: {
-      title: "🎊 Гранд-финал программы",
-      text: "Месяц назад вы начали нейронаучный эксперимент над самим собой. Сегодня мы празднуем не просто завершение программы, а завершение полного цикла нейропластичности!"
-    },
-    scientific_facts: [
-      {
-        fact: "28 дней = полный цикл формирования устойчивой привычки на уровне мозга",
-        source: "Лондонский Университет"
-      },
-      {
-        fact: "За 28 дней мозг создает прочные синаптические связи для новых паттернов",
-        source: "Journal of Neuroscience"
-      },
-      {
-        fact: "Только 9.2% людей завершают такие программы полностью",
-        source: "Американская психологическая ассоциация"
-      },
-      {
-        fact: "Научная рефлексия на 28 день снижает риск отката на 73%",
-        source: "Harvard Medical School"
-      },
-      {
-        fact: "Изменения сохраняются через 6 месяцев у 85% завершивших",
-        source: "Stanford University"
-      }
-    ],
-    achievement_categories: [
-      {
-        emoji: "🧠",
-        name: "Нейрокогнитивные",
-        achievements: [
-          "Распознавать автоматические мысли",
-          "Переоценивать негативные мысли",
-          "Прерывать руминацию"
-        ],
-        neuroscience: "Укрепление префронтальной коры"
-      },
-      {
-        emoji: "❤️",
-        name: "Нейроэмоциональные",
-        achievements: [
-          "Понимать свои эмоции",
-          "Успокаиваться через дыхание",
-          "Практиковать самосострадание"
-        ],
-        neuroscience: "Балансировка лимбической системы"
-      },
-      {
-        emoji: "⚡",
-        name: "Нейроповеденческие",
-        achievements: [
-          "Планировать через SMART-цели",
-          "Преодолевать прокрастинацию",
-          "Создавать микропривычки"
-        ],
-        neuroscience: "Активация системы награды"
-      },
-      {
-        emoji: "🛡️",
-        name: "Нейроустойчивость",
-        achievements: [
-          "Восстанавливаться после стресса",
-          "Предвидеть трудности",
-          "Сохранять спокойствие"
-        ],
-        neuroscience: "Усиление вагусного тонуса"
-      }
-    ],
-    steps: [
-      { step: 1, emoji: "🎉", title: "Церемония признания" },
-      { step: 2, emoji: "📊", title: "Анализ пути" },
-      { step: 3, emoji: "🧩", title: "Интеграция навыков" },
-      { step: 4, emoji: "📋", title: "Система поддержки" },
-      { step: 5, emoji: "🚀", title: "Горизонты развития" },
-      { step: 6, emoji: "🌟", title: "Письмо себе" },
-      { step: 7, emoji: "🎁", title: "Сертификат" }
-    ],
-    maintenance_checklist: [
-      {
-        emoji: "🔴",
-        level: "Критический",
-        signals: "5+ сигналов",
-        action: "Вернуться к неделе 1"
-      },
-      {
-        emoji: "🟡",
-        level: "Высокий",
-        signals: "3-4 сигнала",
-        action: "Интенсифицировать практику"
-      },
-      {
-        emoji: "🟢",
-        level: "Нормальный",
-        signals: "0-2 сигнала",
-        action: "Поддерживающая практика"
-      }
-    ],
-    challenges: [
-      {
-        title: "Грустно, что программа заканчивается",
-        solution: "Это нормально! Создайте план поддержки и ставьте новые цели. Путь продолжается."
-      },
-      {
-        title: "Боюсь потерять результаты",
-        solution: "Для этого мы создаем систему поддержки. Используйте чек-лист и еженедельные ритуалы."
-      },
-      {
-        title: "Не знаю, что дальше",
-        solution: "Изучите горизонты развития в шаге 5. Научное развитие — бесконечный процесс."
-      }
-    ],
-    daily_tips: [
-      {
-        title: "Еженедельная рефлексия",
-        description: "Каждое воскресенье — 20 минут научного анализа"
-      },
-      {
-        title: "Система раннего предупреждения",
-        description: "Используйте чек-лист для отслеживания сигналов"
-      },
-      {
-        title: "Практика радости",
-        description: "3 раза в неделю для поддержания дофаминового баланса"
-      }
-    ],
-    completion_message: {
-      title: "Программа успешно завершена!",
-      stats: "Пройдено 100% программы",
-      tip: "Вы вошли в элитную группу 9.2% людей, завершающих такие программы!"
-    }
-  }
-)
+# # День 28: Гранд-финал и научная рефлексия
+# Day.create!(
+#   program: program,
+#   day_number: 28,
+#   title: "Гранд-финал программы",
+#   description: "Подводим научные итоги 28-дневного эксперимента и создаем план поддержки результатов",
+#   content: {
+#     intro: {
+#       title: "🎊 Гранд-финал программы",
+#       text: "Месяц назад вы начали нейронаучный эксперимент над самим собой. Сегодня мы празднуем не просто завершение программы, а завершение полного цикла нейропластичности!"
+#     },
+#     scientific_facts: [
+#       {
+#         fact: "28 дней = полный цикл формирования устойчивой привычки на уровне мозга",
+#         source: "Лондонский Университет"
+#       },
+#       {
+#         fact: "За 28 дней мозг создает прочные синаптические связи для новых паттернов",
+#         source: "Journal of Neuroscience"
+#       },
+#       {
+#         fact: "Только 9.2% людей завершают такие программы полностью",
+#         source: "Американская психологическая ассоциация"
+#       },
+#       {
+#         fact: "Научная рефлексия на 28 день снижает риск отката на 73%",
+#         source: "Harvard Medical School"
+#       },
+#       {
+#         fact: "Изменения сохраняются через 6 месяцев у 85% завершивших",
+#         source: "Stanford University"
+#       }
+#     ],
+#     achievement_categories: [
+#       {
+#         emoji: "🧠",
+#         name: "Нейрокогнитивные",
+#         achievements: [
+#           "Распознавать автоматические мысли",
+#           "Переоценивать негативные мысли",
+#           "Прерывать руминацию"
+#         ],
+#         neuroscience: "Укрепление префронтальной коры"
+#       },
+#       {
+#         emoji: "❤️",
+#         name: "Нейроэмоциональные",
+#         achievements: [
+#           "Понимать свои эмоции",
+#           "Успокаиваться через дыхание",
+#           "Практиковать самосострадание"
+#         ],
+#         neuroscience: "Балансировка лимбической системы"
+#       },
+#       {
+#         emoji: "⚡",
+#         name: "Нейроповеденческие",
+#         achievements: [
+#           "Планировать через SMART-цели",
+#           "Преодолевать прокрастинацию",
+#           "Создавать микропривычки"
+#         ],
+#         neuroscience: "Активация системы награды"
+#       },
+#       {
+#         emoji: "🛡️",
+#         name: "Нейроустойчивость",
+#         achievements: [
+#           "Восстанавливаться после стресса",
+#           "Предвидеть трудности",
+#           "Сохранять спокойствие"
+#         ],
+#         neuroscience: "Усиление вагусного тонуса"
+#       }
+#     ],
+#     steps: [
+#       { step: 1, emoji: "🎉", title: "Церемония признания" },
+#       { step: 2, emoji: "📊", title: "Анализ пути" },
+#       { step: 3, emoji: "🧩", title: "Интеграция навыков" },
+#       { step: 4, emoji: "📋", title: "Система поддержки" },
+#       { step: 5, emoji: "🚀", title: "Горизонты развития" },
+#       { step: 6, emoji: "🌟", title: "Письмо себе" },
+#       { step: 7, emoji: "🎁", title: "Сертификат" }
+#     ],
+#     maintenance_checklist: [
+#       {
+#         emoji: "🔴",
+#         level: "Критический",
+#         signals: "5+ сигналов",
+#         action: "Вернуться к неделе 1"
+#       },
+#       {
+#         emoji: "🟡",
+#         level: "Высокий",
+#         signals: "3-4 сигнала",
+#         action: "Интенсифицировать практику"
+#       },
+#       {
+#         emoji: "🟢",
+#         level: "Нормальный",
+#         signals: "0-2 сигнала",
+#         action: "Поддерживающая практика"
+#       }
+#     ],
+#     challenges: [
+#       {
+#         title: "Грустно, что программа заканчивается",
+#         solution: "Это нормально! Создайте план поддержки и ставьте новые цели. Путь продолжается."
+#       },
+#       {
+#         title: "Боюсь потерять результаты",
+#         solution: "Для этого мы создаем систему поддержки. Используйте чек-лист и еженедельные ритуалы."
+#       },
+#       {
+#         title: "Не знаю, что дальше",
+#         solution: "Изучите горизонты развития в шаге 5. Научное развитие — бесконечный процесс."
+#       }
+#     ],
+#     daily_tips: [
+#       {
+#         title: "Еженедельная рефлексия",
+#         description: "Каждое воскресенье — 20 минут научного анализа"
+#       },
+#       {
+#         title: "Система раннего предупреждения",
+#         description: "Используйте чек-лист для отслеживания сигналов"
+#       },
+#       {
+#         title: "Практика радости",
+#         description: "3 раза в неделю для поддержания дофаминового баланса"
+#       }
+#     ],
+#     completion_message: {
+#       title: "Программа успешно завершена!",
+#       stats: "Пройдено 100% программы",
+#       tip: "Вы вошли в элитную группу 9.2% людей, завершающих такие программы!"
+#     }
+#   }
+# )
 
-puts "✅ Добавлен День 28 программы самопомощи"
+# puts "✅ Добавлен День 28 программы самопомощи"
+
+# Создаем ачивки
+# achievements = [
+#   {
+#     title: "Первый шаг",
+#     description: "Пройдите первый тест",
+#     icon: "fa-solid fa-star",
+#     rarity: "bronze",
+#     condition: { type: "test_count", value: 1 }
+#   },
+#   {
+#     title: "Исследователь",
+#     description: "Пройдите все тесты",
+#     icon: "fa-solid fa-flask",
+#     rarity: "silver",
+#     condition: { type: "test_count", value: 3 }
+#   },
+#   {
+#     title: "Неделя осознанности",
+#     description: "7 дней подряд",
+#     icon: "fa-solid fa-calendar-check",
+#     rarity: "bronze",
+#     condition: { type: "streak", value: 7 }
+#   },
+#   {
+#     title: "Месяц практики",
+#     description: "28 дней подряд",
+#     icon: "fa-solid fa-fire",
+#     rarity: "gold",
+#     condition: { type: "streak", value: 28 }
+#   },
+#   {
+#     title: "Дневник эмоций",
+#     description: "50 записей в дневнике",
+#     icon: "fa-solid fa-book-open",
+#     rarity: "silver",
+#     condition: { type: "diary_entries", value: 50 }
+#   },
+#   {
+#     title: "Благодарное сердце",
+#     description: "100 записей благодарности",
+#     icon: "fa-solid fa-heart",
+#     rarity: "gold",
+#     condition: { type: "gratitude_entries", value: 100 }
+#   },
+#   {
+#     title: "Начало пути",
+#     description: "Пройдите День 1 программы",
+#     icon: "fa-solid fa-seedling",
+#     rarity: "bronze",
+#     condition: { type: "day_completed", value: 1 }
+#   },
+#   {
+#     title: "Первая неделя",
+#     description: "Пройдите 7 дней программы",
+#     icon: "fa-solid fa-calendar-week",
+#     rarity: "silver",
+#     condition: { type: "days_completed", value: 7 }
+#   },
+#   {
+#     title: "Экватор",
+#     description: "Пройдите 14 дней программы",
+#     icon: "fa-solid fa-route",
+#     rarity: "silver",
+#     condition: { type: "days_completed", value: 14 }
+#   },
+#   {
+#     title: "Покоритель",
+#     description: "Завершите всю программу (28 дней)",
+#     icon: "fa-solid fa-trophy",
+#     rarity: "gold",
+#     condition: { type: "days_completed", value: 28 }
+#   }
+# ]
+
+# achievements.each do |a|
+#   Achievement.find_or_create_by!(title: a[:title]) do |ach|
+#     ach.description = a[:description]
+#     ach.icon = a[:icon]
+#     ach.rarity = a[:rarity]
+#     ach.condition = a[:condition]
+#   end
+# end
+
+# puts "✅ Создано #{Achievement.count} ачивок"
+
+# Элементы сада (будут разблокироваться за достижения)
+# Шаблоны элементов сада (будут разблокироваться за достижения)
+templates = [
+  {
+    name: "Маленький росток",
+    element_type: "sprout",
+    icon: "fa-solid fa-seedling",
+    color: "#4CAF50",
+    achievement: "Первый шаг",
+    default_position: { x: 100, y: 200 }
+  },
+  {
+    name: "Кустик",
+    element_type: "bush",
+    icon: "fa-solid fa-leaf",
+    color: "#2E7D32",
+    achievement: "Неделя осознанности",
+    default_position: { x: 150, y: 180 }
+  },
+  {
+    name: "Цветок",
+    element_type: "flower",
+    icon: "fa-solid fa-fan",
+    color: "#FF69B4",
+    achievement: "Дневник эмоций",
+    default_position: { x: 200, y: 160 }
+  },
+  {
+    name: "Дерево",
+    element_type: "tree",
+    icon: "fa-solid fa-tree",
+    color: "#228B22",
+    achievement: "Месяц практики",
+    default_position: { x: 250, y: 140 }
+  },
+  {
+    name: "Скамейка",
+    element_type: "bench",
+    icon: "fa-solid fa-chair",
+    color: "#8B4513",
+    achievement: "Первая неделя",
+    default_position: { x: 120, y: 220 }
+  },
+  {
+    name: "Фонарик",
+    element_type: "lantern",
+    icon: "fa-solid fa-lightbulb",
+    color: "#FFD700",
+    achievement: "Экватор",
+    default_position: { x: 280, y: 200 }
+  },
+  {
+    name: "Пруд",
+    element_type: "pond",
+    icon: "fa-solid fa-water",
+    color: "#2196F3",
+    achievement: "Благодарное сердце",
+    default_position: { x: 50, y: 250 }
+  },
+  {
+    name: "Домик",
+    element_type: "house",
+    icon: "fa-solid fa-house",
+    color: "#CD853F",
+    achievement: "Покоритель",
+    default_position: { x: 300, y: 100 }
+  }
+]
+
+templates.each do |tmpl|
+  GardenElementTemplate.find_or_create_by!(element_type: tmpl[:element_type]) do |t|
+    t.name = tmpl[:name]
+    t.icon = tmpl[:icon]
+    t.color = tmpl[:color]
+    t.achievement = tmpl[:achievement]
+    t.default_position = tmpl[:default_position]
+  end
+end
+
+puts "✅ Добавлено #{GardenElementTemplate.count} шаблонов элементов сада"

@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  element_type: MyString
+  position_x: 1
+  position_y: 1
+  unlocked_at: 2026-03-06 17:05:28
+  metadata: 
+
+two:
+  user: two
+  element_type: MyString
+  position_x: 1
+  position_y: 1
+  unlocked_at: 2026-03-06 17:05:28
+  metadata: 

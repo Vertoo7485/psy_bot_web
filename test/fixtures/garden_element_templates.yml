@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  element_type: MyString
+  icon: MyString
+  color: MyString
+  achievement: MyString
+  default_position: 
+
+two:
+  name: MyString
+  element_type: MyString
+  icon: MyString
+  color: MyString
+  achievement: MyString
+  default_position: 

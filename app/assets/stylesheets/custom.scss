@@ -1,6 +1,7 @@
 // Импорт шрифтов
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
 :root {
   // Основная палитра
@@ -421,4 +422,219 @@ h1, h2, h3, h4, h5, h6 {
     border: none;
     box-shadow: var(--shadow-lg);
   }
+}
+
+.garden-container {
+  position: relative;
+  min-height: 400px;
+  background: linear-gradient(180deg, #a8d5e5 0%, #7cb57c 100%);
+  border-radius: 20px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 -20px 20px rgba(0,0,0,0.1);
+  
+  // Солнце
+  &::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #ffd700 0%, #ffa500 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px #ffd700;
+    animation: sunGlow 3s ease-in-out infinite;
+  }
+  
+  // Облака
+  &::after {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    width: 80px;
+    height: 30px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50px;
+    filter: blur(5px);
+    animation: cloudMove 20s linear infinite;
+  }
+  
+  // Трава (передний план)
+  .grass {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%);
+    border-radius: 0 0 20px 20px;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: 10%;
+      width: 20px;
+      height: 20px;
+      background: #4caf50;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      transform: rotate(10deg);
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: -12px;
+      right: 15%;
+      width: 25px;
+      height: 25px;
+      background: #4caf50;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      transform: rotate(-5deg);
+    }
+  }
+  
+  // Общие стили для элементов
+  .garden-element {
+    position: absolute;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 10;
+    
+    i {
+      font-size: 40px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      border: 2px solid rgba(255,255,255,0.8);
+      transition: all 0.3s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-10px) scale(1.1);
+      z-index: 100;
+      
+      i {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      }
+    }
+    
+    // Растения
+    &[data-type="sprout"] i {
+      background: #4caf50;
+      color: #2e7d32;
+    }
+    
+    &[data-type="bush"] i {
+      background: #6b8e23;
+      color: #2e4a1f;
+    }
+    
+    &[data-type="flower"] i {
+      background: #ff69b4;
+      color: #c71585;
+    }
+    
+    &[data-type="tree"] i {
+      background: #228b22;
+      color: #0a4f0a;
+      border-radius: 30% 30% 0 0;
+    }
+    
+    // Предметы
+    &[data-type="house"] i {
+      background: #cd853f;
+      color: #8b4513;
+      clip-path: polygon(20% 0%, 80% 0%, 100% 30%, 100% 100%, 0 100%, 0% 30%);
+      border-radius: 10px 10px 0 0;
+    }
+    
+    &[data-type="lantern"] i {
+      background: #ffd700;
+      color: #b8860b;
+      border-radius: 30% 30% 10% 10%;
+      box-shadow: 0 0 15px #ffd700;
+      animation: lanternGlow 2s ease-in-out infinite;
+    }
+    
+    &[data-type="bench"] i {
+      background: #8b4513;
+      color: #5d3a1a;
+      border-radius: 20% 20% 0 0;
+      transform: perspective(100px) rotateX(5deg);
+    }
+    
+    &[data-type="pond"] i {
+      background: #2196f3;
+      color: #0d47a1;
+      border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%;
+      box-shadow: inset 0 0 10px #64b5f6;
+      animation: waterRipple 3s ease-in-out infinite;
+    }
+  }
+  
+  // Бейдж "новое"
+  .badge-new {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4444;
+    color: white;
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    animation: pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes sunGlow {
+  0%, 100% { box-shadow: 0 0 30px #ffd700; }
+  50% { box-shadow: 0 0 50px #ffa500; }
+}
+
+@keyframes cloudMove {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(400px); }
+}
+
+@keyframes lanternGlow {
+  0%, 100% { box-shadow: 0 0 15px #ffd700; }
+  50% { box-shadow: 0 0 25px #ffa500; }
+}
+
+@keyframes waterRipple {
+  0%, 100% { border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%; }
+  50% { border-radius: 45% 55% 55% 45% / 55% 45% 55% 45%; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.garden-image {
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+  
+  &:hover {
+    transform: translateY(-5px) scale(1.1);
+    filter: drop-shadow(4px 8px 12px rgba(0,0,0,0.3));
+  }
+}
+
+.badge-new {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 10px;
+  animation: pulse 1s ease-in-out infinite;
 }

@@ -1,4 +1,6 @@
+
 class User < ApplicationRecord
+  include GardenProgress
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -23,6 +25,11 @@ class User < ApplicationRecord
   has_many :fear_conquests, dependent: :destroy
   has_many :reflection_answers, dependent: :destroy
   has_many :push_subscriptions, dependent: :destroy
+  has_one :experience, dependent: :destroy
+  has_one :streak, dependent: :destroy
+  has_many :user_achievements, dependent: :destroy
+  has_many :achievements, through: :user_achievements
+  has_many :garden_elements, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'

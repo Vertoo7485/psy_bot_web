@@ -183,6 +183,8 @@ def submit
     total: total_score,
     subscales: subscales
 }.to_json
+  current_user.add_experience(20)  # +20 опыта за тест
+  current_user.update_streak
   end
 
   
