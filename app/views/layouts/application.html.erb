@@ -17,7 +17,6 @@
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "custom", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
   </head>
 
   <body>
@@ -127,6 +126,41 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+<!-- Подключаем Stimulus через CDN -->
+<script type="module">
+  // Импортируем Stimulus из CDN
+  import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js'
+  
+  window.Stimulus = Application.start()
+  console.log('✅ Stimulus started')
+  
+  // Делаем Controller доступным глобально для всех контроллеров
+  window.Controller = Controller
+  
+  // Функция для загрузки контроллера
+  async function loadController(name, path) {
+    try {
+      const module = await import(path)
+      Stimulus.register(name, module.default)
+      console.log(`✅ ${name} controller registered`)
+    } catch (err) {
+      console.error(`❌ Failed to load ${name} controller:`, err)
+    }
+  }
+  
+  // Загружаем исправленный тестовый контроллер
+  loadController('test', '/assets/controllers/test_controller_fixed-cdab1ea77caf2d9d2db4ee718b7d8abfbcfbd5b867fab6faf7f901862cffafde.js')
+  
+  // Загружаем исправленный day-program контроллер
+  loadController('day-program', '/assets/controllers/day_program_controller_fixed-48f98d40fabff7224619ad35b879fd78e8be90d11bfd675aa301ddae841e8696.js')
+
+
+ // Загружаем исправленный reflection контроллер
+  loadController('reflection', '/assets/controllers/reflection_controller_fixed-95d2efbec79aa84a18bcec183658c9596a07affe9b72d166b98eed03b4a6740c.js')
+
+  // Загружаем остальные контроллеры (они пока не будут работать, но тестовая кнопка — да)
+</script>
     <%= yield :javascript %>
   </body>
 </html>

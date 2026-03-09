@@ -87,11 +87,18 @@
       <p class="lead mb-4" style="color: rgba(255,255,255,0.9);">
         Премиум-доступ открывает расширенную программу,<br>персональные рекомендации и приоритетную поддержку
       </p>
-      <%= link_to "#", class: "btn btn-light btn-lg px-5 py-3" do %>
+      <%= link_to premium_path, class: "btn btn-light btn-lg px-5 py-3" do %>
         <i class="fas fa-crown me-2" style="color: var(--primary);"></i>Узнать о премиум
       <% end %>
     </div>
   </div>
+</div>
+
+<!-- Тестовая кнопка Stimulus -->
+<div class="container text-center my-5" data-controller="test">
+  <button class="btn btn-success btn-lg" data-action="click->test#click">
+    🧪 Тестовая кнопка Stimulus
+  </button>
 </div>
 
 <style>

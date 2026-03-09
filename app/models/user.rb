@@ -1,6 +1,4 @@
-
 class User < ApplicationRecord
-  include GardenProgress
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -24,13 +22,15 @@ class User < ApplicationRecord
   has_many :meditation_sessions, dependent: :destroy
   has_many :fear_conquests, dependent: :destroy
   has_many :reflection_answers, dependent: :destroy
+  has_many :payments, dependent: :destroy
   has_many :push_subscriptions, dependent: :destroy
   has_one :experience, dependent: :destroy
   has_one :streak, dependent: :destroy
   has_many :user_achievements, dependent: :destroy
   has_many :achievements, through: :user_achievements
   has_many :garden_elements, dependent: :destroy
-  has_many :payments, dependent: :destroy
+
+  include GardenProgress
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'
@@ -109,22 +109,23 @@ class User < ApplicationRecord
     return true if day_number == 1
     
     previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
-    previous_progress = user_day_progresses.find_by(day: previous_day)
+    previous_progress = user_day_progresses.find_by(day: previous_day, completed: true)
     
-    return false unless previous_progress&.completed?
+    return false unless previous_progress
     
-    Time.current - previous_progress.completed_at >= 12.hours
+    # Считаем от начала предыдущего дня, а не от завершения
+    Time.current - previous_progress.started_at >= 12.hours
   end
 
   def time_until_next_day(day_number, program_id)
     return 0 if day_number == 1
     
     previous_day = Day.find_by(program_id: program_id, day_number: day_number - 1)
-    previous_progress = user_day_progresses.find_by(day: previous_day)
+    previous_progress = user_day_progresses.find_by(day: previous_day, completed: true)
     
-    return 0 unless previous_progress&.completed?
+    return 0 unless previous_progress
     
-    time_passed = Time.current - previous_progress.completed_at
+    time_passed = Time.current - previous_progress.started_at
     if time_passed < 12.hours
       (12.hours - time_passed).ceil
     else
@@ -148,23 +149,21 @@ class User < ApplicationRecord
   end
 
   # Проверка статуса подписки (вызывается перед сохранением)
-before_save :check_subscription_status
+  before_save :check_subscription_status
 
-private
-
-def check_subscription_status
-  # Если триал истек и нет активной подписки
-  if premium? && trial_ends_at && trial_ends_at <= Time.current && !subscription_active?
-    self.access_level = 'free'
-    self.trial_ends_at = nil
-    Rails.logger.info "User #{id} auto-downgraded from premium to free (trial expired)"
+  def check_subscription_status
+    # Если триал истек и нет активной подписки
+    if premium? && trial_ends_at && trial_ends_at <= Time.current && !subscription_active?
+      self.access_level = 'free'
+      self.trial_ends_at = nil
+      Rails.logger.info "User #{id} auto-downgraded from premium to free (trial expired)"
+    end
+    
+    # Если подписка истекла
+    if premium? && subscription_ends_at && subscription_ends_at <= Time.current
+      self.access_level = 'free'
+      self.subscription_ends_at = nil
+      Rails.logger.info "User #{id} auto-downgraded from premium to free (subscription expired)"
+    end
   end
-  
-  # Если подписка истекла
-  if premium? && subscription_ends_at && subscription_ends_at <= Time.current
-    self.access_level = 'free'
-    self.subscription_ends_at = nil
-    Rails.logger.info "User #{id} auto-downgraded from premium to free (subscription expired)"
-  end
-end
 end

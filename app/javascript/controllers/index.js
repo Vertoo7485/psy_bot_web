@@ -5,3 +5,5 @@ eagerLoadControllersFrom("controllers", application)
 
 import DayProgramController from "./day_program_controller"
 application.register("day-program", DayProgramController)
+import TestController from "./test_controller"
+application.register("test", TestController)
