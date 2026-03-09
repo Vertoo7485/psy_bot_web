@@ -30,6 +30,7 @@ class User < ApplicationRecord
   has_many :user_achievements, dependent: :destroy
   has_many :achievements, through: :user_achievements
   has_many :garden_elements, dependent: :destroy
+  has_many :payments, dependent: :destroy
 
   # Поля для подписки (из бота)
   attribute :access_level, :string, default: 'free'

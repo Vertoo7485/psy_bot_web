@@ -17,6 +17,10 @@ class GratitudeEntriesController < ApplicationController
         )
       end
       
+      # Добавляем опыт и обновляем серию
+      current_user.add_experience(5)   # +5 за благодарность
+      current_user.update_streak
+      
       render json: { success: true }
     else
       render json: { success: false, error: "No entries provided" }, status: :unprocessable_entity
@@ -25,7 +29,4 @@ class GratitudeEntriesController < ApplicationController
   rescue => e
     render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
-
-  current_user.add_experience(5)   # +5 за благодарность
-  current_user.update_streak
 end

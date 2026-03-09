@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'payments/create'
+  get 'payments/success'
   get 'push_subscriptions/create'
   get 'support/new'
   get 'support/create'
@@ -68,6 +70,10 @@ Rails.application.routes.draw do
   get 'start', to: 'start#index'
   get 'support', to: 'support#new'
   post 'support', to: 'support#create'
+
+  post 'payments/create', to: 'payments#create'
+  get 'payments/success', to: 'payments#success'
+  post 'webhook/yookassa', to: 'webhook#yookassa'
 
   resources :push_subscriptions, only: [:create]
   

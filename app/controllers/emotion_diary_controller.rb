@@ -56,11 +56,12 @@ class EmotionDiaryController < ApplicationController
       new_thoughts: params[:new_thoughts]
     )
     
+    # Добавляем опыт и обновляем серию
+    current_user.add_experience(5)   # +5 за запись в дневнике
+    current_user.update_streak
+    
     render json: { success: true, id: entry.id }
   rescue => e
     render json: { success: false, error: e.message }, status: :unprocessable_entity
   end
-
-  current_user.add_experience(5)   # +5 за запись в дневнике
-  current_user.update_streak
 end

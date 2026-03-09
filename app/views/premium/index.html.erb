@@ -1,24 +1,33 @@
 <div class="container py-5">
+  <h1 class="text-center mb-5">Премиум-доступ</h1>
+  
   <div class="row">
-    <div class="col-md-8 offset-md-2">
-      <div class="card">
-        <div class="card-header bg-primary text-white">
-          <h3 class="mb-0">Премиум-доступ</h3>
+    <div class="col-md-6 offset-md-3">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="mb-0">Премиум</h3>
         </div>
         <div class="card-body">
-          <p class="lead">Программа самопомощи доступна только с премиум-подпиской.</p>
+          <h2 class="text-center mb-4">299₽ / месяц</h2>
           
-          <h5 class="mt-4">Что дает премиум:</h5>
+          <h5>Что включено:</h5>
           <ul class="list-unstyled">
             <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>28-дневная программа самопомощи</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Все тесты с аналитикой</li>
+            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Все тесты с расширенной аналитикой</li>
             <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Дневник эмоций и благодарности</li>
-            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Рефлексия и сохранение ответов</li>
+            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Рефлексия с сохранением ответов</li>
+            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Статистика и прогресс</li>
           </ul>
           
           <div class="text-center mt-4">
-            <p class="text-muted">Скоро здесь можно будет оформить подписку</p>
-            <%= link_to "Вернуться в профиль", profile_path, class: "btn btn-outline-primary" %>
+            <%= form_tag payments_create_path, method: :post do %>
+              <%= hidden_field_tag :amount, 299 %>
+              <%= submit_tag "Оформить подписку за 299₽", class: "btn btn-success btn-lg" %>
+            <% end %>
+            <p class="text-secondary mt-2 small">
+              <i class="fas fa-lock me-1"></i>
+              Безопасная оплата через ЮKassa
+            </p>
           </div>
         </div>
       </div>
