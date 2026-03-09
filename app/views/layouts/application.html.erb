@@ -31,40 +31,39 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
-
             <li class="nav-item">
               <%= link_to start_path, class: "nav-link" do %>
-                <i class="fas fa-rocket me-1"></i> С чего начать?
+                <i class="fas fa-rocket"></i> С чего начать?
               <% end %>
             </li>
 
             <li class="nav-item">
               <%= link_to programs_path, class: "nav-link" do %>
-                <i class="fas fa-seedling me-1"></i> Программа
+                <i class="fas fa-seedling"></i> Программа
               <% end %>
             </li>
 
             <li class="nav-item">
               <%= link_to gratitude_entries_path, class: "nav-link" do %>
-                <i class="fas fa-heart me-1"></i> Благодарности
+                <i class="fas fa-heart"></i> Благодарности
               <% end %>
             </li>
 
             <li class="nav-item">
               <%= link_to new_emotion_diary_path, class: "nav-link" do %>
-                <i class="fas fa-book-open me-1"></i> Дневник эмоций
+                <i class="fas fa-book-open"></i> Дневник эмоций
               <% end %>
             </li>
-  
+
             <li class="nav-item">
               <%= link_to tests_path, class: "nav-link" do %>
-                <i class="fas fa-clipboard-list me-1"></i> Тесты
+                <i class="fas fa-clipboard-list"></i> Тесты
               <% end %>
             </li>
 
             <li class="nav-item">
               <%= link_to support_path, class: "nav-link" do %>
-                <i class="fas fa-headset me-1"></i> Поддержка
+                <i class="fas fa-headset"></i> Поддержка
               <% end %>
             </li>
 
@@ -72,13 +71,15 @@
               <% if current_user.admin? %>
                 <li class="nav-item">
                   <%= link_to admin_dashboard_path, class: "nav-link" do %>
-                    <i class="fas fa-crown me-1"></i> Админ
+                    <i class="fas fa-crown"></i> Админ
                   <% end %>
                 </li>
               <% end %>
 
               <li class="nav-item">
-                <%= link_to "Профиль", profile_path, class: "nav-link" %>
+                <%= link_to profile_path, class: "nav-link" do %>
+                  <i class="fas fa-user"></i> Профиль
+                <% end %>
               </li>
 
               <li class="nav-item">
@@ -87,15 +88,19 @@
                               form_class: "d-inline",
                               class: "btn btn-link nav-link p-0 border-0",
                               data: { turbo: false } do %>
-                  <i class="fas fa-sign-out-alt me-1"></i> Выйти
+                  <i class="fas fa-sign-out-alt"></i> Выйти
                 <% end %>
               </li>
             <% else %>
               <li class="nav-item">
-                <%= link_to "Войти", new_user_session_path, class: "nav-link" %>
+                <%= link_to new_user_session_path, class: "nav-link" do %>
+                  <i class="fas fa-sign-in-alt"></i> Войти
+                <% end %>
               </li>
               <li class="nav-item">
-                <%= link_to "Регистрация", new_user_registration_path, class: "nav-link" %>
+                <%= link_to new_user_registration_path, class: "nav-link" do %>
+                  <i class="fas fa-user-plus"></i> Регистрация
+                <% end %>
               </li>
             <% end %>
           </ul>
