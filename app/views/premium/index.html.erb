@@ -21,7 +21,7 @@
           
           <div class="text-center mt-4">
             <%= form_tag payments_create_path, method: :post do %>
-              <%= hidden_field_tag :amount, 299 %>
+	    <%= hidden_field_tag :amount, 299 %>
               <%= submit_tag "Оформить подписку за 299₽", class: "btn btn-success btn-lg" %>
             <% end %>
             <p class="text-secondary mt-2 small">

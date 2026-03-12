@@ -71,8 +71,8 @@ end
     @program = Program.find(params[:id])
   end
 
-  def require_premium
-  unless current_user.has_active_premium?
+def require_premium
+  unless current_user.has_active_premium? || current_user.admin?
     redirect_to premium_path, alert: "Программа самопомощи доступна только с премиум-подпиской"
   end
 end

@@ -75,7 +75,11 @@ Rails.application.routes.draw do
   get 'payments/success', to: 'payments#success'
   post 'webhook/yookassa', to: 'webhook#yookassa'
 
-  resources :push_subscriptions, only: [:create]
+resources :push_subscriptions, only: [:create] do
+  collection do
+    post 'test'
+  end
+end
   
   # Главная страница
   root to: 'home#index'
