@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get 'static/install'
   get 'payments/create'
   get 'payments/success'
   get 'push_subscriptions/create'
@@ -74,6 +75,8 @@ Rails.application.routes.draw do
   post 'payments/create', to: 'payments#create'
   get 'payments/success', to: 'payments#success'
   post 'webhook/yookassa', to: 'webhook#yookassa'
+
+  get 'install', to: 'static#install'
 
 resources :push_subscriptions, only: [:create] do
   collection do
