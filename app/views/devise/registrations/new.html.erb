@@ -1,29 +1,53 @@
-<h2>Sign up</h2>
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-6 offset-md-3 col-lg-6 offset-lg-3">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="text-center mb-4">Регистрация</h2>
+          
+          <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "needs-validation" }) do |f| %>
+            <%= render "devise/shared/error_messages", resource: resource %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+            <div class="mb-3">
+              <%= f.label :email, "Email", class: "form-label" %>
+              <%= f.email_field :email, 
+                  autofocus: true, 
+                  autocomplete: "email",
+                  class: "form-control form-control-lg",
+                  placeholder: "your@email.com" %>
+            </div>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+            <div class="mb-3">
+              <%= f.label :password, "Пароль", class: "form-label" %>
+              <% if @minimum_password_length %>
+                <small class="text-muted">(минимум <%= @minimum_password_length %> символов)</small>
+              <% end %>
+              <%= f.password_field :password, 
+                  autocomplete: "new-password",
+                  class: "form-control form-control-lg",
+                  placeholder: "••••••••" %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :password_confirmation, "Подтверждение пароля", class: "form-label" %>
+              <%= f.password_field :password_confirmation, 
+                  autocomplete: "new-password",
+                  class: "form-control form-control-lg",
+                  placeholder: "••••••••" %>
+            </div>
+
+            <div class="d-grid gap-2">
+              <%= f.submit "Зарегистрироваться", class: "btn btn-success btn-lg" %>
+            </div>
+          <% end %>
+
+          <hr class="my-4">
+
+          <div class="text-center">
+            <%= render "devise/shared/links" %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="field">
-    <p><%= f.label :password %></p>
-    <% if @minimum_password_length %>
-      <p><em>(<%= @minimum_password_length %> characters minimum)</em></p>
-    <% end %>
-    <p><%= f.password_field :password, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="field">
-    <p><%= f.label :password_confirmation %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Sign up" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>
