@@ -72,6 +72,9 @@ module GardenProgress
       user_day_progresses.where(completed: true, day_id: condition['value']).exists?
     when 'days_completed'
       user_day_progresses.where(completed: true).count >= condition['value']
+    when 'test_passed'
+      test = Test.find_by(category: condition['test_category'])
+      test_results.where(test: test).count >= condition['value']
     else
       false
     end

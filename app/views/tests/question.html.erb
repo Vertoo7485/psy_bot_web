@@ -1,6 +1,12 @@
 <% 
-  progress = ((@question_index + 1) * 100 / 40).to_i
-  type_text = @type == "situational" ? "Как вы чувствуете себя СЕЙЧАС" : "Как вы чувствуете себя ОБЫЧНО"
+  progress = ((@question_index + 1) * 100 / @total_questions).to_i
+  if @test.category == 'anxiety'
+    type_text = @type == "situational" ? "Как вы чувствуете себя СЕЙЧАС" : "Как вы чувствуете себя ОБЫЧНО"
+  elsif @test.category == 'stress'
+    type_text = "Как часто за последний месяц"
+  else
+    type_text = ""
+  end
 %>
 
 <div class="container py-5">
@@ -13,7 +19,9 @@
               <i class="fas fa-question-circle me-2"></i>
               Вопрос <%= @question_index + 1 %> из <%= @total_questions %>
             </h3>
-            <span class="badge bg-info"><%= type_text %></span>
+            <% if type_text.present? %>
+              <span class="badge bg-info"><%= type_text %></span>
+            <% end %>
           </div>
         </div>
         
@@ -30,121 +38,155 @@
           </div>
           
           <!-- Вопрос -->
-<h4 class="mb-4 text-center">
-  <% if @test.category == 'depression' || @test.category == 'eq' %>
-    <%= @current_question["text"] %>
-  <% else %>
-    <%= @current_question %>
-  <% end %>
-</h4>
+          <h4 class="mb-4 text-center">
+            <% if ['depression', 'eq', 'stress'].include?(@test.category) %>
+              <%= @current_question["text"] %>
+            <% else %>
+              <%= @current_question %>
+            <% end %>
+          </h4>
           
           <!-- Варианты ответов -->
-<%= form_tag question_test_path(@test, question: @question_index + 1), method: :post, class: "mt-4" do %>
-  <div class="row g-3">
-    <% if @test.category == 'depression' %>
-      <!-- Для теста депрессии - свои варианты из questions -->
-      <% @current_question["answers"].each do |answer| %>
-        <div class="col-md-6">
-          <div class="form-check card-option">
-            <input class="form-check-input" 
-                   type="radio" 
-                   name="answer" 
-                   id="answer_<%= answer["score"] %>" 
-                   value="<%= answer["score"] %>"
-                   required>
-            <label class="form-check-label w-100 p-3" for="answer_<%= answer["score"] %>">
-              <div class="d-flex justify-content-between align-items-center">
-                <span><%= answer["text"] %></span>
-                <span class="badge bg-light text-dark"><%= answer["score"] %>/3</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      <% end %>
-    
-    <% elsif @test.category == 'eq' %>
-      <!-- Для теста EQ - шкала от 1 до 7 -->
-      <% (1..7).each do |value| %>
-        <div class="col-md-6">
-          <div class="form-check card-option">
-            <input class="form-check-input" 
-                   type="radio" 
-                   name="answer" 
-                   id="answer_<%= value %>" 
-                   value="<%= value %>"
-                   required>
-            <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
-              <div class="d-flex justify-content-between align-items-center">
-                <span>
-                  <% if value == 1 %>
-                    Полностью не согласен
-                  <% elsif value == 2 %>
-                    Не согласен
-                  <% elsif value == 3 %>
-                    Скорее не согласен
-                  <% elsif value == 4 %>
-                    Нейтрально
-                  <% elsif value == 5 %>
-                    Скорее согласен
-                  <% elsif value == 6 %>
-                    Согласен
-                  <% elsif value == 7 %>
-                    Полностью согласен
-                  <% end %>
-                </span>
-                <span class="badge bg-light text-dark"><%= value %>/7</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      <% end %>
+          <%= form_tag question_test_path(@test, question: @question_index + 1), method: :post, class: "mt-4" do %>
+            <div class="row g-3">
+              <% if @test.category == 'depression' %>
+                <!-- Для теста депрессии - свои варианты из questions -->
+                <% @current_question["answers"].each do |answer| %>
+                  <div class="col-md-6">
+                    <div class="form-check card-option">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             name="answer" 
+                             id="answer_<%= answer["score"] %>" 
+                             value="<%= answer["score"] %>"
+                             required>
+                      <label class="form-check-label w-100 p-3" for="answer_<%= answer["score"] %>">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span><%= answer["text"] %></span>
+                          <span class="badge bg-light text-dark"><%= answer["score"] %>/3</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                <% end %>
+              
+              <% elsif @test.category == 'eq' %>
+                <!-- Для теста EQ - шкала от 1 до 7 -->
+                <% (1..7).each do |value| %>
+                  <div class="col-md-6">
+                    <div class="form-check card-option">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             name="answer" 
+                             id="answer_<%= value %>" 
+                             value="<%= value %>"
+                             required>
+                      <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span>
+                            <% if value == 1 %>
+                              Полностью не согласен
+                            <% elsif value == 2 %>
+                              Не согласен
+                            <% elsif value == 3 %>
+                              Скорее не согласен
+                            <% elsif value == 4 %>
+                              Нейтрально
+                            <% elsif value == 5 %>
+                              Скорее согласен
+                            <% elsif value == 6 %>
+                              Согласен
+                            <% elsif value == 7 %>
+                              Полностью согласен
+                            <% end %>
+                          </span>
+                          <span class="badge bg-light text-dark"><%= value %>/7</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                <% end %>
 
-    <% else %>
-      <!-- Для теста тревожности - стандартные варианты -->
-      <% [1,2,3,4].each do |value| %>
-        <div class="col-md-6">
-          <div class="form-check card-option">
-            <input class="form-check-input" 
-                   type="radio" 
-                   name="answer" 
-                   id="answer_<%= value %>" 
-                   value="<%= value %>"
-                   required>
-            <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
-              <div class="d-flex justify-content-between align-items-center">
-                <span>
-                  <% if value == 1 %>
-                    Совсем нет
-                  <% elsif value == 2 %>
-                    Слегка
-                  <% elsif value == 3 %>
-                    Умеренно
-                  <% elsif value == 4 %>
-                    Очень сильно
-                  <% end %>
-                </span>
-                <span class="badge bg-light text-dark"><%= value %>/4</span>
-              </div>
-            </label>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
+              <% elsif @test.category == 'stress' %>
+                <!-- Для теста на стресс - шкала 0-4 -->
+                <% [0,1,2,3,4].each do |value| %>
+                  <div class="col-md-6">
+                    <div class="form-check card-option">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             name="answer" 
+                             id="answer_<%= value %>" 
+                             value="<%= value %>"
+                             required>
+                      <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span>
+                            <% if value == 0 %>
+                              Никогда
+                            <% elsif value == 1 %>
+                              Почти никогда
+                            <% elsif value == 2 %>
+                              Иногда
+                            <% elsif value == 3 %>
+                              Довольно часто
+                            <% elsif value == 4 %>
+                              Очень часто
+                            <% end %>
+                          </span>
+                          <span class="badge bg-light text-dark"><%= value %>/4</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                <% end %>
+
+              <% else %>
+                <!-- Для теста тревожности - стандартные варианты -->
+                <% [1,2,3,4].each do |value| %>
+                  <div class="col-md-6">
+                    <div class="form-check card-option">
+                      <input class="form-check-input" 
+                             type="radio" 
+                             name="answer" 
+                             id="answer_<%= value %>" 
+                             value="<%= value %>"
+                             required>
+                      <label class="form-check-label w-100 p-3" for="answer_<%= value %>">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span>
+                            <% if value == 1 %>
+                              Совсем нет
+                            <% elsif value == 2 %>
+                              Слегка
+                            <% elsif value == 3 %>
+                              Умеренно
+                            <% elsif value == 4 %>
+                              Очень сильно
+                            <% end %>
+                          </span>
+                          <span class="badge bg-light text-dark"><%= value %>/4</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
             
             <!-- кнопка отправки -->
-  <div class="text-center mt-5">
-    <button type="submit" class="btn btn-primary btn-lg px-5">
-      <% if (@test.category == 'anxiety' && @question_index == 39) || 
-            (@test.category == 'depression' && @question_index == 20) ||
-            (@test.category == 'eq' && @question_index == 29) %>
-        <i class="fas fa-check-circle me-2"></i>Завершить тест
-      <% else %>
-        <i class="fas fa-arrow-right me-2"></i>Следующий вопрос
-      <% end %>
-    </button>
-  </div>
-<% end %>
+            <div class="text-center mt-5">
+              <button type="submit" class="btn btn-primary btn-lg px-5">
+                <% if (@test.category == 'anxiety' && @question_index == 39) || 
+                      (@test.category == 'depression' && @question_index == 20) ||
+                      (@test.category == 'eq' && @question_index == 29) ||
+                      (@test.category == 'stress' && @question_index == 9) %>
+                  <i class="fas fa-check-circle me-2"></i>Завершить тест
+                <% else %>
+                  <i class="fas fa-arrow-right me-2"></i>Следующий вопрос
+                <% end %>
+              </button>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>

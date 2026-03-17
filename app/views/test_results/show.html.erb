@@ -8,10 +8,15 @@
     total = score["total"] || 0
     situational_text = interpretation["situational"] || ""
     personal_text = interpretation["personal"] || ""
-  else
+  elsif @test.category == 'depression'
     total = score["total"] || 0
     depression_text = interpretation["depression"] || ""
+  elsif @test.category == 'eq'
+    total = score["total"] || 0
     eq_text = interpretation["eq"] || ""
+  elsif @test.category == 'stress'
+    total = score["total"] || 0
+    stress_text = interpretation["stress"] || ""
   end
 %>
 
@@ -165,6 +170,45 @@
               <% end %>
               
               <p class="mb-0">Практикуйте осознанность и ведите дневник эмоций.</p>
+            </div>
+
+          <% elsif @test.category == 'stress' %>
+            <!-- Результаты для стресса -->
+            <div class="row g-4 mb-5">
+              <div class="col-md-8 mx-auto">
+                <div class="card bg-light border-0">
+                  <div class="card-body text-center">
+                    <h5 class="mb-3">Уровень стресса</h5>
+                    <div class="display-4 mb-2" style="color: <%= total > 26 ? '#dc3545' : (total > 13 ? '#ffc107' : '#28a745') %>">
+                      <%= total %>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                      <div class="progress-bar <%= total > 26 ? 'bg-danger' : (total > 13 ? 'bg-warning' : 'bg-success') %>" 
+                           style="width: <%= (total.to_f / 40 * 100) %>%"></div>
+                    </div>
+                    <p class="mb-0"><%= stress_text %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Рекомендации для стресса -->
+            <div class="alert alert-info">
+              <h5 class="alert-heading mb-3">
+                <i class="fas fa-lightbulb me-2"></i>
+                Рекомендации
+              </h5>
+              
+              <% if total > 26 %>
+                <p class="mb-2">Высокий уровень стресса. Рекомендуем регулярные практики релаксации и, возможно, консультацию специалиста.</p>
+                <p class="mb-0">Попробуйте техники дыхания и сканирования тела из программы самопомощи.</p>
+              <% elsif total > 13 %>
+                <p class="mb-2">Средний уровень стресса. Важно находить время для отдыха и восстановления.</p>
+                <p class="mb-0">Рекомендуем вести дневник эмоций и практиковать благодарность.</p>
+              <% else %>
+                <p class="mb-2">Низкий уровень стресса. Вы хорошо справляетесь с нагрузкой.</p>
+                <p class="mb-0">Продолжайте поддерживать здоровый образ жизни.</p>
+              <% end %>
             </div>
           <% end %>
           

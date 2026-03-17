@@ -42,6 +42,12 @@ Rails.application.routes.draw do
     get 'dashboard', to: 'dashboard#index'
     resources :users, only: [:index, :show, :edit, :update]
     resources :support_messages, only: [:index, :show, :destroy]
+    resources :users do
+      member do
+        get 'edit_password'
+        patch 'update_password'
+      end
+    end
   end
 
   resources :gratitude_entries, only: [:create, :index]
