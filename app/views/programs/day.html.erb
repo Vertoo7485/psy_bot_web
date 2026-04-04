@@ -15,7 +15,7 @@
         
         <div class="d-flex justify-content-between align-items-center">
           <h2>День <%= day.day_number %>: <%= day.title %></h2>
-          <span class="badge bg-primary fs-6">День <%= day.day_number %>/28</span>
+          <span class="badge bg-primary fs-6">День <%= day.day_number %>/<%= @program.days.count %></span>
         </div>
         <p class="text-secondary"><%= day.description %></p>
       </div>
@@ -23,256 +23,179 @@
 
     <!-- Прогресс -->
     <div class="progress mb-4" style="height: 8px;">
-      <div class="progress-bar bg-success" style="width: <%= (day.day_number.to_f / 28 * 100) %>%"></div>
+      <div class="progress-bar bg-success" style="width: <%= (day.day_number.to_f / @program.days.count * 100) %>%"></div>
     </div>
 
-    <!-- Вступление -->
-    <% if content["intro"].present? %>
+    <!-- Специальный рендеринг для программы 14 дней -->
+    <% if @program.days.count == 14 %>
+      
+      <!-- Вступление -->
       <div class="card mb-4">
         <div class="card-body">
           <h4 class="card-title">
-            <i class="fas fa-leaf text-success me-2"></i>
+            <i class="fas fa-info-circle text-primary me-2"></i>
             <%= content["intro"]["title"] %>
           </h4>
           <p class="card-text"><%= content["intro"]["text"] %></p>
         </div>
       </div>
-    <% end %>
 
-    <!-- Общие компоненты -->
-    <%= render 'programs/shared/scientific_facts', content: content %>
-    <%= render 'programs/shared/benefits', content: content %>
-
-    <!-- Упражнение -->
-    <div class="card mb-4 border-primary">
-      <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">
-          <i class="fas fa-heartbeat me-2"></i>
-          Практика дня
-        </h4>
-      </div>
-      <div class="card-body">
-
-        <!-- Техники (дни 1,4) -->
-        <% if day_has_techniques?(day.day_number) %>
-          <%= render 'programs/shared/techniques', day: day, content: content %>
-        <% end %>
-
-        <!-- Выбор активности (день 5) -->
-        <% if day_has_activity_selection?(day.day_number) && content["exercise"]["activity_types"].present? %>
-          <%= render 'programs/shared/selection_cards', 
-              items: content["exercise"]["activity_types"], 
-              item_type: "activity",
-              target: "activityButtons",
-              action: "selectActivity" %>
-        <% end %>
-
-        <!-- Выбор отдыха (день 6) -->
-        <% if day_has_rest_selection?(day.day_number) && content["exercise"]["rest_types"].present? %>
-          <%= render 'programs/shared/selection_cards', 
-              items: content["exercise"]["rest_types"], 
-              item_type: "rest",
-              target: "restButtons",
-              action: "selectRest" %>
-        <% end %>
-
-        <!-- День 8: Стоп-сигналы -->
-        <% if day_has_stop_signal?(day.day_number) && content["exercise"]["stop_signals"].present? %>
-          <%= render 'programs/shared/selection_cards', 
-              items: content["exercise"]["stop_signals"], 
-              item_type: "signal",
-              target: "signalButtons",
-              action: "selectSignal" %>
-        <% end %>
-
-        <!-- День 8: Стратегии переключения -->
-        <% if day_has_stop_signal?(day.day_number) && content["exercise"]["distraction_strategies"].present? %>
-          <div class="card mb-4" id="strategySection" style="display: none;">
-            <div class="card-header bg-primary text-white">
-              <h6 class="mb-0">Шаг 2: Выберите стратегию переключения</h6>
+      <!-- Упражнение -->
+      <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-heartbeat me-2"></i>
+            Практика дня
+          </h4>
+        </div>
+        <div class="card-body">
+          <h5><%= content["exercise"]["title"] %></h5>
+          <p class="lead"><%= content["exercise"]["description"] %></p>
+          
+          <!-- Пошаговая инструкция -->
+          <% if content["exercise"]["steps"] %>
+            <div class="mt-4">
+              <h6>📋 Пошаговая инструкция:</h6>
+              <ol class="mt-3">
+                <% content["exercise"]["steps"].each do |step| %>
+                  <li class="mb-2"><%= step %></li>
+                <% end %>
+              </ol>
             </div>
-            <div class="card-body">
-              <%= render 'programs/shared/selection_cards', 
-                  items: content["exercise"]["distraction_strategies"], 
-                  item_type: "strategy",
-                  target: "strategyButtons",
-                  action: "selectStrategy" %>
+          <% end %>
+          
+          <!-- Вопросы для размышления -->
+          <% if content["exercise"]["questions"] %>
+            <div class="mt-4">
+              <h6>🤔 Вопросы для размышления:</h6>
+              <ul class="mt-3">
+                <% content["exercise"]["questions"].each do |q| %>
+                  <li class="mb-2"><%= q %></li>
+                <% end %>
+              </ul>
             </div>
-          </div>
-        <% end %>
-
-        <!-- День 2: Текстовая медитация -->
-        <% if content["text_meditation"].present? %>
+          <% end %>
+          
+          <!-- Зоны для сканирования -->
+          <% if content["exercise"]["zones"] %>
+            <div class="mt-4">
+              <h6>🔍 Зоны для сканирования:</h6>
+              <ol class="mt-3">
+                <% content["exercise"]["zones"].each do |zone| %>
+                  <li class="mb-2"><%= zone %></li>
+                <% end %>
+              </ol>
+            </div>
+          <% end %>
+          
+          <!-- Таймер -->
           <div class="mt-4">
-            <h5>Текстовая версия сканирования тела:</h5>
-            <% content["text_meditation"].each do |part| %>
-              <div class="mb-3 p-3 bg-light rounded">
-                <h6><%= part["part"] %></h6>
-                <p class="mb-0"><%= part["details"] %></p>
-              </div>
-            <% end %>
+            <h5>⏱️ Время практики:</h5>
+            <div class="btn-group" role="group">
+              <% content["exercise"]["timer_options"].each do |minutes| %>
+                <button class="btn btn-outline-primary timer-option"
+                        data-action="click->day-program#selectTimer"
+                        data-day-program-target="timerButtons"
+                        data-minutes="<%= minutes %>">
+                  <%= minutes %> мин
+                </button>
+              <% end %>
+              <button class="btn btn-outline-secondary timer-option"
+                      data-action="click->day-program#selectTimer"
+                      data-day-program-target="timerButtons"
+                      data-minutes="custom">
+                Свой вариант
+              </button>
+            </div>
           </div>
-        <% end %>
 
-        <!-- День 3: Благодарность -->
-        <% if day_is_gratitude?(day.day_number) %>
-          <%= render 'day_3_gratitude', content: content %>
-        <% end %>
-
-        <!-- День 7: Рефлексия недели -->
-        <% if day_is_reflection_week?(day.day_number) %>
-          <%= render 'day_7_reflection', content: content %>
-        <% end %>
-
-        <!-- День 8: Ввод мысли -->
-        <% if day_has_stop_signal?(day.day_number) %>
-          <%= render 'day_8_thought_input' %>
-        <% end %>
-
-        <!-- Таймер -->
-        <% if day_has_timer?(day.day_number) %>
-          <%= render 'programs/shared/timer', day: day, content: content %>
-        <% end %>
-
+          <!-- Важное примечание -->
+          <% if content["exercise"]["note"] %>
+            <div class="alert alert-info mt-4">
+              <i class="fas fa-lightbulb me-2"></i>
+              <strong>💡 Важно:</strong> <%= content["exercise"]["note"] %>
+            </div>
+          <% end %>
+          
+          <!-- Кнопка начала -->
+          <div class="text-center mt-4">
+            <button class="btn btn-success btn-lg px-5" 
+                    id="startPractice"
+                    data-action="click->day-program#startPractice">
+              <i class="fas fa-play me-2"></i>Начать практику
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Рефлексия (общая) -->
-    <%= render 'programs/shared/reflection', content: content %>
+      <!-- Советы -->
+      <% if content["tips"] %>
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">
+              <i class="fas fa-lightbulb text-warning me-2"></i>
+              💡 Полезные советы
+            </h4>
+            <ul class="mt-3">
+              <% content["tips"].each do |tip| %>
+                <li class="mb-2"><%= tip %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      <% end %>
 
-    <!-- День 5: Выбор настроения -->
-    <% if day.day_number == 5 && content["mood_options"].present? %>
-      <%= render 'day_5_mood_selection', content: content %>
+      <!-- Рефлексия -->
+      <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
+        <div class="card-body">
+          <h4 class="card-title">
+            <i class="fas fa-pen me-2"></i>
+            Рефлексия после практики
+          </h4>
+          <p>Как вы себя чувствуете после практики?</p>
+          <textarea class="form-control" rows="3" placeholder="Напишите свои ощущения..."></textarea>
+        </div>
+      </div>
+
+    <% else %>
+      <!-- Старый рендеринг для 28-дневной программы -->
+      <% if content["intro"].present? %>
+        <div class="card mb-4">
+          <div class="card-body">
+            <h4 class="card-title">
+              <i class="fas fa-leaf text-success me-2"></i>
+              <%= content["intro"]["title"] %>
+            </h4>
+            <p class="card-text"><%= content["intro"]["text"] %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <%= render 'programs/shared/scientific_facts', content: content %>
+      <%= render 'programs/shared/benefits', content: content %>
+
+      <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-heartbeat me-2"></i>
+            Практика дня
+          </h4>
+        </div>
+        <div class="card-body">
+          <% if day_has_techniques?(day.day_number) %>
+            <%= render 'programs/shared/techniques', day: day, content: content %>
+          <% end %>
+
+          <% if day_has_timer?(day.day_number) %>
+            <%= render 'programs/shared/timer', day: day, content: content %>
+          <% end %>
+        </div>
+      </div>
+
+      <%= render 'programs/shared/reflection', content: content %>
+      <%= render 'programs/shared/challenges', content: content %>
+      <%= render 'programs/shared/daily_tips', content: content %>
     <% end %>
-
-    <!-- День 6: Выбор состояния -->
-    <% if day.day_number == 6 && content["state_options"].present? %>
-      <%= render 'day_6_state_selection', content: content %>
-    <% end %>
-
-    <!-- День 9: Когнитивный анализ -->
-    <% if day.day_number == 9 %>
-      <%= render 'day_9_cognitive_analysis', content: content %>
-      <%= render 'day_9_script' %>
-    <% end %>
-
-    <!-- День 10: Дневник эмоций -->
-    <% if day.day_number == 10 %>
-      <%= render 'day_10_emotion_diary', content: content %>
-      <%= render 'day_10_script' %>
-    <% end %>
-
-    <!-- День 11: Техника заземления -->
-    <% if day.day_number == 11 %>
-      <%= render 'day_11_grounding', content: content %>
-      <%= render 'day_11_script', content: content %>
-    <% end %>
-
-    <!-- День 12: Практика самосострадания -->
-    <% if day.day_number == 12 %>
-      <%= render 'day_12_self_compassion', content: content %>
-      <%= render 'day_12_script', content: content %>
-    <% end %>
-
-    <!-- День 13: Преодоление прокрастинации -->
-    <% if day.day_number == 13 %>
-      <%= render 'day_13_procrastination', content: content %>
-      <%= render 'day_13_script', content: content %>
-    <% end %>
-
-    <!-- День 14: Промежуточная рефлексия -->
-    <% if day.day_number == 14 %>
-      <%= render 'day_14_two_weeks_reflection', content: content %>
-      <%= render 'day_14_script', content: content %>
-    <% end %>
-
-    <!-- День 15: Акты доброты -->
-    <% if day.day_number == 15 %>
-      <%= render 'day_15_kindness', content: content %>
-      <%= render 'day_15_script', content: content %>
-    <% end %>
-
-    <!-- День 16: Восстановление связей -->
-    <% if day.day_number == 16 %>
-      <%= render 'day_16_reconnection', content: content %>
-      <%= render 'day_16_script', content: content %>
-    <% end %>
-
-    <!-- День 17: Письмо самосострадания -->
-    <% if day.day_number == 17 %>
-      <%= render 'day_17_compassion_letter', content: content %>
-      <%= render 'day_17_script', content: content %>
-    <% end %>
-
-    <!-- День 18: Время для себя -->
-    <% if day.day_number == 18 %>
-      <%= render 'day_18_pleasure', content: content %>
-      <%= render 'day_18_script', content: content %>
-    <% end %>
-
-    <!-- День 19: Первая медитация -->
-    <% if day.day_number == 19 %>
-      <%= render 'day_19_meditation', content: content %>
-      <%= render 'day_19_script', content: content %>
-    <% end %>
-
-    
-    <!-- День 20: Преодоление страха -->
-    <% if day.day_number == 20 %>
-      <%= render 'day_20_fear', content: content %>
-      <%= render 'day_20_script', content: content %>
-    <% end %>
-
-    <!-- День 21: Рефлексия 3 недель -->
-    <% if day.day_number == 21 %>
-      <%= render 'day_21_reflection', content: content %>
-      <%= render 'day_21_script', content: content %>
-    <% end %>
-
-    <!-- День 22: Планирование с SMART целями -->
-    <% if day.day_number == 22 %>
-      <%= render 'day_22_smart', content: content %>
-      <%= render 'day_22_script', content: content %>
-    <% end %>
-
-    <!-- День 23: Анализ дневника эмоций -->
-    <% if day.day_number == 23 %>
-      <%= render 'day_23_analysis', content: content %>
-      <%= render 'day_23_script', content: content %>
-    <% end %>
-
-    <!-- День 24: Проактивная гибкость -->
-    <% if day.day_number == 24 %>
-      <%= render 'day_24_anticipation', content: content %>
-      <%= render 'day_24_script', content: content %>
-    <% end %>
-
-    <!-- День 25: Стоический "Вид сверху" -->
-    <% if day.day_number == 25 %>
-      <%= render 'day_25_view_from_above', content: content %>
-      <%= render 'day_25_script', content: content %>
-    <% end %>
-
-    <!-- День 26: КПТ "Цепочка ценностей" -->
-    <% if day.day_number == 26 %>
-      <%= render 'day_26_values_chain', content: content %>
-      <%= render 'day_26_script', content: content %>
-    <% end %>
-
-    <!-- День 27: Нейрохакинг радости -->
-    <% if day.day_number == 27 %>
-      <%= render 'day_27_neurohacking', content: content %>
-      <%= render 'day_27_script', content: content %>
-    <% end %>
-
-    <!-- День 28: Гранд-финал -->
-    <% if day.day_number == 28 %>
-      <%= render 'day_28_finale', content: content %>
-      <%= render 'day_28_script', content: content %>
-    <% end %>
-
-    <!-- Трудности и советы -->
-    <%= render 'programs/shared/challenges', content: content %>
 
     <!-- Завершение дня -->
     <div class="text-center mt-5">
@@ -292,7 +215,132 @@
 <!-- Стили -->
 <%= render 'programs/shared/styles' %>
 
-<!-- Скрипты для специальных дней -->
-<%= render 'day_3_script', content: content if day_is_gratitude?(day.day_number) %>
-<%= render 'day_7_script', content: content if day_is_reflection_week?(day.day_number) %>
-<%= render 'day_8_script', content: content if day_has_stop_signal?(day.day_number) %>
+<!-- Таймер с звуком через Web Audio API -->
+<script>
+  (function() {
+    let timerInterval = null
+    let startBtn = null
+    let audioCtx = null
+    
+    function playSound() {
+      if (!audioCtx) return
+      const now = audioCtx.currentTime
+      
+      const osc = audioCtx.createOscillator()
+      const gain = audioCtx.createGain()
+      osc.connect(gain)
+      gain.connect(audioCtx.destination)
+      osc.type = 'sine'
+      osc.frequency.value = 880
+      gain.gain.value = 0.3
+      osc.start()
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.5)
+      osc.stop(now + 0.5)
+      
+      setTimeout(() => {
+        if (!audioCtx) return
+        const osc2 = audioCtx.createOscillator()
+        const gain2 = audioCtx.createGain()
+        osc2.connect(gain2)
+        gain2.connect(audioCtx.destination)
+        osc2.type = 'sine'
+        osc2.frequency.value = 660
+        gain2.gain.value = 0.3
+        osc2.start()
+        gain2.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5)
+        osc2.stop(audioCtx.currentTime + 0.5)
+      }, 200)
+    }
+    
+    function showNotification() {
+      const notif = document.createElement('div')
+      notif.className = 'alert alert-success position-fixed top-0 start-50 translate-middle-x mt-3'
+      notif.style.zIndex = '9999'
+      notif.innerHTML = '✅ Время практики закончилось!'
+      document.body.appendChild(notif)
+      setTimeout(() => notif.remove(), 3000)
+    }
+    
+    function initTimer() {
+      startBtn = document.getElementById('startPractice')
+      if (!startBtn) return
+      
+      // Удаляем старый обработчик
+      const newBtn = startBtn.cloneNode(true)
+      startBtn.parentNode.replaceChild(newBtn, startBtn)
+      startBtn = newBtn
+      
+      startBtn.addEventListener('click', function() {
+        // Инициализируем и "будим" аудиоконтекст
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume()
+        }
+        
+        // Находим выбранное время
+        const selectedBtn = document.querySelector('.timer-option.btn-primary')
+        if (!selectedBtn) {
+          alert('Сначала выберите время практики')
+          return
+        }
+        
+        let minutes = parseInt(selectedBtn.dataset.minutes)
+          if (isNaN(minutes)) {
+            minutes = parseInt(prompt('Введите количество минут (1-30):', '5'))
+            if (isNaN(minutes) || minutes < 1 || minutes > 30) {
+              alert('Введите число от 1 до 30')
+              return
+            }
+          }
+        if (isNaN(minutes)) minutes = 5
+        
+        let seconds = minutes * 60
+        startBtn.disabled = true
+        startBtn.textContent = '⏳ Идёт практика...'
+        
+        if (timerInterval) clearInterval(timerInterval)
+        
+        timerInterval = setInterval(function() {
+          seconds--
+          if (seconds <= 0) {
+            clearInterval(timerInterval)
+            showNotification()
+            playSound()
+            startBtn.disabled = false
+            startBtn.textContent = '▶️ Начать практику'
+            
+            // Показываем рефлексию
+            const reflectionSection = document.getElementById('reflectionSection')
+            if (reflectionSection) {
+              reflectionSection.classList.remove('d-none')
+            }
+          }
+        }, 1000)
+      })
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTimer)
+    } else {
+      initTimer()
+    }
+  })()
+</script>
+
+<!-- Стили для таймера -->
+<style>
+  .timer-option.btn-primary {
+    background-color: #0d6efd;
+    color: white;
+  }
+  .timer-option.btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+  }
+  .timer-option.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+  }
+</style>

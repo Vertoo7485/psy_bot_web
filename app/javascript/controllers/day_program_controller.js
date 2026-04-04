@@ -1,4 +1,3 @@
-// app/javascript/controllers/day_program_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -23,7 +22,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedRest = button.dataset.rest
 
-    // Визуальное выделение
     this.restButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -40,20 +38,16 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedState = button.dataset.state
     
-    // Находим родительскую карточку
     const card = button.closest('.card')
     
-    // Визуальное выделение — убираем выделение со всех карточек
     document.querySelectorAll('#stateSelection .card').forEach(c => {
       c.classList.remove('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
     })
     
-    // Выделяем выбранную карточку
     if (card) {
       card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
     }
     
-    // Также выделяем саму кнопку (для совместимости)
     this.stateButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -68,7 +62,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedTechnique = button.dataset.technique
     
-    // Визуальное выделение
     this.techniqueButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -83,7 +76,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedMinutes = button.dataset.minutes
     
-    // Визуальное выделение
     this.timerButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -111,7 +103,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedActivity = button.dataset.activity
 
-    // Визуальное выделение
     this.activityButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -128,20 +119,16 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedMood = button.dataset.mood
     
-    // Находим родительскую карточку
     const card = button.closest('.card')
     
-    // Визуальное выделение — убираем выделение со всех карточек
     document.querySelectorAll('#moodSelection .card').forEach(c => {
       c.classList.remove('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
     })
     
-    // Выделяем выбранную карточку
     if (card) {
       card.classList.add('border-success', 'border-2', 'bg-success', 'bg-opacity-10')
     }
     
-    // Также выделяем саму кнопку (для совместимости)
     this.moodButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -149,7 +136,6 @@ export default class extends Controller {
     button.classList.remove('btn-outline-primary')
     button.classList.add('btn-primary', 'text-white')
     
-    // Сохраняем настроение
     this.saveMood(this.selectedMood)
     
     console.log('Выбрано настроение:', this.selectedMood)
@@ -171,7 +157,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedSignal = button.dataset.signal
 
-    // Визуальное выделение
     this.signalButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -188,7 +173,6 @@ export default class extends Controller {
     const button = event.currentTarget
     this.selectedStrategy = button.dataset.strategy
 
-    // Визуальное выделение
     this.strategyButtonsTargets.forEach(btn => {
       btn.classList.remove('btn-primary', 'text-white')
       btn.classList.add('btn-outline-primary')
@@ -208,30 +192,25 @@ export default class extends Controller {
     const hasRest = this.restButtonsTargets.length > 0
     const hasSignals = this.signalButtonsTargets?.length > 0
 
-    // Для дня 8 проверка не нужна - у него свой интерфейс
     if (dayNumber == '8') {
       return
     }
     
-    // Для дня 6 нужен выбор типа отдыха
     if (dayNumber == '6' && hasRest && !this.selectedRest) {
       alert('Сначала выберите тип отдыха')
       return
     }
     
-    // Для дня 5 нужен выбор активности
     if (dayNumber == '5' && hasActivities && !this.selectedActivity) {
       alert('Сначала выберите тип активности')
       return
     }
     
-    // Для дня 4 нужен выбор техники наблюдения
     if (dayNumber == '4' && hasTechniques && !this.selectedTechnique) {
       alert('Сначала выберите технику наблюдения')
       return
     }
     
-    // Для дня 1 нужен выбор техники дыхания
     if (dayNumber == '1' && hasTechniques && !this.selectedTechnique) {
       alert('Сначала выберите технику дыхания')
       return
@@ -244,10 +223,8 @@ export default class extends Controller {
     
     this.practiceStarted = true
     
-    // Скрываем кнопку старта, показываем таймер
     document.getElementById('startPractice').classList.add('d-none')
     
-    // Создаем и показываем таймер
     this.showTimer()
   }
   
@@ -255,7 +232,6 @@ export default class extends Controller {
     const minutes = parseInt(this.selectedMinutes)
     let seconds = minutes * 60
     
-    // Создаем элемент таймера
     const timerDiv = document.createElement('div')
     timerDiv.id = 'practiceTimer'
     timerDiv.className = 'text-center my-4 p-4 bg-light rounded'
@@ -267,7 +243,6 @@ export default class extends Controller {
       </button>
     `
     
-    // Находим карточку упражнения
     const exerciseCard = document.querySelector('.card.border-primary .card-body')
     if (exerciseCard) {
       exerciseCard.appendChild(timerDiv)
@@ -298,15 +273,76 @@ export default class extends Controller {
   }
   
   completePractice() {
-    // Убираем таймер
+      alert('Метод completePractice вызван!')  // ← добавить эту строку
+
+    // Визуальное оповещение
+    const notification = document.createElement('div')
+    notification.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3'
+    notification.style.zIndex = '9999'
+    notification.innerHTML = `
+      <i class="fas fa-check-circle me-2"></i>
+      Время практики закончилось!
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `
+    document.body.appendChild(notification)
+    
+    // Звук через Web Audio
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext
+      const ctx = new AudioContext()
+      const now = ctx.currentTime
+      
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.value = 880
+      gain.gain.value = 0.3
+      osc.start()
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.5)
+      osc.stop(now + 0.5)
+      
+      setTimeout(() => {
+        if (ctx.state === 'closed') return
+        const osc2 = ctx.createOscillator()
+        const gain2 = ctx.createGain()
+        osc2.connect(gain2)
+        gain2.connect(ctx.destination)
+        osc2.type = 'sine'
+        osc2.frequency.value = 660
+        gain2.gain.value = 0.3
+        osc2.start()
+        gain2.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5)
+        osc2.stop(ctx.currentTime + 0.5)
+      }, 300)
+      
+      setTimeout(() => {
+        notification.remove()
+      }, 3000)
+      
+    } catch (e) {
+      console.log('Audio error:', e)
+      setTimeout(() => {
+        notification.remove()
+      }, 3000)
+    }
+    
+    // Вибрация
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200])
+    }
+    
     document.getElementById('practiceTimer')?.remove()
     
-    // Показываем рефлексию
     this.reflectionTarget.classList.remove('d-none')
     
     const dayNumber = this.data.get('dayNumber')
     
-    // Для дня 5 показываем выбор настроения
     if (dayNumber == '5') {
       const moodSelection = document.getElementById('moodSelection')
       if (moodSelection) {
@@ -314,7 +350,6 @@ export default class extends Controller {
       }
     }
 
-    // Для дня 6 показываем выбор состояния
     if (dayNumber == '6') {
       const stateSelection = document.getElementById('stateSelection')
       if (stateSelection) {
@@ -322,42 +357,36 @@ export default class extends Controller {
       }
     }
     
-    // Показываем кнопку завершения дня
     document.getElementById('completeDay').classList.remove('d-none')
     
-    // Прокручиваем к рефлексии
     this.reflectionTarget.scrollIntoView({ behavior: 'smooth' })
   }
   
- completeDay() {
-  const dayNumber = this.data.get('dayNumber')
-  
-  // Для дней без таймера не проверяем практику
-  if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && dayNumber != '10' && dayNumber != '11' && dayNumber != '12' && dayNumber != '13' && dayNumber != '14' && dayNumber != '15' && dayNumber != '16' && dayNumber != '17' && dayNumber != '18' && dayNumber != '19' && dayNumber != '20' && dayNumber != '21' && dayNumber != '22' && dayNumber != '23' && dayNumber != '24' && dayNumber != '25' && dayNumber != '26' && dayNumber != '27' && dayNumber != '28' && !this.practiceStarted) {
-    alert('Сначала выполните практику')
-    return
-  }
-  
-  // Сохраняем прогресс через fetch
-  fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-    },
-    body: JSON.stringify({
-      completed: true
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+  completeDay() {
+    const dayNumber = this.data.get('dayNumber')
+    
+    if (dayNumber != '3' && dayNumber != '7' && dayNumber != '8' && dayNumber != '9' && dayNumber != '10' && dayNumber != '11' && dayNumber != '12' && dayNumber != '13' && dayNumber != '14' && dayNumber != '15' && dayNumber != '16' && dayNumber != '17' && dayNumber != '18' && dayNumber != '19' && dayNumber != '20' && dayNumber != '21' && dayNumber != '22' && dayNumber != '23' && dayNumber != '24' && dayNumber != '25' && dayNumber != '26' && dayNumber != '27' && !this.practiceStarted) {
+      alert('Сначала выполните практику')
+      return
     }
-  })
-}
-
-
+    
+    fetch(`/programs/${this.data.get('programId')}/day/${this.data.get('dayNumber')}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        completed: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = `/programs?day_completed=${this.data.get('dayNumber')}`
+      }
+    })
+  }
 
   // Методы для дня 3 (благодарность)
   startGratitudeExercise() {
@@ -377,7 +406,6 @@ export default class extends Controller {
     
     const step = this.gratitudeSteps[this.currentGratitudeStep]
     
-    // Скрываем основное содержимое, показываем шаг
     document.querySelector('.card.border-primary').classList.add('d-none')
     
     let stepHtml = `
@@ -408,10 +436,8 @@ export default class extends Controller {
       </div>
     `
     
-    // Вставляем шаг после упражнения
     document.querySelector('.card.border-primary').insertAdjacentHTML('afterend', stepHtml)
     
-    // Добавляем обработчик для кнопки
     document.querySelector('#gratitudeStep .btn-success').addEventListener('click', () => {
       const input = document.getElementById('gratitudeInput')
       if (!input.value.trim()) {
@@ -435,7 +461,6 @@ export default class extends Controller {
     document.getElementById('gratitudeStep')?.remove()
     document.querySelector('.card.border-primary').classList.remove('d-none')
     
-    // Сохраняем в базу
     fetch('/gratitude_entries', {
       method: 'POST',
       headers: {
@@ -450,7 +475,6 @@ export default class extends Controller {
     .then(data => {
       if (data.success) {
         alert('✅ Благодарности сохранены!')
-        // Показываем рефлексию
         this.reflectionTarget.classList.remove('d-none')
         document.getElementById('completeDay').classList.remove('d-none')
       }

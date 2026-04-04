@@ -37,12 +37,6 @@
             </li>
 
             <li class="nav-item">
-              <%= link_to install_path, class: "nav-link" do %>
-                <i class="fas fa-download"></i> Установить
-              <% end %>
-            </li>
-
-            <li class="nav-item">
               <%= link_to programs_path, class: "nav-link" do %>
                 <i class="fas fa-seedling"></i> Программа
               <% end %>
@@ -69,6 +63,12 @@
             <li class="nav-item">
               <%= link_to support_path, class: "nav-link" do %>
                 <i class="fas fa-headset"></i> Поддержка
+              <% end %>
+            </li>
+
+            <li class="nav-item">
+              <%= link_to install_path, class: "nav-link" do %>
+                <i class="fas fa-download"></i> Установить
               <% end %>
             </li>
 
@@ -133,40 +133,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-<!-- Подключаем Stimulus через CDN -->
-<script type="module">
-  // Импортируем Stimulus из CDN
-  import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js'
-  
-  window.Stimulus = Application.start()
-  console.log('✅ Stimulus started')
-  
-  // Делаем Controller доступным глобально для всех контроллеров
-  window.Controller = Controller
-  
-  // Функция для загрузки контроллера
-  async function loadController(name, path) {
-    try {
-      const module = await import(path)
-      Stimulus.register(name, module.default)
-      console.log(`✅ ${name} controller registered`)
-    } catch (err) {
-      console.error(`❌ Failed to load ${name} controller:`, err)
-    }
-  }
-  
-  // Загружаем исправленный тестовый контроллер
-  loadController('test', '/assets/controllers/test_controller_fixed-cdab1ea77caf2d9d2db4ee718b7d8abfbcfbd5b867fab6faf7f901862cffafde.js')
-  
-  // Загружаем исправленный day-program контроллер
-  loadController('day-program', '/assets/controllers/day_program_controller_fixed-48f98d40fabff7224619ad35b879fd78e8be90d11bfd675aa301ddae841e8696.js')
-
-
- // Загружаем исправленный reflection контроллер
-  loadController('reflection', '/assets/controllers/reflection_controller_fixed-95d2efbec79aa84a18bcec183658c9596a07affe9b72d166b98eed03b4a6740c.js')
-
-  // Загружаем остальные контроллеры (они пока не будут работать, но тестовая кнопка — да)
-</script>
+    <!-- Подключаем Stimulus через CDN -->
+    <script type="module">
+      import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus@3.2.2/dist/stimulus.js'
+      
+      window.Stimulus = Application.start()
+      window.Controller = Controller
+      
+      // Загружаем контроллеры с актуальными хешами
+      import('/assets/controllers/test_controller_fixed-cdab1ea77caf2d9d2db4ee718b7d8abfbcfbd5b867fab6faf7f901862cffafde.js').then(m => Stimulus.register('test', m.default)).catch(e => console.error('test:', e))
+      import('/assets/controllers/day_program_controller_fixed-48f98d40fabff7224619ad35b879fd78e8be90d11bfd675aa301ddae841e8696.js').then(m => Stimulus.register('day-program', m.default)).catch(e => console.error('day-program:', e))
+      import('/assets/controllers/reflection_controller_fixed-0538f5ab17dc5cb2f4ef2f7fb27642bf780fef0861f7ccc9ecc241f2ee7b846b.js').then(m => Stimulus.register('reflection', m.default)).catch(e => console.error('reflection:', e))
+      import('/assets/controllers/push_controller-040d6f90b1619a0e65640720b812c6f3bbe255df1460206b5aa71065f7b767aa.js').then(m => Stimulus.register('push', m.default)).catch(e => console.error('push:', e))
+      
+      console.log('✅ Stimulus started')
+    </script>
+    
     <%= yield :javascript %>
   </body>
 </html>
