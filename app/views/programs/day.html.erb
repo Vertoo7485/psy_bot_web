@@ -34,13 +34,20 @@
         <div class="card-body">
           <h4 class="card-title">
             <i class="fas fa-info-circle text-primary me-2"></i>
-            <%= content["intro"]["title"] %>
+            <%= content["intro"] %>
           </h4>
-          <p class="card-text"><%= content["intro"]["text"] %></p>
         </div>
       </div>
 
-      <!-- Упражнение -->
+      <!-- Теория -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5>📖 Теория</h5>
+          <p class="card-text"><%= content["theory"] %></p>
+        </div>
+      </div>
+
+      <!-- Практика -->
       <div class="card mb-4 border-primary">
         <div class="card-header bg-primary text-white">
           <h4 class="mb-0">
@@ -49,42 +56,41 @@
           </h4>
         </div>
         <div class="card-body">
-          <h5><%= content["exercise"]["title"] %></h5>
-          <p class="lead"><%= content["exercise"]["description"] %></p>
+          <h5><%= content["practice"]["title"] %></h5>
           
           <!-- Пошаговая инструкция -->
-          <% if content["exercise"]["steps"] %>
+          <% if content["practice"]["steps"] %>
             <div class="mt-4">
               <h6>📋 Пошаговая инструкция:</h6>
               <ol class="mt-3">
-                <% content["exercise"]["steps"].each do |step| %>
+                <% content["practice"]["steps"].each do |step| %>
                   <li class="mb-2"><%= step %></li>
                 <% end %>
               </ol>
             </div>
           <% end %>
           
-          <!-- Вопросы для размышления -->
-          <% if content["exercise"]["questions"] %>
-            <div class="mt-4">
-              <h6>🤔 Вопросы для размышления:</h6>
-              <ul class="mt-3">
-                <% content["exercise"]["questions"].each do |q| %>
-                  <li class="mb-2"><%= q %></li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
-          
           <!-- Зоны для сканирования -->
-          <% if content["exercise"]["zones"] %>
+          <% if content["practice"]["zones"] %>
             <div class="mt-4">
               <h6>🔍 Зоны для сканирования:</h6>
               <ol class="mt-3">
-                <% content["exercise"]["zones"].each do |zone| %>
+                <% content["practice"]["zones"].each do |zone| %>
                   <li class="mb-2"><%= zone %></li>
                 <% end %>
               </ol>
+            </div>
+          <% end %>
+          
+          <!-- Вопросы для размышления -->
+          <% if content["practice"]["questions"] %>
+            <div class="mt-4">
+              <h6>🤔 Вопросы для размышления:</h6>
+              <ul class="mt-3">
+                <% content["practice"]["questions"].each do |q| %>
+                  <li class="mb-2"><%= q %></li>
+                <% end %>
+              </ul>
             </div>
           <% end %>
           
@@ -92,7 +98,7 @@
           <div class="mt-4">
             <h5>⏱️ Время практики:</h5>
             <div class="btn-group" role="group">
-              <% content["exercise"]["timer_options"].each do |minutes| %>
+              <% content["practice"]["timer_options"].each do |minutes| %>
                 <button class="btn btn-outline-primary timer-option"
                         data-action="click->day-program#selectTimer"
                         data-day-program-target="timerButtons"
@@ -110,10 +116,10 @@
           </div>
 
           <!-- Важное примечание -->
-          <% if content["exercise"]["note"] %>
+          <% if content["practice"]["note"] %>
             <div class="alert alert-info mt-4">
               <i class="fas fa-lightbulb me-2"></i>
-              <strong>💡 Важно:</strong> <%= content["exercise"]["note"] %>
+              <strong>💡 Важно:</strong> <%= content["practice"]["note"] %>
             </div>
           <% end %>
           
@@ -128,25 +134,38 @@
         </div>
       </div>
 
-      <!-- Советы -->
-      <% if content["tips"] %>
+      <!-- Пример -->
+      <% if content["example"] %>
         <div class="card mb-4">
           <div class="card-body">
-            <h4 class="card-title">
-              <i class="fas fa-lightbulb text-warning me-2"></i>
-              💡 Полезные советы
-            </h4>
-            <ul class="mt-3">
-              <% content["tips"].each do |tip| %>
-                <li class="mb-2"><%= tip %></li>
-              <% end %>
-            </ul>
+            <h5>🌟 Пример из жизни</h5>
+            <p><%= content["example"] %></p>
           </div>
         </div>
       <% end %>
 
       <!-- Рефлексия -->
-      <div id="reflectionSection" class="card mb-4 d-none" data-day-program-target="reflection">
+      <% if content["reflection"] %>
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5>🤔 Рефлексия</h5>
+            <p><%= content["reflection"] %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Совет -->
+      <% if content["tip"] %>
+        <div class="card mb-4 bg-light">
+          <div class="card-body">
+            <h5>💡 Совет дня</h5>
+            <p><%= content["tip"] %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Рефлексия после практики (для таймера) -->
+      <div id="reflectionSection" class="card mb-4 d-none">
         <div class="card-body">
           <h4 class="card-title">
             <i class="fas fa-pen me-2"></i>
@@ -201,7 +220,8 @@
     <div class="text-center mt-5">
       <button class="btn btn-success btn-lg px-5 d-none" 
               id="completeDay"
-              data-action="click->day-program#completeDay">
+              data-program-id="<%= @program.id %>"
+              data-day-number="<%= day.day_number %>">
         <i class="fas fa-check-circle me-2"></i>Завершить день
       </button>
       <p class="text-secondary mt-2 small">
@@ -287,14 +307,13 @@
         }
         
         let minutes = parseInt(selectedBtn.dataset.minutes)
-          if (isNaN(minutes)) {
-            minutes = parseInt(prompt('Введите количество минут (1-30):', '5'))
-            if (isNaN(minutes) || minutes < 1 || minutes > 30) {
-              alert('Введите число от 1 до 30')
-              return
-            }
+        if (isNaN(minutes)) {
+          minutes = parseInt(prompt('Введите количество минут (1-30):', '5'))
+          if (isNaN(minutes) || minutes < 1 || minutes > 30) {
+            alert('Введите число от 1 до 30')
+            return
           }
-        if (isNaN(minutes)) minutes = 5
+        }
         
         let seconds = minutes * 60
         startBtn.disabled = true
@@ -316,8 +335,33 @@
             if (reflectionSection) {
               reflectionSection.classList.remove('d-none')
             }
+            
+            // Показываем кнопку "Завершить день"
+            const completeDayBtn = document.getElementById('completeDay')
+            if (completeDayBtn) {
+              completeDayBtn.classList.remove('d-none')
+            }
           }
         }, 1000)
+      })
+    }
+    
+    // Обработчик для кнопки "Завершить день"
+    const completeDayBtn = document.getElementById('completeDay')
+    if (completeDayBtn) {
+      completeDayBtn.addEventListener('click', function() {
+        const programId = completeDayBtn.dataset.programId
+        const dayNumber = completeDayBtn.dataset.dayNumber
+        fetch(`/programs/${programId}/day/${dayNumber}/complete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ completed: true })
+        }).then(() => {
+          window.location.href = '/programs'
+        })
       })
     }
     
